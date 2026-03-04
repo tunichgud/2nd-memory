@@ -18,21 +18,95 @@
     .typing-dot:nth-child(3) { animation-delay: 0.4s; }
     @keyframes blink { 0%,80%,100%{opacity:0} 40%{opacity:1} }
     pre { white-space: pre-wrap; word-break: break-word; }
+    #ner-overlay { backdrop-filter: blur(4px); }
   </style>
 </head>
 <body class="bg-gray-950 text-gray-100 min-h-screen font-sans">
+
+<!-- NER-Ladeoverlay: blockiert UI bis Modell bereit -->
+<div id="ner-overlay" class="fixed inset-0 bg-gray-950 bg-opacity-90 z-50 flex flex-col items-center justify-center gap-6">
+  <span class="text-5xl">🦕</span>
+  <div class="flex flex-col items-center gap-3 max-w-sm w-full px-6">
+    <p class="font-semibold text-gray-100">memosaur startet…</p>
+    <p class="text-xs text-gray-400 text-center">
+      Das NER-Modell für lokale Datenmaskierung wird geladen (~90 MB).
+      Nach dem ersten Download wird es im Browser gecacht.
+    </p>
+    <div class="w-full bg-gray-800 rounded-full h-2">
+      <div id="ner-progress-bar" class="bg-blue-500 h-2 rounded-full transition-all" style="width:0%"></div>
+    </div>
+    <span id="ner-status" class="text-xs text-yellow-200 bg-yellow-900 px-3 py-1 rounded-full">Lade Modell…</span>
+  </div>
+</div>
+
+<!-- Consent-Modal -->
+<div id="consent-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 z-40 flex items-center justify-center p-4">
+  <div class="bg-gray-900 border border-gray-700 rounded-2xl max-w-md w-full p-6 flex flex-col gap-4">
+    <h2 class="font-bold text-lg">Datenverarbeitung – Ihre Einwilligung</h2>
+    <p class="text-sm text-gray-400">
+      Für folgende Features verarbeiten wir sensible personenbezogene Daten
+      gemäß <strong>Art. 9 DSGVO</strong>. Sie können einzelne Features aktivieren
+      oder deaktivieren.
+    </p>
+    <div class="flex flex-col gap-3">
+      <label class="flex items-start gap-3 cursor-pointer">
+        <input type="checkbox" id="consent-photos" class="mt-1 w-4 h-4 accent-blue-500">
+        <div>
+          <div class="font-medium text-sm">Fotos &amp; KI-Bilderkennung</div>
+          <div class="text-xs text-gray-500">
+            Bilder werden lokal an Ollama (Vision-KI) gesendet. Bildbeschreibungen
+            werden vor der Speicherung im Browser anonymisiert (Klarnamen → Tokens).
+          </div>
+        </div>
+      </label>
+      <label class="flex items-start gap-3 cursor-pointer">
+        <input type="checkbox" id="consent-gps" class="mt-1 w-4 h-4 accent-blue-500">
+        <div>
+          <div class="font-medium text-sm">GPS-Standortdaten</div>
+          <div class="text-xs text-gray-500">
+            GPS-Koordinaten werden für Reverse Geocoding an OpenStreetMap/Nominatim
+            gesendet (Koordinaten, keine Namen).
+          </div>
+        </div>
+      </label>
+      <label class="flex items-start gap-3 cursor-pointer">
+        <input type="checkbox" id="consent-messages" class="mt-1 w-4 h-4 accent-blue-500">
+        <div>
+          <div class="font-medium text-sm">Nachrichten (WhatsApp, Signal)</div>
+          <div class="text-xs text-gray-500">
+            Nachrichten werden vor dem Upload im Browser maskiert – nur Tokens
+            verlassen Ihren Browser. Klarnamen bleiben lokal in der IndexedDB.
+          </div>
+        </div>
+      </label>
+    </div>
+    <p class="text-xs text-gray-500">
+      Ohne Einwilligung sind die jeweiligen Features deaktiviert.
+      Diese Einstellung kann jederzeit im Einstellungen-Tab geändert werden.
+    </p>
+    <div class="flex gap-3">
+      <button onclick="saveConsent(false)" class="flex-1 bg-gray-700 hover:bg-gray-600 rounded-lg px-4 py-2 text-sm">
+        Ablehnen
+      </button>
+      <button onclick="saveConsent(true)" class="flex-1 bg-blue-600 hover:bg-blue-500 rounded-lg px-4 py-2 text-sm font-medium">
+        Einwilligen &amp; Starten
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- Header -->
 <header class="bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between">
   <div class="flex items-center gap-3">
     <span class="text-2xl">🦕</span>
     <h1 class="text-xl font-bold tracking-tight">memosaur</h1>
-    <span class="text-xs text-gray-500">Persönliches Gedächtnis-System</span>
+    <span class="text-xs text-gray-500">v2 · Privacy-First</span>
   </div>
   <nav class="flex gap-4 text-sm">
-    <button onclick="showTab('chat')"    id="tab-chat"    class="tab-btn active px-3 py-1 rounded">Chat</button>
-    <button onclick="showTab('map')"     id="tab-map"     class="tab-btn px-3 py-1 rounded">Karte</button>
-    <button onclick="showTab('import')"  id="tab-import"  class="tab-btn px-3 py-1 rounded">Import</button>
+    <button onclick="showTab('chat')"     id="tab-chat"     class="tab-btn active px-3 py-1 rounded">Chat</button>
+    <button onclick="showTab('map')"      id="tab-map"      class="tab-btn px-3 py-1 rounded">Karte</button>
+    <button onclick="showTab('import')"   id="tab-import"   class="tab-btn px-3 py-1 rounded">Import</button>
+    <button onclick="showTab('settings')" id="tab-settings" class="tab-btn px-3 py-1 rounded">Einstellungen</button>
   </nav>
   <div id="status-bar" class="text-xs text-gray-500"></div>
 </header>
@@ -155,9 +229,69 @@
   .ingest-btn { padding:8px 16px; border-radius:8px; font-size:0.875rem; font-weight:500; cursor:pointer; transition:background 0.15s; }
 </style>
 
+<!-- Einstellungen-Tab -->
+<div id="view-settings" class="view hidden max-w-2xl mx-auto p-4 flex flex-col gap-6">
+
+  <!-- Consent -->
+  <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+    <h2 class="font-semibold mb-3">🔒 Datenschutz &amp; Einwilligungen</h2>
+    <div id="consent-settings" class="flex flex-col gap-3 text-sm text-gray-400">Lädt…</div>
+    <button onclick="openConsentModal()" class="mt-4 ingest-btn bg-gray-700 hover:bg-gray-600 text-sm">
+      Einwilligungen ändern
+    </button>
+  </div>
+
+  <!-- Sync -->
+  <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+    <h2 class="font-semibold mb-3">🔄 Multi-Device Sync</h2>
+    <div id="sync-container">Sync wird geladen…</div>
+  </div>
+
+  <!-- User-Info -->
+  <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+    <h2 class="font-semibold mb-3">👤 Aktiver Nutzer</h2>
+    <div id="user-info" class="text-sm text-gray-400">Lädt…</div>
+  </div>
+</div>
+
+<!-- Module laden (ES-Modul für NER, klassische Scripts für den Rest) -->
+<script src="/static/token_store.js"></script>
+<script src="/static/sync.js"></script>
+<script type="module">
+  import { loadNER } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js';
+  // Eigenes ner.js als Modul laden
+  const nerMod = await import('/static/ner.js').catch(() => null);
+  if (nerMod) {
+    window._nerReady = false;
+    await window.NER.loadNER((pct) => {
+      document.getElementById('ner-progress-bar').style.width = pct + '%';
+    });
+    window._nerReady = true;
+  }
+  // Overlay entfernen
+  document.getElementById('ner-overlay').remove();
+  // App initialisieren
+  window._appInit();
+</script>
 <script src="/static/chat.js"></script>
 <script src="/static/map.js"></script>
 <script>
+// Aktueller User (Default: ManfredMustermann)
+window._userId = '00000000-0000-0000-0000-000000000001';
+
+// -------------------------------------------------------------------------
+// App-Initialisierung (nach NER-Laden)
+// -------------------------------------------------------------------------
+window._appInit = async function() {
+  loadStatus();
+  loadConsentSettings();
+  loadUserInfo();
+  window.Sync?.renderSyncUI('sync-container', window._userId);
+  // Consent beim ersten Besuch prüfen
+  const seen = localStorage.getItem('memosaur_consent_seen');
+  if (!seen) openConsentModal();
+};
+
 // -------------------------------------------------------------------------
 // Tab-Navigation
 // -------------------------------------------------------------------------
@@ -166,8 +300,9 @@ function showTab(name) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('view-' + name).classList.remove('hidden');
   document.getElementById('tab-' + name).classList.add('active');
-  if (name === 'map') { loadMap(); }
-  if (name === 'import') { loadStatus(); }
+  if (name === 'map')      loadMap();
+  if (name === 'import')   loadStatus();
+  if (name === 'settings') { loadConsentSettings(); window.Sync?.renderSyncUI('sync-container', window._userId); }
 }
 
 // -------------------------------------------------------------------------
@@ -175,22 +310,82 @@ function showTab(name) {
 // -------------------------------------------------------------------------
 async function loadStatus() {
   try {
-    const r = await fetch('/api/ingest/status');
+    const r = await fetch(`/api/v1/ingest/status?user_id=${window._userId}`);
     const d = await r.json();
-    document.getElementById('db-status').innerHTML = `
-      <div class="bg-gray-800 rounded p-3"><span class="text-blue-400 font-bold text-lg">${d.photos}</span><br><span class="text-gray-400">Fotos</span></div>
-      <div class="bg-gray-800 rounded p-3"><span class="text-emerald-400 font-bold text-lg">${d.reviews}</span><br><span class="text-gray-400">Bewertungen</span></div>
-      <div class="bg-gray-800 rounded p-3"><span class="text-amber-400 font-bold text-lg">${d.saved_places}</span><br><span class="text-gray-400">Gespeicherte Orte</span></div>
-      <div class="bg-gray-800 rounded p-3"><span class="text-purple-400 font-bold text-lg">${d.messages}</span><br><span class="text-gray-400">Nachrichten</span></div>
+    const total = Object.values(d).reduce((a,b) => a+b, 0);
+    const el = document.getElementById('db-status');
+    if (el) el.innerHTML = `
+      <div class="bg-gray-800 rounded p-3"><span class="text-blue-400 font-bold text-lg">${d.photos||0}</span><br><span class="text-gray-400">Fotos</span></div>
+      <div class="bg-gray-800 rounded p-3"><span class="text-emerald-400 font-bold text-lg">${d.reviews||0}</span><br><span class="text-gray-400">Bewertungen</span></div>
+      <div class="bg-gray-800 rounded p-3"><span class="text-amber-400 font-bold text-lg">${d.saved_places||0}</span><br><span class="text-gray-400">Gespeicherte Orte</span></div>
+      <div class="bg-gray-800 rounded p-3"><span class="text-purple-400 font-bold text-lg">${d.messages||0}</span><br><span class="text-gray-400">Nachrichten</span></div>
     `;
-    document.getElementById('status-bar').textContent = `${d.total} Einträge indexiert`;
+    document.getElementById('status-bar').textContent = `${total} Einträge indexiert`;
   } catch(e) {
-    document.getElementById('db-status').innerHTML = '<span class="text-red-400">Fehler beim Laden</span>';
+    const el = document.getElementById('db-status');
+    if (el) el.innerHTML = '<span class="text-red-400">Fehler beim Laden</span>';
   }
 }
 
-// Beim Laden Status holen
-loadStatus();
+// -------------------------------------------------------------------------
+// Consent-Modal
+// -------------------------------------------------------------------------
+function openConsentModal() {
+  // Aktuellen Status laden
+  fetch(`/api/v1/consent/${window._userId}`)
+    .then(r => r.json())
+    .then(d => {
+      document.getElementById('consent-photos').checked   = d.biometric_photos;
+      document.getElementById('consent-gps').checked      = d.gps;
+      document.getElementById('consent-messages').checked = d.messages;
+    }).catch(() => {});
+  document.getElementById('consent-modal').classList.remove('hidden');
+}
+
+async function saveConsent(acceptAll) {
+  const photos   = acceptAll ? true : document.getElementById('consent-photos').checked;
+  const gps      = acceptAll ? true : document.getElementById('consent-gps').checked;
+  const messages = acceptAll ? true : document.getElementById('consent-messages').checked;
+  if (acceptAll) {
+    document.getElementById('consent-photos').checked   = true;
+    document.getElementById('consent-gps').checked      = true;
+    document.getElementById('consent-messages').checked = true;
+  }
+  try {
+    await fetch(`/api/v1/consent/${window._userId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ biometric_photos: photos, gps, messages }),
+    });
+    localStorage.setItem('memosaur_consent_seen', '1');
+  } catch(e) { console.error('Consent-Fehler:', e); }
+  document.getElementById('consent-modal').classList.add('hidden');
+  loadConsentSettings();
+}
+
+async function loadConsentSettings() {
+  try {
+    const r = await fetch(`/api/v1/consent/${window._userId}`);
+    const d = await r.json();
+    const el = document.getElementById('consent-settings');
+    if (!el) return;
+    const icon = (v) => v ? '✅' : '❌';
+    el.innerHTML = `
+      <div>${icon(d.biometric_photos)} Fotos &amp; KI-Bilderkennung</div>
+      <div>${icon(d.gps)} GPS-Standortdaten</div>
+      <div>${icon(d.messages)} Nachrichten</div>
+    `;
+  } catch(e) {}
+}
+
+async function loadUserInfo() {
+  try {
+    const r = await fetch(`/api/v1/users/${window._userId}`);
+    const d = await r.json();
+    const el = document.getElementById('user-info');
+    if (el) el.innerHTML = `<strong>${d.display_name}</strong> <span class="text-gray-600 text-xs">(${d.id})</span>`;
+  } catch(e) {}
+}
 </script>
 </body>
 </html>

@@ -1,8 +1,10 @@
 """
 main.py – FastAPI Hauptanwendung für memosaur.
 
+v0-Endpunkte (/api/*) bleiben erhalten (Rückwärtskompatibilität).
+v1-Endpunkte (/api/v1/*) sind token-aware und user-scoped.
+
 Start: python -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
-oder:  python backend/main.py
 """
 
 from __future__ import annotations
@@ -18,7 +20,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
-# Logging konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -26,21 +27,19 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Projektpfad sicherstellen
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
 # ---------------------------------------------------------------------------
-# App initialisieren
+# App
 # ---------------------------------------------------------------------------
 
 app = FastAPI(
     title="memosaur",
-    description="Persönliches Gedächtnis-System: Fotos, Nachrichten, Geodaten",
-    version="0.1.0",
+    description="Persönliches Gedächtnis-System – Privacy-First RAG",
+    version="2.0.0",
 )
 
-# CORS (für lokale Entwicklung)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -49,7 +48,17 @@ app.add_middleware(
 )
 
 # ---------------------------------------------------------------------------
-# Router einbinden
+# Startup: SQLite initialisieren
+# ---------------------------------------------------------------------------
+
+@app.on_event("startup")
+async def startup_event():
+    from backend.db.database import init_db
+    await init_db()
+    logger.info("memosaur v2 gestartet.")
+
+# ---------------------------------------------------------------------------
+# v0-Router (Rückwärtskompatibilität – bleiben erhalten)
 # ---------------------------------------------------------------------------
 
 from backend.api.ingest import router as ingest_router
@@ -63,7 +72,27 @@ app.include_router(map_router)
 app.include_router(media_router)
 
 # ---------------------------------------------------------------------------
-# Frontend statische Dateien
+# v1-Router (token-aware, user-scoped)
+# ---------------------------------------------------------------------------
+
+from backend.api.v1.users   import router as v1_users_router
+from backend.api.v1.consent import router as v1_consent_router
+from backend.api.v1.sync    import router as v1_sync_router
+from backend.api.v1.ingest  import router as v1_ingest_router
+from backend.api.v1.query   import router as v1_query_router
+from backend.api.v1.map     import router as v1_map_router
+from backend.api.v1.media   import router as v1_media_router
+
+app.include_router(v1_users_router)
+app.include_router(v1_consent_router)
+app.include_router(v1_sync_router)
+app.include_router(v1_ingest_router)
+app.include_router(v1_query_router)
+app.include_router(v1_map_router)
+app.include_router(v1_media_router)
+
+# ---------------------------------------------------------------------------
+# Frontend (statische Dateien)
 # ---------------------------------------------------------------------------
 
 FRONTEND_DIR = BASE_DIR / "frontend"
@@ -75,21 +104,19 @@ if FRONTEND_DIR.exists():
         return FileResponse(str(FRONTEND_DIR / "index.html"))
 
 # ---------------------------------------------------------------------------
-# Healthcheck
+# Shared Endpunkte
 # ---------------------------------------------------------------------------
 
 @app.get("/health")
 async def health() -> dict:
-    return {"status": "ok", "app": "memosaur"}
+    return {"status": "ok", "app": "memosaur", "version": "2.0.0"}
 
 
 @app.get("/api/config")
 async def get_config() -> dict:
-    """Gibt die aktuelle (nicht-sensitive) Konfiguration zurück."""
     cfg_path = BASE_DIR / "config.yaml"
     with open(cfg_path, encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
-    # Sensible Felder entfernen
     llm = dict(cfg.get("llm", {}))
     llm.pop("api_key", None)
     return {"llm": llm, "ingestion": cfg.get("ingestion", {}), "rag": cfg.get("rag", {})}

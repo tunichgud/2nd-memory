@@ -1,4 +1,4 @@
-// chat.js – Chat-UI Logik für memosaur
+// chat.js – Chat-UI Logik für memosaur v2 (Token-Flow)
 
 const SOURCE_LABELS = {
   photos:       { label: 'Foto',              color: 'blue',   icon: '📷' },
@@ -7,8 +7,11 @@ const SOURCE_LABELS = {
   messages:     { label: 'Nachricht',         color: 'purple', icon: '💬' },
 };
 
+// v2-API aktiv wenn NER geladen ist, sonst v0-Fallback
+function _useV2() { return window._nerReady === true; }
+
 // -------------------------------------------------------------------------
-// Abfrage senden
+// Abfrage senden – mit optionalem Token-Flow (v2) oder direktem (v0)
 // -------------------------------------------------------------------------
 async function sendQuery() {
   const input = document.getElementById('chat-input');
@@ -20,27 +23,98 @@ async function sendQuery() {
   const typingId = appendTypingIndicator();
 
   try {
-    const res = await fetch('/api/query', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, n_results: 8, min_score: 0.25 }),
-    });
-
-    removeTyping(typingId);
-
-    if (!res.ok) {
-      const err = await res.json();
-      appendErrorMessage(err.detail || 'Unbekannter Fehler');
-      return;
+    if (_useV2()) {
+      await _sendQueryV2(query, typingId);
+    } else {
+      await _sendQueryV0(query, typingId);
     }
-
-    const data = await res.json();
-    appendAssistantMessage(data.answer, data.sources, data.parsed_query);
-
   } catch (e) {
     removeTyping(typingId);
     appendErrorMessage('Verbindungsfehler: ' + e.message);
   }
+}
+
+/** v2: NER-Maskierung → Token-API → Unmaskierung */
+async function _sendQueryV2(query, typingId) {
+  // 1. NER: Anfrage maskieren
+  const { masked, entities } = await window.NER.maskText(query);
+
+  // 2. Token-IDs für Filter extrahieren
+  const personTokens   = entities.filter(e => e.type === 'PER').map(e => e.token);
+  const locationTokens = entities.filter(e => e.type === 'LOC').map(e => e.token);
+
+  // 3. Anfrage an v2-API
+  const res = await fetch('/api/v1/query', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      user_id:          window._userId,
+      masked_query:     masked,
+      person_tokens:    personTokens,
+      location_tokens:  locationTokens,
+      n_results:        6,
+      min_score:        0.2,
+    }),
+  });
+
+  removeTyping(typingId);
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    appendErrorMessage(err.detail || 'Unbekannter Fehler (v2)');
+    return;
+  }
+
+  const data = await res.json();
+
+  // 4. Antwort und Quellen unmaskieren
+  const unmaskedAnswer = await window.TokenStore.unmaskText(data.masked_answer);
+  const unmaskedSources = await Promise.all(
+    (data.sources || []).map(async (src) => ({
+      ...src,
+      document: await window.TokenStore.unmaskText(src.document),
+      metadata: await _unmaskMetadata(src.metadata),
+    }))
+  );
+
+  appendAssistantMessage(unmaskedAnswer, unmaskedSources, {
+    filter_summary: data.filter_summary,
+    persons:  personTokens,
+    locations: locationTokens,
+  });
+}
+
+/** v0-Fallback: direkt ohne Maskierung */
+async function _sendQueryV0(query, typingId) {
+  const res = await fetch('/api/query', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, n_results: 8, min_score: 0.25 }),
+  });
+
+  removeTyping(typingId);
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    appendErrorMessage(err.detail || 'Unbekannter Fehler (v0)');
+    return;
+  }
+
+  const data = await res.json();
+  appendAssistantMessage(data.answer, data.sources, data.parsed_query);
+}
+
+/** Unmaskiert String-Felder in einem Metadaten-Objekt. */
+async function _unmaskMetadata(meta) {
+  if (!meta) return meta;
+  const result = { ...meta };
+  const stringFields = ['place_name', 'persons', 'mentioned_persons', 'name', 'address'];
+  for (const field of stringFields) {
+    if (result[field]) {
+      result[field] = await window.TokenStore.unmaskText(String(result[field]));
+    }
+  }
+  return result;
 }
 
 function quickQuery(text) {
