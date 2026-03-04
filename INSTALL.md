@@ -1,4 +1,22 @@
-# Installationsanleitung – memosaur
+# Installationsanleitung – memosaur v2
+
+## Inhaltsverzeichnis
+
+1. [Voraussetzungen](#voraussetzungen)
+2. [Ollama installieren](#schritt-1--ollama-installieren)
+3. [Repository klonen](#schritt-2--repository-klonen)
+4. [Python-Umgebung](#schritt-3--python-umgebung-einrichten)
+5. [Konfiguration](#schritt-4--konfiguration)
+6. [Google Takeout exportieren](#schritt-5--google-takeout-exportieren)
+7. [Server starten](#schritt-6--server-starten)
+8. [Erster Start im Browser](#schritt-7--erster-start-im-browser)
+9. [Daten importieren](#schritt-8--daten-importieren)
+10. [Messenger-Daten (optional)](#messenger-daten-hinzufügen-optional)
+11. [Migration von v1](#migration-von-v1-auf-v2)
+12. [Fehlerbehebung](#fehlerbehebung)
+13. [Modell-Empfehlungen](#empfohlene-modelle-nach-hardware)
+
+---
 
 ## Voraussetzungen
 
@@ -9,15 +27,17 @@
 | RAM | 8 GB | 16 GB |
 | VRAM (GPU) | 8 GB | 16 GB |
 | Speicherplatz | 5 GB | 20 GB |
+| Browser | Chrome 112+ / Firefox 115+ | aktuell |
 
-> memosaur läuft vollständig lokal. Eine Internetverbindung wird nur für das
-> erstmalige Herunterladen der Sprachmodelle und des Embedding-Modells benötigt.
+> **Browser-Anforderung:** memosaur v2 verwendet WebAssembly (NER-Modell), IndexedDB
+> (Token-Wörterbuch) und die Web Crypto API (Sync-Verschlüsselung). Diese Features
+> sind in allen modernen Browsern verfügbar, aber nicht in sehr alten Versionen.
 
 ---
 
 ## Schritt 1 – Ollama installieren
 
-Ollama stellt die LLM-Modelle bereit.
+Ollama stellt die LLM-Modelle lokal bereit.
 
 **Linux:**
 ```bash
@@ -39,19 +59,20 @@ ollama serve
 ### Benötigte Modelle laden
 
 ```bash
-# Text-Modell für Abfragen und Query-Parsing
+# Text-Modell für RAG-Abfragen und Query-Parsing (v0)
 ollama pull qwen3:8b
 
-# Vision-Modell für Bildbeschreibungen
+# Vision-Modell für KI-Bildbeschreibungen
 ollama pull gemma3:12b
 ```
 
-> **Hinweis zu AMD-GPUs (RDNA 4):** Ollama benötigt ROCm 6.3+.
-> Falls `ollama ps` die GPU nicht anzeigt, siehe
+> **Hinweis zu AMD-GPUs (RDNA 4 / RX 9070):** Ollama benötigt ROCm 6.3+.
+> Falls `ollama ps` die GPU nicht erkennt, siehe
 > [Ollama AMD-Dokumentation](https://ollama.com/blog/amd-preview).
 
-> **VRAM-Hinweis:** `gemma3:12b` benötigt ~8 GB VRAM. Auf Systemen mit weniger
-> VRAM empfiehlt sich `gemma3:4b` (~3 GB) als Vision-Modell.
+> **VRAM-Hinweis:** `gemma3:12b` benötigt ~8 GB VRAM.
+> Auf Systemen mit weniger VRAM: `gemma3:4b` (~3 GB) als Vision-Modell nutzen.
+> Die Modelle laufen **nicht gleichzeitig** (Vision nur beim Import, Chat-Modell nur bei Abfragen).
 
 ---
 
@@ -73,15 +94,18 @@ python3 -m venv .venv
 # Aktivieren
 # Linux/macOS:
 source .venv/bin/activate
-# Windows:
-.venv\Scripts\activate
+# Windows (PowerShell):
+.venv\Scripts\Activate.ps1
 
 # Abhängigkeiten installieren
 pip install -r requirements.txt
 ```
 
-> Das Embedding-Modell (`paraphrase-multilingual-MiniLM-L12-v2`, ~470 MB) wird
-> beim ersten Start automatisch von HuggingFace heruntergeladen.
+> **Beim ersten Start** werden zwei Modelle automatisch heruntergeladen:
+> - Python-Backend: `paraphrase-multilingual-MiniLM-L12-v2` (~470 MB, von HuggingFace)
+> - Browser: NER-Modell `bert-base-multilingual-cased-ner-hrl` (~90 MB, vom CDN)
+>
+> Beide werden lokal gecacht und nur einmalig geladen.
 
 ---
 
@@ -97,198 +121,342 @@ cp config.yaml.example config.yaml
 llm:
   provider: ollama
   base_url: "http://localhost:11434"  # Ollama-Adresse
-  model: "qwen3:8b"                   # Muss in Ollama installiert sein
-  vision_model: "gemma3:12b"          # Muss in Ollama installiert sein
+  model: "qwen3:8b"                   # Text-Modell
+  vision_model: "gemma3:12b"          # Vision-Modell
 ```
 
-> Falls Ollama auf einem anderen Rechner läuft (z.B. Windows-Host, memosaur
-> in WSL2), die IP-Adresse entsprechend anpassen.
+> **Ollama auf einem anderen Rechner** (z.B. Windows-Host, memosaur in WSL2):
+> Die IP-Adresse aus WSL2 herausfinden:
+> ```bash
+> cat /etc/resolv.conf | grep nameserver
+> ```
+> Dann in `config.yaml` eintragen:
+> ```yaml
+> base_url: "http://172.x.x.x:11434"
+> ```
 
 ---
 
 ## Schritt 5 – Google Takeout exportieren
 
 1. [https://takeout.google.com](https://takeout.google.com) aufrufen
-2. **Auswahl aufheben** → dann nur auswählen:
-   - **Google Fotos** (alle Alben oder nur das gewünschte)
+2. **"Auswahl aufheben"** → dann **nur** auswählen:
+   - **Google Fotos** (alle Alben oder ein bestimmtes Jahr)
    - **Maps (Meine Orte)** (enthält Bewertungen und gespeicherte Orte)
-3. Format: ZIP, Dateigröße: max. 2 GB
-4. Export herunterladen
+3. Format: ZIP, Dateigröße: max. 2 GB pro Datei
+4. Export herunterladen (kann einige Stunden dauern, Google schickt eine E-Mail)
 
-### Takeout entpacken
+### Takeout ablegen
 
 ```bash
 # ZIP-Archiv(e) in das takeout/-Verzeichnis legen:
 mkdir -p takeout
-# Entweder entpacken:
+
+# Option A: Entpacken
 unzip 'takeout-*.zip' -d takeout/
-# Oder ZIPs direkt im Ordner belassen – memosaur liest beide Formate
+
+# Option B: ZIPs direkt im Ordner lassen
+# memosaur liest beide Formate automatisch
+cp takeout-*.zip takeout/
 ```
 
-Die Struktur sollte so aussehen:
+Erwartete Verzeichnisstruktur nach dem Entpacken:
 ```
 takeout/
-├── Takeout/
-│   ├── Google Fotos/
-│   │   └── Fotos von 2025/
-│   │       ├── 20250101_120006.jpg
-│   │       ├── 20250101_120006.jpg.supplemental-metadata.json
-│   │       └── ...
-│   └── Maps (Meine Orte)/
-│       ├── Bewertungen.json
-│       └── Gespeicherte Orte.json
+└── Takeout/
+    ├── Google Fotos/
+    │   └── Fotos von 2025/
+    │       ├── 20250101_120006.jpg
+    │       ├── 20250101_120006.jpg.supplemental-metadata.json
+    │       └── ...
+    └── Maps (Meine Orte)/
+        ├── Bewertungen.json
+        └── Gespeicherte Orte.json
 ```
 
-> Falls das Fotos-Jahr abweicht, `paths.photos_dir` in `config.yaml` anpassen.
+> Falls das Fotos-Verzeichnis ein anderes Jahr enthält, `paths.photos_dir` in `config.yaml` anpassen:
+> ```yaml
+> paths:
+>   photos_dir: "takeout/Takeout/Google Fotos/Fotos von 2024"
+> ```
 
 ---
 
 ## Schritt 6 – Server starten
 
 ```bash
-# Mit dem Startskript (aktiviert venv automatisch):
+# Mit dem Startskript (richtet venv ein falls nötig):
 ./start.sh
 
 # Oder manuell:
 source .venv/bin/activate
-python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload --app-dir .
 ```
+
+Der Server gibt beim Start folgendes aus:
+```
+Initialisiere SQLite-Datenbank: data/memosaur.db
+Default-User 'ManfredMustermann' angelegt (ID: 00000000-...)
+memosaur v2 gestartet.
+INFO:     Uvicorn running on http://0.0.0.0:8000
+```
+
+---
+
+## Schritt 7 – Erster Start im Browser
 
 Browser öffnen: **[http://localhost:8000](http://localhost:8000)**
 
----
+Beim ersten Besuch läuft folgende Sequenz automatisch ab:
 
-## Schritt 7 – Daten importieren
+### 1. Token-Wörterbuch laden (< 1 Sekunde)
+Das NER-Wörterbuch wird vom Server abgerufen und in der Browser-IndexedDB gespeichert. Dieser Schritt ist nur beim allerersten Besuch nötig.
 
-1. **Import-Tab** öffnen
-2. **"Alles einlesen"** klicken
+### 2. NER-Modell laden (~90 MB, einmalig)
+Ein KI-Modell für die lokale Erkennung von Namen und Orten wird heruntergeladen. Ein Fortschrittsbalken zeigt den Stand. Nach dem Download wird es im Browser-Cache gespeichert – beim nächsten Besuch startet es sofort.
 
-Der Import läuft in drei Phasen:
-- **Bewertungen** (47 Einträge): ~30 Sekunden
-- **Gespeicherte Orte** (210 Einträge): ~2 Minuten
-- **Fotos** (50 Sample): ~15–25 Minuten
-  - Pro Foto: Reverse Geocoding + Vision-Beschreibung + Embedding
-  - Fortschritt im Server-Log sichtbar
-
-Nach dem Import erscheint im **Datenbank-Status**:
 ```
-49 Fotos · 47 Bewertungen · 210 Gespeicherte Orte
+Lade Token-Wörterbuch…
+Wörterbuch geladen (267 Tokens)
+NER-Modell: 45% (model_quantized.onnx)
+NER-Modell: 100%
+→ App startet
 ```
 
+### 3. DSGVO-Einwilligungsdialog
+Beim allerersten Start erscheint ein Dialog für die Einwilligungen nach Art. 9 DSGVO:
+
+| Feature | Was wird verarbeitet |
+|---|---|
+| **Fotos & KI-Bilderkennung** | Bilder werden an Ollama (lokal) gesendet; die Beschreibungen werden im Browser vor der Speicherung anonymisiert |
+| **GPS-Standortdaten** | GPS-Koordinaten gehen an OpenStreetMap/Nominatim für Reverse Geocoding (nur Koordinaten, keine Namen) |
+| **Nachrichten** | Chat-Texte werden vor dem Upload im Browser maskiert – nur Tokens erreichen den Server |
+
+Ohne Einwilligung sind die jeweiligen Features deaktiviert. Die Einstellung kann jederzeit im **Einstellungen-Tab** geändert werden.
+
 ---
 
-## Schritt 8 – Erste Abfrage
+## Schritt 8 – Daten importieren
+
+Im **Import-Tab** die gewünschten Quellen einlesen:
+
+### Google Fotos + Maps (empfohlen als Einstieg)
+
+Klick auf **"Alles einlesen"** startet den Import in drei Phasen:
+
+| Phase | Dauer (ca.) | Hinweis |
+|---|---|---|
+| Bewertungen (47 Einträge) | ~30 Sek. | Nur Embeddings, kein LLM |
+| Gespeicherte Orte (210 Einträge) | ~2 Min. | Nur Embeddings, kein LLM |
+| 50 Sample-Fotos | ~15–25 Min. | Vision-LLM + Reverse Geocoding pro Foto |
+
+> **Foto-Ingestion via v2-API (mit Consent):**
+> Jedes Foto durchläuft:
+> 1. Server ruft Ollama Vision auf → sendet Klartext-Beschreibung an Browser
+> 2. Browser maskiert Beschreibung (NER: Namen → Tokens)
+> 3. Browser schickt maskierten Text zurück → Server speichert in ChromaDB
+>
+> Kein Klarname wird dauerhaft auf dem Server gespeichert.
+
+Nach dem Import zeigt der **Datenbank-Status**:
+```
+49 Fotos  ·  47 Bewertungen  ·  210 Gespeicherte Orte
+```
+
+### Erste Abfrage
 
 Im **Chat-Tab** eine Frage stellen:
-
 ```
 Wo war ich im August?
-Was habe ich letztes Jahr in München gegessen?
 Welche Restaurants habe ich bewertet?
+Wo habe ich im September Fotos gemacht?
 ```
 
 ---
 
 ## Messenger-Daten hinzufügen (optional)
 
+Messenger-Daten benötigen die Einwilligung **"Nachrichten"** im Consent-Dialog.
+
 ### WhatsApp
 
-1. WhatsApp öffnen → Einstellungen → Chats → Chat exportieren → **Ohne Medien**
-2. Die `.txt`-Datei im Import-Tab unter **"WhatsApp Export"** hochladen
-3. Nachrichten werden automatisch in 10er-Chunks indexiert, Personen-Erwähnungen extrahiert
+1. WhatsApp → Einstellungen → Chats → Chat exportieren → **Ohne Medien**
+2. Die `.txt`-Datei im **Import-Tab** unter "WhatsApp Export" hochladen
+3. Der Browser maskiert den Text vor dem Upload automatisch
+4. Nachrichten werden in 10er-Chunks indexiert, erwähnte Personen erkannt
 
 ### Signal
 
-1. Signal Desktop öffnen → Einstellungen → Chats → Chats exportieren
-2. Die `messages.json` im Import-Tab unter **"Signal Export"** hochladen
+1. Signal Desktop → Einstellungen → Chats → Chats exportieren
+2. Die `messages.json` im **Import-Tab** unter "Signal Export" hochladen
+
+---
+
+## Migration von v1 auf v2
+
+Falls du memosaur bereits in der v1 (ohne Token-Flow) genutzt hast und die bestehende ChromaDB migrieren möchtest:
+
+### Was die Migration tut
+
+1. SQLite-Datenbank anlegen + Default-User `ManfredMustermann`
+2. Alle ChromaDB-Dokumente mit `user_id` versehen
+3. Klarnamen (Personen, Orte) durch Tokens ersetzen
+4. Embeddings neu berechnen (tokenisierter Text)
+5. Token-Wörterbuch als `data/migration_dictionary.json` exportieren
+
+### Migration ausführen
+
+```bash
+source .venv/bin/activate
+python scripts/migrate_to_v2.py
+```
+
+Ausgabe am Ende:
+```
+Migration abgeschlossen!
+  267 Dokumente migriert
+  267 Tokens erzeugt (5 PER, 16 LOC, 246 ORG)
+  Wörterbuch: data/migration_dictionary.json
+```
+
+### Nach der Migration
+
+1. Server starten: `./start.sh`
+2. Browser öffnen: http://localhost:8000
+3. Das Wörterbuch wird beim ersten Seitenaufruf **automatisch** in den Browser importiert
+4. Die Datei `data/migration_dictionary.json` wird danach automatisch vom Server gelöscht
+
+> **Wichtig:** Solange `migration_dictionary.json` existiert, enthält sie Klarnamen
+> im Klartext auf dem Server. Sie wird nach dem ersten Browser-Import automatisch
+> gelöscht. Bis dahin sollte der Server nicht öffentlich erreichbar sein.
 
 ---
 
 ## Fehlerbehebung
 
+### NER-Modell lädt nicht / bleibt bei 0%
+
+**Ursache:** Browser blockiert den CDN-Zugriff auf `cdn.jsdelivr.net`
+
+**Lösung:** Browser-Konsole öffnen (F12) und auf Fehler prüfen:
+- `CORS error` → Firewall oder Browser-Erweiterung blockiert CDN
+- `Failed to fetch` → Keine Internetverbindung beim ersten Start
+
+Das Modell muss nur einmal heruntergeladen werden. Nach dem ersten Laden ist es im Browser-Cache.
+
+### Tokens werden nicht demaskiert (`[LOC_1]` bleibt sichtbar)
+
+**Ursache:** Token-Wörterbuch ist nicht in der Browser-IndexedDB
+
+**Diagnose** (Browser-Konsole):
+```javascript
+await TokenStore.getAllTokens().then(t => console.log(t.length + ' Tokens'))
+// Sollte: "267 Tokens" (oder mehr nach neuen Importen)
+// Falls 0: Wörterbuch fehlt
+```
+
+**Lösung:**
+```javascript
+// Manuell neu importieren (setzt auch den localStorage-Flag zurück)
+localStorage.removeItem('memosaur_dict_imported');
+location.reload();
+// → App lädt Wörterbuch automatisch beim Neustart
+```
+
 ### GPU-Timeout beim Bildimport
 
-**Symptom:** `model runner has unexpectedly stopped` im Log
+**Symptom:** `model runner has unexpectedly stopped` im Server-Log
 
 **Ursachen/Lösungen:**
-- VRAM reicht nicht: kleineres Vision-Modell verwenden (`gemma3:4b` statt `gemma3:12b`)
-- `config.yaml` anpassen: `vision_model: "gemma3:4b"`
-- Falls kein passendes Modell verfügbar: Vision in `photos.py` deaktivieren
-  (Zeile `description = describe_image(image_bytes)` auskommentieren)
+- VRAM zu knapp: kleineres Vision-Modell verwenden
+  ```yaml
+  # config.yaml
+  vision_model: "gemma3:4b"   # statt gemma3:12b
+  ```
+- AMD GPU: ROCm-Version prüfen (`rocm-smi --version`), mindestens 6.3 nötig
+- Bild-Resize ist aktiv (max. 768px), aber bei sehr vielen gleichzeitigen Anfragen trotzdem Timeout → `vision_batch_size: 1` in config.yaml sicherstellen
 
 ### Ollama nicht erreichbar
 
-**Symptom:** `Connection refused` oder `404 Not Found`
+**Symptom:** `Connection refused` oder `404 Not Found` im Log
 
-**Lösung:**
 ```bash
-# Ollama-Status prüfen
+# Status prüfen
 curl http://localhost:11434/api/tags
 
-# Installierte Modelle prüfen
+# Modelle prüfen
 ollama list
 
-# Ollama neu starten
+# Neu starten
 ollama serve
 ```
 
 ### Modell nicht gefunden (404)
 
-**Symptom:** `model "xyz" not found`
-
-**Lösung:**
 ```bash
-# Modell installieren
 ollama pull qwen3:8b
 ollama pull gemma3:12b
 
-# In config.yaml anpassen falls anderes Modell genutzt werden soll
+# Oder alternatives Modell in config.yaml eintragen
 ```
 
-### Embedding-Modell wird jedes Mal neu geladen
+### ChromaDB-Fehler nach Migration
 
-Das Embedding-Modell wird beim ersten Aufruf von HuggingFace geladen und dann
-lokal gecacht (`~/.cache/huggingface/`). Der erste Start dauert deshalb länger.
+**Symptom:** `ValueError: Expected metadata value to be...`
 
-### Takeout-Pfade falsch
-
-**Symptom:** `0 Fotos gefunden` oder `Bewertungen.json nicht gefunden`
-
-**Lösung:** Pfade in `config.yaml` prüfen. Die exakten Pfadnamen im Takeout
-können je nach Sprache und Export-Datum variieren:
+Neue Boolean-Flags (`has_per_1` etc.) wurden nicht für alle Dokumente gesetzt.
 
 ```bash
-# Tatsächliche Struktur anzeigen
+# Migration erneut ausführen (ist idempotent)
+python scripts/migrate_to_v2.py
+```
+
+### Takeout-Pfade nicht gefunden
+
+```bash
+# Tatsächliche Struktur prüfen
 find takeout/ -maxdepth 4 -type d
+
+# Pfad in config.yaml anpassen falls nötig
+# z.B. bei englischsprachigem Takeout:
+#   photos_dir: "takeout/Takeout/Google Photos/Photos from 2025"
 ```
 
 ---
 
 ## Empfohlene Modelle nach Hardware
 
-| VRAM | Text-Modell | Vision-Modell | Qualität |
+| VRAM | Chat-Modell | Vision-Modell | Qualität |
 |---|---|---|---|
 | 4 GB | `qwen3:4b` | `gemma3:4b` | Gut |
 | 8 GB | `qwen3:8b` | `gemma3:4b` | Sehr gut |
 | 16 GB | `qwen3:8b` | `gemma3:12b` | Ausgezeichnet |
 | 24 GB+ | `mistral-small3.2:24b` | `gemma3:12b` | Optimal |
 
-> Die Modelle laufen **nicht gleichzeitig** – Vision wird nur beim Import
-> benötigt, Text-LLM nur bei Abfragen.
+> Die Modelle laufen **nie gleichzeitig**: Vision wird nur beim Foto-Import verwendet,
+> das Chat-Modell nur bei Abfragen und Query-Parsing (v0). Bei 16 GB VRAM
+> (z.B. Radeon RX 9070) läuft `gemma3:12b` + `qwen3:8b` komfortabel abwechselnd.
 
 ---
 
-## Systemanforderungen (Windows + WSL2)
+## Konsolendiagnose (Browser)
 
-Falls memosaur unter Windows in WSL2 läuft und Ollama auf dem Windows-Host:
+Nützliche Befehle in der Browser-Konsole (F12):
 
-1. Ollama auf Windows installieren und starten
-2. Windows-IP aus WSL2 herausfinden:
-   ```bash
-   cat /etc/resolv.conf | grep nameserver | awk '{print $2}'
-   ```
-3. In `config.yaml` eintragen:
-   ```yaml
-   llm:
-     base_url: "http://172.x.x.x:11434"
-   ```
+```javascript
+// Token-Wörterbuch prüfen
+await TokenStore.getAllTokens().then(t => t.slice(0,5))
+
+// Demaskierung testen
+await TokenStore.unmaskText("Hallo [PER_1], warst du in [LOC_1]?")
+
+// NER-Status
+NER.getNERState()   // → 'ready' | 'loading' | 'error'
+
+// NER testen
+await NER.recognizeEntities("Nora war in Ahrensburg beim Bäcker")
+
+// Consent-Status
+fetch('/api/v1/consent/00000000-0000-0000-0000-000000000001')
+  .then(r => r.json()).then(console.log)
+```
