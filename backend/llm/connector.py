@@ -1,0 +1,279 @@
+"""
+connector.py – LLM-Abstraktion für memosaur.
+
+Unterstützt:
+  - Ollama (lokal, Standard)
+  - OpenAI
+  - Anthropic
+
+Konfiguration über config.yaml (llm.provider, llm.model, llm.vision_model).
+"""
+
+from __future__ import annotations
+
+import base64
+import logging
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Konfiguration laden
+# ---------------------------------------------------------------------------
+
+def _load_config() -> dict:
+    cfg_path = Path(__file__).resolve().parents[2] / "config.yaml"
+    with open(cfg_path, encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+_cfg: dict | None = None
+
+
+def get_cfg() -> dict:
+    global _cfg
+    if _cfg is None:
+        _cfg = _load_config()
+    return _cfg
+
+
+# ---------------------------------------------------------------------------
+# Ollama-Client (gecacht)
+# ---------------------------------------------------------------------------
+
+_ollama_client: Any = None
+
+
+def _get_ollama_client():
+    global _ollama_client
+    if _ollama_client is None:
+        import ollama
+        cfg = get_cfg()["llm"]
+        _ollama_client = ollama.Client(host=cfg["base_url"])
+    return _ollama_client
+
+
+# ---------------------------------------------------------------------------
+# Text-Chat
+# ---------------------------------------------------------------------------
+
+def _strip_thinking(text: str) -> str:
+    """Entfernt <think>...</think> Blöcke aus qwen3/deepseek-r1 Antworten."""
+    import re
+    return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+
+
+def chat(messages: list[dict], model: str | None = None) -> str:
+    """Sendet eine Chat-Anfrage an das konfigurierte LLM und gibt den Antworttext zurück."""
+    cfg = get_cfg()["llm"]
+    provider = cfg["provider"]
+    model = model or cfg["model"]
+
+    if provider == "ollama":
+        client = _get_ollama_client()
+        response = client.chat(model=model, messages=messages)
+        return _strip_thinking(response["message"]["content"].strip())
+
+    elif provider == "openai":
+        from openai import OpenAI
+        client = OpenAI(api_key=cfg.get("api_key", ""))
+        response = client.chat.completions.create(model=model, messages=messages)
+        return response.choices[0].message.content.strip()
+
+    elif provider == "anthropic":
+        import anthropic
+        client = anthropic.Anthropic(api_key=cfg.get("api_key", ""))
+        # Anthropic erwartet system-Nachrichten separat
+        system = ""
+        filtered = []
+        for m in messages:
+            if m["role"] == "system":
+                system = m["content"]
+            else:
+                filtered.append(m)
+        response = client.messages.create(
+            model=model,
+            max_tokens=4096,
+            system=system,
+            messages=filtered,
+        )
+        return response.content[0].text.strip()
+
+    else:
+        raise ValueError(f"Unbekannter LLM-Provider: {provider}")
+
+
+# ---------------------------------------------------------------------------
+# Vision (Bildbeschreibung)
+# ---------------------------------------------------------------------------
+
+# Maximale Bildgröße vor dem Senden an das Vision-Modell (Pixel, längste Seite).
+# Kleinere Bilder = weniger VRAM-Druck, weniger GPU-Timeouts.
+VISION_MAX_PX = 768
+
+
+def _resize_image(image_bytes: bytes, max_px: int = VISION_MAX_PX) -> bytes:
+    """Skaliert ein Bild auf max. max_px (längste Seite), gibt JPEG-Bytes zurück."""
+    from PIL import Image
+    import io
+
+    img = Image.open(io.BytesIO(image_bytes))
+    # EXIF-Rotation anwenden falls vorhanden
+    try:
+        from PIL import ImageOps
+        img = ImageOps.exif_transpose(img)
+    except Exception:
+        pass
+
+    w, h = img.size
+    if max(w, h) > max_px:
+        ratio = max_px / max(w, h)
+        resample = getattr(Image.Resampling, "LANCZOS", 1)  # 1 = LANCZOS in alten Versionen
+        img = img.resize((int(w * ratio), int(h * ratio)), resample)
+
+    # Als RGB-JPEG speichern (entfernt Alpha-Kanal falls vorhanden)
+    if img.mode != "RGB":
+        img = img.convert("RGB")
+
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG", quality=85, optimize=True)
+    return buf.getvalue()
+
+
+def describe_image(image_bytes: bytes, prompt: str | None = None) -> str:
+    """Analysiert ein Bild und gibt eine deutschsprachige Beschreibung zurück.
+
+    Bilder werden vor dem Senden auf VISION_MAX_PX skaliert um GPU-Timeouts
+    durch zu hohen VRAM-Verbrauch zu vermeiden.
+    """
+    import time
+
+    cfg = get_cfg()["llm"]
+    provider = cfg["provider"]
+    vision_model = cfg["vision_model"]
+
+    if prompt is None:
+        prompt = (
+            "Beschreibe dieses Bild in 2-4 Sätzen auf Deutsch. "
+            "Fokussiere dich auf: Personen (Anzahl, Geschlecht, Aktivität), "
+            "Ort/Umgebung (drinnen/draußen, Art des Ortes), "
+            "sichtbare Objekte (Essen, Gegenstände, Fahrzeuge), "
+            "Stimmung und Tageszeit. "
+            "Sei präzise und faktisch."
+        )
+
+    # Bild skalieren
+    try:
+        image_bytes = _resize_image(image_bytes)
+    except Exception as exc:
+        logger.warning("Bild-Resize fehlgeschlagen, sende Original: %s", exc)
+
+    if provider == "ollama":
+        client = _get_ollama_client()
+        image_b64 = base64.standard_b64encode(image_bytes).decode("utf-8")
+
+        last_exc: Exception | None = None
+        for attempt in range(1, 4):  # bis zu 3 Versuche
+            try:
+                response = client.chat(
+                    model=vision_model,
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": prompt,
+                            "images": [image_b64],
+                        }
+                    ],
+                    options={
+                        # Nach jedem Aufruf VRAM freigeben (0 = sofort entladen)
+                        "keep_alive": 0,
+                    },
+                )
+                return _strip_thinking(response["message"]["content"].strip())
+            except Exception as exc:
+                last_exc = exc
+                logger.warning("Vision Versuch %d/3 fehlgeschlagen: %s", attempt, exc)
+                time.sleep(5 * attempt)  # 5s, 10s, 15s warten
+
+        raise last_exc  # type: ignore[misc]
+
+    elif provider == "openai":
+        from openai import OpenAI
+        client = OpenAI(api_key=cfg.get("api_key", ""))
+        image_b64 = base64.standard_b64encode(image_bytes).decode("utf-8")
+        response = client.chat.completions.create(
+            model=vision_model,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": f"data:image/jpeg;base64,{image_b64}"},
+                        },
+                    ],
+                }
+            ],
+        )
+        return response.choices[0].message.content.strip()
+
+    elif provider == "anthropic":
+        import anthropic
+        client = anthropic.Anthropic(api_key=cfg.get("api_key", ""))
+        image_b64 = base64.standard_b64encode(image_bytes).decode("utf-8")
+        response = client.messages.create(
+            model=vision_model,
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": "image/jpeg",
+                                "data": image_b64,
+                            },
+                        },
+                        {"type": "text", "text": prompt},
+                    ],
+                }
+            ],
+        )
+        return response.content[0].text.strip()
+
+    else:
+        raise ValueError(f"Unbekannter LLM-Provider: {provider}")
+
+
+# ---------------------------------------------------------------------------
+# Embeddings
+# ---------------------------------------------------------------------------
+
+_st_model = None
+
+
+def _get_st_model():
+    """Gibt ein gecachtes SentenceTransformer-Modell zurück."""
+    global _st_model
+    if _st_model is None:
+        from sentence_transformers import SentenceTransformer
+        logger.info("Lade Embedding-Modell paraphrase-multilingual-MiniLM-L12-v2 …")
+        _st_model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+        logger.info("Embedding-Modell geladen.")
+    return _st_model
+
+
+def embed(texts: list[str]) -> list[list[float]]:
+    """Erzeugt Embedding-Vektoren für eine Liste von Texten.
+
+    Verwendet immer sentence-transformers lokal (kein Ollama-Embedding-Modell
+    nötig) – schneller, zuverlässiger und offline-fähig.
+    """
+    model = _get_st_model()
+    return model.encode(texts, show_progress_bar=False).tolist()

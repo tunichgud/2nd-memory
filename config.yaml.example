@@ -1,0 +1,68 @@
+# ============================================================
+# memosaur – Konfiguration (Vorlage)
+# Kopiere diese Datei nach config.yaml und passe die Werte an.
+# config.yaml wird NICHT ins Git eingecheckt.
+# ============================================================
+
+# --- Ollama / LLM -----------------------------------------------------------
+llm:
+  # provider: ollama | openai | anthropic
+  provider: ollama
+  base_url: "http://localhost:11434"   # Ollama-Serveradresse
+
+  # Text-Modell für RAG-Abfragen und Chat
+  model: "qwen3:8b"
+
+  # Vision-Modell für Bildbeschreibungen (muss Vision-fähig sein)
+  vision_model: "gemma3:12b"
+
+  # Embedding-Modell (läuft lokal via sentence-transformers)
+  embedding_model: "paraphrase-multilingual-MiniLM-L12-v2"
+
+  # API-Key – nur nötig wenn provider = openai oder anthropic
+  # api_key: "sk-..."
+
+# --- Pfade ------------------------------------------------------------------
+paths:
+  # Wurzelverzeichnis des entpackten Google Takeout Exports
+  takeout_dir: "takeout/Takeout"
+
+  # Verzeichnis mit den Fotos (Google Fotos Takeout)
+  photos_dir: "takeout/Takeout/Google Fotos/Fotos von 2025"
+
+  # Google Maps Bewertungen (aus Takeout)
+  reviews_file: "takeout/Takeout/Maps (Meine Orte)/Bewertungen.json"
+
+  # Google Maps Gespeicherte Orte (aus Takeout)
+  saved_places_file: "takeout/Takeout/Maps (Meine Orte)/Gespeicherte Orte.json"
+
+  # Lokale Datenbank (ChromaDB)
+  data_dir: "data"
+
+# --- Ingestion --------------------------------------------------------------
+ingestion:
+  # Maximale Anzahl Fotos für das Sample (0 = alle)
+  photo_sample_size: 50
+
+  # Sample-Strategie: "diverse" | "newest" | "all"
+  photo_sample_strategy: "diverse"
+
+  # Batch-Größe für Vision-Beschreibungen
+  vision_batch_size: 1
+
+  # Gesichtserkennung für ungetaggte Fotos aktivieren
+  face_recognition_enabled: true
+
+# --- RAG --------------------------------------------------------------------
+rag:
+  # Anzahl der abgerufenen Dokumente pro Abfrage
+  top_k: 10
+
+  # Mindest-Ähnlichkeit (0.0–1.0) für Treffer
+  min_score: 0.3
+
+# --- Server -----------------------------------------------------------------
+server:
+  host: "0.0.0.0"
+  port: 8000
+  reload: true

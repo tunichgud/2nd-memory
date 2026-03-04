@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>memosaur – Persönliches Gedächtnis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    #map { height: 400px; }
+    .source-photo   { border-left: 4px solid #3b82f6; }
+    .source-reviews { border-left: 4px solid #10b981; }
+    .source-saved_places { border-left: 4px solid #f59e0b; }
+    .source-messages { border-left: 4px solid #8b5cf6; }
+    .typing-dot { animation: blink 1.2s infinite; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink { 0%,80%,100%{opacity:0} 40%{opacity:1} }
+    pre { white-space: pre-wrap; word-break: break-word; }
+  </style>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen font-sans">
+
+<!-- Header -->
+<header class="bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between">
+  <div class="flex items-center gap-3">
+    <span class="text-2xl">🦕</span>
+    <h1 class="text-xl font-bold tracking-tight">memosaur</h1>
+    <span class="text-xs text-gray-500">Persönliches Gedächtnis-System</span>
+  </div>
+  <nav class="flex gap-4 text-sm">
+    <button onclick="showTab('chat')"    id="tab-chat"    class="tab-btn active px-3 py-1 rounded">Chat</button>
+    <button onclick="showTab('map')"     id="tab-map"     class="tab-btn px-3 py-1 rounded">Karte</button>
+    <button onclick="showTab('import')"  id="tab-import"  class="tab-btn px-3 py-1 rounded">Import</button>
+  </nav>
+  <div id="status-bar" class="text-xs text-gray-500"></div>
+</header>
+
+<!-- Chat-Tab -->
+<div id="view-chat" class="view max-w-4xl mx-auto p-4 flex flex-col gap-4" style="height:calc(100vh - 70px)">
+  <div id="chat-messages" class="flex-1 overflow-y-auto flex flex-col gap-4 pr-2"></div>
+
+  <!-- Eingabe -->
+  <div class="flex gap-2">
+    <input id="chat-input"
+      type="text"
+      placeholder="Frage stellen, z.B. ›Wo war ich im August mit Nora?‹"
+      class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-500"
+      onkeydown="if(event.key==='Enter') sendQuery()"
+    />
+    <button onclick="sendQuery()"
+      class="bg-blue-600 hover:bg-blue-500 px-5 py-3 rounded-lg text-sm font-medium transition-colors">
+      Fragen
+    </button>
+  </div>
+
+  <!-- Schnellfilter -->
+  <div class="flex gap-2 flex-wrap text-xs">
+    <span class="text-gray-500">Schnell:</span>
+    <button onclick="quickQuery('Wo war ich im August?')"          class="quick-btn">August</button>
+    <button onclick="quickQuery('Mit wem war ich in München?')"    class="quick-btn">München</button>
+    <button onclick="quickQuery('Welche Restaurants habe ich besucht?')" class="quick-btn">Restaurants</button>
+    <button onclick="quickQuery('Was habe ich mit Nora gemacht?')" class="quick-btn">Nora</button>
+    <button onclick="quickQuery('Wo habe ich im November Fotos gemacht?')" class="quick-btn">November</button>
+  </div>
+</div>
+
+<!-- Karten-Tab -->
+<div id="view-map" class="view hidden p-4">
+  <div class="flex gap-3 mb-3 text-sm flex-wrap items-center">
+    <select id="map-source" onchange="loadMap()" class="bg-gray-800 border border-gray-700 rounded px-3 py-1">
+      <option value="">Alle Quellen</option>
+      <option value="photos">Fotos</option>
+      <option value="reviews">Bewertungen</option>
+      <option value="saved_places">Gespeicherte Orte</option>
+    </select>
+    <input type="date" id="map-from" onchange="loadMap()" class="bg-gray-800 border border-gray-700 rounded px-3 py-1">
+    <span class="text-gray-500">bis</span>
+    <input type="date" id="map-to" onchange="loadMap()" class="bg-gray-800 border border-gray-700 rounded px-3 py-1">
+    <span id="map-count" class="text-gray-500 ml-2"></span>
+  </div>
+  <div id="map" class="rounded-lg border border-gray-800"></div>
+  <div id="map-legend" class="flex gap-4 mt-3 text-xs text-gray-400">
+    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Fotos</span>
+    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Bewertungen</span>
+    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Gespeicherte Orte</span>
+  </div>
+</div>
+
+<!-- Import-Tab -->
+<div id="view-import" class="view hidden max-w-2xl mx-auto p-4 flex flex-col gap-6">
+  <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+    <h2 class="font-semibold mb-4 flex items-center gap-2">📷 Google Fotos & Maps</h2>
+    <p class="text-sm text-gray-400 mb-4">
+      Indexiert die 50 Sample-Fotos mit GPS, Personen-Tags und KI-Bildbeschreibung
+      sowie alle Google Maps Bewertungen und gespeicherten Orte.
+    </p>
+    <div class="flex gap-3">
+      <button onclick="ingestSource('all')"     class="ingest-btn bg-blue-700 hover:bg-blue-600">Alles einlesen</button>
+      <button onclick="ingestSource('photos')"  class="ingest-btn bg-gray-700 hover:bg-gray-600">Nur Fotos</button>
+      <button onclick="ingestSource('reviews')" class="ingest-btn bg-gray-700 hover:bg-gray-600">Nur Bewertungen</button>
+      <button onclick="ingestSource('saved')"   class="ingest-btn bg-gray-700 hover:bg-gray-600">Nur Gespeicherte</button>
+    </div>
+    <div id="ingest-progress" class="mt-4 hidden">
+      <div class="flex justify-between text-xs text-gray-400 mb-1">
+        <span id="progress-text">Verarbeite…</span>
+        <span id="progress-pct"></span>
+      </div>
+      <div class="w-full bg-gray-800 rounded-full h-2">
+        <div id="progress-bar" class="bg-blue-500 h-2 rounded-full transition-all" style="width:0%"></div>
+      </div>
+    </div>
+    <div id="ingest-result" class="mt-3 text-sm"></div>
+  </div>
+
+  <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+    <h2 class="font-semibold mb-4 flex items-center gap-2">💬 WhatsApp Export</h2>
+    <p class="text-sm text-gray-400 mb-3">
+      WhatsApp → Einstellungen → Chats → Chat exportieren → Ohne Medien → TXT-Datei hochladen.
+    </p>
+    <div class="flex gap-3 items-center">
+      <input type="file" id="wa-file" accept=".txt,.zip" class="text-sm text-gray-400">
+      <button onclick="uploadWhatsApp()" class="ingest-btn bg-emerald-700 hover:bg-emerald-600">Hochladen</button>
+    </div>
+    <div id="wa-result" class="mt-3 text-sm"></div>
+  </div>
+
+  <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+    <h2 class="font-semibold mb-4 flex items-center gap-2">🔒 Signal Export</h2>
+    <p class="text-sm text-gray-400 mb-3">
+      Signal Desktop → Einstellungen → Chats → Chats exportieren → messages.json hochladen.
+    </p>
+    <div class="flex gap-3 items-center">
+      <input type="file" id="signal-file" accept=".json,.zip" class="text-sm text-gray-400">
+      <button onclick="uploadSignal()" class="ingest-btn bg-purple-700 hover:bg-purple-600">Hochladen</button>
+    </div>
+    <div id="signal-result" class="mt-3 text-sm"></div>
+  </div>
+
+  <!-- DB-Status -->
+  <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+    <h2 class="font-semibold mb-3">📊 Datenbank-Status</h2>
+    <div id="db-status" class="grid grid-cols-2 gap-3 text-sm"></div>
+    <button onclick="loadStatus()" class="mt-3 text-xs text-gray-500 hover:text-gray-300">Aktualisieren</button>
+  </div>
+</div>
+
+<style>
+  .tab-btn { color: #9ca3af; }
+  .tab-btn:hover { color: #e5e7eb; }
+  .tab-btn.active { color: #fff; background: #374151; }
+  .quick-btn { background:#1f2937; color:#9ca3af; border:1px solid #374151; padding:3px 10px; border-radius:9999px; cursor:pointer; }
+  .quick-btn:hover { background:#374151; color:#e5e7eb; }
+  .ingest-btn { padding:8px 16px; border-radius:8px; font-size:0.875rem; font-weight:500; cursor:pointer; transition:background 0.15s; }
+</style>
+
+<script src="/static/chat.js"></script>
+<script src="/static/map.js"></script>
+<script>
+// -------------------------------------------------------------------------
+// Tab-Navigation
+// -------------------------------------------------------------------------
+function showTab(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + name).classList.remove('hidden');
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'map') { loadMap(); }
+  if (name === 'import') { loadStatus(); }
+}
+
+// -------------------------------------------------------------------------
+// Status laden
+// -------------------------------------------------------------------------
+async function loadStatus() {
+  try {
+    const r = await fetch('/api/ingest/status');
+    const d = await r.json();
+    document.getElementById('db-status').innerHTML = `
+      <div class="bg-gray-800 rounded p-3"><span class="text-blue-400 font-bold text-lg">${d.photos}</span><br><span class="text-gray-400">Fotos</span></div>
+      <div class="bg-gray-800 rounded p-3"><span class="text-emerald-400 font-bold text-lg">${d.reviews}</span><br><span class="text-gray-400">Bewertungen</span></div>
+      <div class="bg-gray-800 rounded p-3"><span class="text-amber-400 font-bold text-lg">${d.saved_places}</span><br><span class="text-gray-400">Gespeicherte Orte</span></div>
+      <div class="bg-gray-800 rounded p-3"><span class="text-purple-400 font-bold text-lg">${d.messages}</span><br><span class="text-gray-400">Nachrichten</span></div>
+    `;
+    document.getElementById('status-bar').textContent = `${d.total} Einträge indexiert`;
+  } catch(e) {
+    document.getElementById('db-status').innerHTML = '<span class="text-red-400">Fehler beim Laden</span>';
+  }
+}
+
+// Beim Laden Status holen
+loadStatus();
+</script>
+</body>
+</html>
