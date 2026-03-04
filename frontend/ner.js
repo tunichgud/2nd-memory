@@ -15,50 +15,49 @@
  *   'error'    – Ladefehler
  */
 
-// Transformers.js via CDN (ONNX WASM Backend)
+// Transformers.js via CDN (ESM Build)
 import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js';
 
-// WASM-Dateien vom selben CDN laden
+// Konfiguration für Browser-Umgebung
 env.allowLocalModels = false;
-env.useBrowserCache  = true;   // Modell im Browser-Cache halten
+env.useBrowserCache  = true;
 
 const MODEL_ID = 'Xenova/bert-base-multilingual-cased-ner-hrl';
 
 let _pipe    = null;
 let _state   = 'loading';
-let _onReady = null;  // Callback wenn bereit
+let _onReady = null;
 
-/** Gibt den aktuellen Ladezustand zurück. */
-function getNERState() { return _state; }
-
-/**
- * Lädt das NER-Modell. Gibt ein Promise zurück das resolved wenn bereit.
- * Wird beim App-Start aufgerufen – blockiert Ingestion/Query bis bereit.
- */
 async function loadNER(onProgress) {
+  console.log('[NER] Initialisiere Modell-Download...');
   try {
     _state = 'loading';
-    _updateLoadingUI('NER-Modell wird geladen (~90 MB, einmalig)…');
+    _updateLoadingUI('Initialisiere NER-Modell…');
 
     _pipe = await pipeline('token-classification', MODEL_ID, {
-      aggregation_strategy: 'simple',   // Gruppen zusammenführen (z.B. "New York" → 1 Token)
+      aggregation_strategy: 'simple',
       progress_callback: (info) => {
-        if (info.status === 'downloading' && onProgress) {
-          const pct = info.total ? Math.round((info.loaded / info.total) * 100) : 0;
-          onProgress(pct, info.name);
-          _updateLoadingUI(`NER-Modell: ${pct}% (${info.name || ''})`);
+        if (info.status === 'progress') {
+          const pct = Math.round(info.progress || 0);
+          const file = info.file || '';
+          if (onProgress) onProgress(pct, file);
+          _updateLoadingUI(`NER-Modell: ${pct}% (${file})`);
+        } else if (info.status === 'done') {
+           _updateLoadingUI(`NER-Modell: Datei fertig geladen.`);
+        } else if (info.status === 'initiate') {
+           _updateLoadingUI(`Starte Download: ${info.file || ''}...`);
         }
       },
     });
 
     _state = 'ready';
+    console.log('[NER] Modell vollständig geladen und bereit.');
     _updateLoadingUI(null);
     if (_onReady) _onReady();
-    console.log('[NER] Modell bereit:', MODEL_ID);
   } catch (err) {
     _state = 'error';
-    _updateLoadingUI(`NER-Fehler: ${err.message}`, true);
-    console.error('[NER] Ladefehler:', err);
+    _updateLoadingUI(`NER-Ladefehler: ${err.message}`, true);
+    console.error('[NER] Kritischer Ladefehler:', err);
     throw err;
   }
 }
