@@ -136,31 +136,36 @@ function appendUserMessage(text) {
   scrollBottom();
 }
 
-function appendAssistantMessage(text, sources, parsedQuery) {
+async function appendAssistantMessage(text, sources, parsedQuery) {
   const div = document.createElement('div');
   div.className = 'flex flex-col gap-3 max-w-[92%]';
 
   // Filter-Zusammenfassung (erkannte Suchparameter)
-  if (parsedQuery && parsedQuery.filter_summary) {
+  if (parsedQuery && (parsedQuery.filter_summary || parsedQuery.persons?.length || parsedQuery.locations?.length)) {
     const filterDiv = document.createElement('div');
     filterDiv.className = 'flex flex-wrap gap-1 text-[11px]';
 
-    // Kleine Chips für Personen, Zeitraum, Orte
+    // Kleine Chips für Personen
     if (parsedQuery.persons && parsedQuery.persons.length > 0) {
-      parsedQuery.persons.forEach(p => {
-        filterDiv.appendChild(_filterChip('👤', p, 'bg-blue-900 text-blue-300'));
-      });
+      for (const p of parsedQuery.persons) {
+        const clearName = await window.TokenStore.lookupToken(p);
+        filterDiv.appendChild(_filterChip('👤', clearName, 'bg-blue-900 text-blue-300'));
+      }
     }
+    // Zeitraum
     if (parsedQuery.date_from) {
-      const label = parsedQuery.filter_summary.match(/Zeitraum: ([^·]+)/)?.[1]?.trim()
+      const label = (parsedQuery.filter_summary || '').match(/Zeitraum: ([^·]+)/)?.[1]?.trim()
         || `${parsedQuery.date_from} – ${parsedQuery.date_to || '…'}`;
       filterDiv.appendChild(_filterChip('📅', label, 'bg-gray-800 text-gray-400'));
     }
+    // Orte
     if (parsedQuery.locations && parsedQuery.locations.length > 0) {
-      parsedQuery.locations.forEach(l => {
-        filterDiv.appendChild(_filterChip('📍', l, 'bg-amber-900 text-amber-300'));
-      });
+      for (const l of parsedQuery.locations) {
+        const clearLoc = await window.TokenStore.lookupToken(l);
+        filterDiv.appendChild(_filterChip('📍', clearLoc, 'bg-amber-900 text-amber-300'));
+      }
     }
+    
     if (filterDiv.children.length > 0) {
       div.appendChild(filterDiv);
     }
@@ -174,7 +179,7 @@ function appendAssistantMessage(text, sources, parsedQuery) {
 
   // Quellen – immer direkt sichtbar, nach Collection gruppiert
   if (sources && sources.length > 0) {
-    // Nach Collection gruppieren für übersichtliche Darstellung
+    // Nach Collection gruppieren
     const byCollection = {};
     sources.forEach(src => {
       if (!byCollection[src.collection]) byCollection[src.collection] = [];
@@ -209,11 +214,10 @@ function appendAssistantMessage(text, sources, parsedQuery) {
     header.appendChild(toggle);
     srcWrapper.appendChild(header);
 
-    // Quellenliste – standardmäßig SICHTBAR
+    // Quellenliste
     const srcList = document.createElement('div');
     srcList.className = 'flex flex-col gap-1';
 
-    // Quellen nach Collection sortiert ausgeben
     const colOrder = ['photos', 'reviews', 'saved_places', 'messages'];
     const sortedCols = [...new Set([...colOrder, ...Object.keys(byCollection)])];
     sortedCols.forEach(col => {

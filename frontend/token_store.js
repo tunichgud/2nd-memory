@@ -126,7 +126,9 @@ async function lookupToken(token) {
  * @returns {Promise<string>}
  */
 async function unmaskText(text) {
-  const tokens = [...new Set((text.match(/\[(PER|LOC|ORG)_\d+\]/g) || []))];
+  if (!text) return text;
+  // Matcht [ANY_123] case-insensitive
+  const tokens = [...new Set((text.match(/\[[A-Z]+_\d+\]/gi) || []))];
   let result = text;
   for (const tok of tokens) {
     const cleartext = await lookupToken(tok);
@@ -182,6 +184,48 @@ async function clearTokens() {
   });
 }
 
+/**
+ * Prüft beim App-Start ob das Migrations-Wörterbuch vom Server
+ * importiert werden muss. Läuft nur einmal (Flag in localStorage).
+ *
+ * Ablauf:
+ *  1. Bereits importiert? → überspringen
+ *  2. Server hat Wörterbuch? → importieren, Flag setzen
+ *  3. Nach Import: Server-Datei löschen (DELETE /api/v1/dictionary)
+ */
+async function checkAndImportFromServer() {
+  // Bereits importiert?
+  if (localStorage.getItem('memosaur_dict_imported')) {
+    const count = (await getAllTokens()).length;
+    if (count > 0) {
+      console.log(`[TokenStore] Wörterbuch bereits vorhanden (${count} Einträge).`);
+      return count;
+    }
+    // Flag gesetzt, aber DB leer (z.B. Browser-Daten gelöscht) → erneut versuchen
+    localStorage.removeItem('memosaur_dict_imported');
+  }
+
+  try {
+    const res = await fetch('/api/v1/dictionary');
+    if (!res.ok) return 0;
+    const data = await res.json();
+    if (!data.entries || data.entries.length === 0) return 0;
+
+    const count = await importTokens(data.entries);
+    localStorage.setItem('memosaur_dict_imported', String(count));
+    console.log(`[TokenStore] ${count} Tokens aus Server-Wörterbuch importiert.`);
+
+    // Server-Datei löschen (enthält Klarnamen)
+    await fetch('/api/v1/dictionary', { method: 'DELETE' }).catch(() => {});
+    console.log('[TokenStore] Server-Wörterbuch-Datei gelöscht.');
+
+    return count;
+  } catch (err) {
+    console.warn('[TokenStore] Wörterbuch-Import fehlgeschlagen:', err);
+    return 0;
+  }
+}
+
 // Exportieren für andere Module
 window.TokenStore = {
   getOrCreateToken,
@@ -190,4 +234,5 @@ window.TokenStore = {
   getAllTokens,
   importTokens,
   clearTokens,
+  checkAndImportFromServer,
 };

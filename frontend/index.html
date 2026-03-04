@@ -254,24 +254,47 @@
   </div>
 </div>
 
-<!-- Module laden (ES-Modul für NER, klassische Scripts für den Rest) -->
+<!-- Module laden -->
 <script src="/static/token_store.js"></script>
 <script src="/static/sync.js"></script>
 <script type="module">
-  import { loadNER } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js';
-  // Eigenes ner.js als Modul laden
-  const nerMod = await import('/static/ner.js').catch(() => null);
-  if (nerMod) {
-    window._nerReady = false;
-    await window.NER.loadNER((pct) => {
-      document.getElementById('ner-progress-bar').style.width = pct + '%';
-    });
-    window._nerReady = true;
+  // Schritt 1: Token-Wörterbuch vom Server importieren (einmalig, vor NER)
+  const statusEl = document.getElementById('ner-status');
+  if (statusEl) statusEl.textContent = 'Lade Token-Wörterbuch…';
+  const dictCount = await window.TokenStore.checkAndImportFromServer();
+  if (dictCount > 0 && statusEl) {
+    statusEl.textContent = `Wörterbuch geladen (${dictCount} Tokens)`;
   }
+
+  // Schritt 2: NER-Modell laden
+  try {
+    const nerMod = await import('/static/ner.js');
+    window._nerReady = false;
+
+    await window.NER.loadNER((pct, name) => {
+      const bar = document.getElementById('ner-progress-bar');
+      if (bar) bar.style.width = pct + '%';
+    });
+
+    window._nerReady = true;
+  } catch (err) {
+    console.error('Kritischer Fehler beim Laden von NER:', err);
+    if (statusEl) {
+      statusEl.textContent = 'NER-Fehler: ' + err.message;
+      statusEl.className = 'text-xs px-3 py-1 rounded-full bg-red-900 text-red-200';
+    }
+    // v0-Fallback: trotzdem starten
+    await new Promise(r => setTimeout(r, 2000));
+  }
+
   // Overlay entfernen
-  document.getElementById('ner-overlay').remove();
+  const overlay = document.getElementById('ner-overlay');
+  if (overlay) overlay.remove();
+  
   // App initialisieren
-  window._appInit();
+  if (typeof window._appInit === 'function') {
+    window._appInit();
+  }
 </script>
 <script src="/static/chat.js"></script>
 <script src="/static/map.js"></script>

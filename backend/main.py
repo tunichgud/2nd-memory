@@ -75,17 +75,19 @@ app.include_router(media_router)
 # v1-Router (token-aware, user-scoped)
 # ---------------------------------------------------------------------------
 
-from backend.api.v1.users   import router as v1_users_router
-from backend.api.v1.consent import router as v1_consent_router
-from backend.api.v1.sync    import router as v1_sync_router
-from backend.api.v1.ingest  import router as v1_ingest_router
-from backend.api.v1.query   import router as v1_query_router
-from backend.api.v1.map     import router as v1_map_router
-from backend.api.v1.media   import router as v1_media_router
+from backend.api.v1.users      import router as v1_users_router
+from backend.api.v1.consent    import router as v1_consent_router
+from backend.api.v1.sync       import router as v1_sync_router
+from backend.api.v1.ingest     import router as v1_ingest_router
+from backend.api.v1.query      import router as v1_query_router
+from backend.api.v1.map        import router as v1_map_router
+from backend.api.v1.media      import router as v1_media_router
+from backend.api.v1.dictionary import router as v1_dictionary_router
 
 app.include_router(v1_users_router)
 app.include_router(v1_consent_router)
 app.include_router(v1_sync_router)
+app.include_router(v1_dictionary_router)
 app.include_router(v1_ingest_router)
 app.include_router(v1_query_router)
 app.include_router(v1_map_router)
