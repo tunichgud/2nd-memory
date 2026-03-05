@@ -20,12 +20,12 @@ import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers
 
 // Konfiguration für Browser-Umgebung
 env.allowLocalModels = false;
-env.useBrowserCache  = true;
+env.useBrowserCache = true;
 
 const MODEL_ID = 'Xenova/bert-base-multilingual-cased-ner-hrl';
 
-let _pipe    = null;
-let _state   = 'loading';
+let _pipe = null;
+let _state = 'loading';
 let _onReady = null;
 
 async function loadNER(onProgress) {
@@ -43,9 +43,9 @@ async function loadNER(onProgress) {
           if (onProgress) onProgress(pct, file);
           _updateLoadingUI(`NER-Modell: ${pct}% (${file})`);
         } else if (info.status === 'done') {
-           _updateLoadingUI(`NER-Modell: Datei fertig geladen.`);
+          _updateLoadingUI(`NER-Modell: Datei fertig geladen.`);
         } else if (info.status === 'initiate') {
-           _updateLoadingUI(`Starte Download: ${info.file || ''}...`);
+          _updateLoadingUI(`Starte Download: ${info.file || ''}...`);
         }
       },
     });
@@ -140,10 +140,13 @@ function _updateLoadingUI(message, isError = false) {
     return;
   }
   el.classList.remove('hidden');
-  el.className = `text-xs px-3 py-1 rounded-full ${
-    isError ? 'bg-red-900 text-red-300' : 'bg-yellow-900 text-yellow-200'
-  }`;
+  el.className = `text-xs px-3 py-1 rounded-full ${isError ? 'bg-red-900 text-red-300' : 'bg-yellow-900 text-yellow-200'
+    }`;
   el.textContent = message;
+}
+
+function getNERState() {
+  return _state;
 }
 
 // Exportieren

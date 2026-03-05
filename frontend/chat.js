@@ -1,14 +1,21 @@
 // chat.js – Chat-UI Logik für memosaur v2 (Token-Flow)
 
 const SOURCE_LABELS = {
-  photos:       { label: 'Foto',              color: 'blue',   icon: '📷' },
-  reviews:      { label: 'Bewertung',         color: 'emerald',icon: '⭐' },
-  saved_places: { label: 'Gespeicherter Ort', color: 'amber',  icon: '📍' },
-  messages:     { label: 'Nachricht',         color: 'purple', icon: '💬' },
+  photos: { label: 'Foto', color: 'blue', icon: '📷' },
+  reviews: { label: 'Bewertung', color: 'emerald', icon: '⭐' },
+  saved_places: { label: 'Gespeicherter Ort', color: 'amber', icon: '📍' },
+  messages: { label: 'Nachricht', color: 'purple', icon: '💬' },
 };
 
 // v2-API aktiv wenn NER geladen ist, sonst v0-Fallback
 function _useV2() { return window._nerReady === true; }
+
+// Hilfsfunktion: Schreibt ins `console.log` wenn `localStorage.getItem('DEBUG') === 'true'`
+function _debugLog(topic, data) {
+  if (localStorage.getItem('DEBUG') === 'true') {
+    console.log(`[DEBUG Frontend | ${topic}]`, data);
+  }
+}
 
 // -------------------------------------------------------------------------
 // Abfrage senden – mit optionalem Token-Flow (v2) oder direktem (v0)
@@ -36,25 +43,46 @@ async function sendQuery() {
 
 /** v2: NER-Maskierung → Token-API → Unmaskierung */
 async function _sendQueryV2(query, typingId) {
+  _debugLog('UserQuery', query);
+
   // 1. NER: Anfrage maskieren
   const { masked, entities } = await window.NER.maskText(query);
+  _debugLog('NER', { masked, entities });
 
   // 2. Token-IDs für Filter extrahieren
-  const personTokens   = entities.filter(e => e.type === 'PER').map(e => e.token);
+  const personTokens = entities.filter(e => e.type === 'PER').map(e => e.token);
   const locationTokens = entities.filter(e => e.type === 'LOC').map(e => e.token);
+
+  // Klarnamen der erkannten Orte aus IndexedDB nachschlagen (robust für Backend-Cluster-Filter)
+  const locationNameResults = await Promise.all(
+    locationTokens.map(async (tok) => {
+      const clearName = await window.TokenStore.lookupToken(tok);
+      _debugLog('TokenStore Lookup', { token: tok, clearName });
+      return clearName;
+    })
+  );
+  // lookupToken gibt das Token selbst zurück falls unbekannt – solche herausfiltern
+  const locationNames = locationNameResults.filter(
+    (name, i) => name && name !== locationTokens[i]
+  );
+  _debugLog('Extracted Filter', { personTokens, locationTokens, locationNames });
+
+  const requestBody = {
+    user_id: window._userId,
+    masked_query: masked,
+    person_tokens: personTokens,
+    location_tokens: locationTokens,
+    location_names: locationNames,   // z.B. ["München"] – für cluster-Post-Filter
+    n_results: 6,
+    min_score: 0.2,
+  };
+  _debugLog('API POST /api/v1/query', requestBody);
 
   // 3. Anfrage an v2-API
   const res = await fetch('/api/v1/query', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      user_id:          window._userId,
-      masked_query:     masked,
-      person_tokens:    personTokens,
-      location_tokens:  locationTokens,
-      n_results:        6,
-      min_score:        0.2,
-    }),
+    body: JSON.stringify(requestBody),
   });
 
   removeTyping(typingId);
@@ -79,7 +107,7 @@ async function _sendQueryV2(query, typingId) {
 
   appendAssistantMessage(unmaskedAnswer, unmaskedSources, {
     filter_summary: data.filter_summary,
-    persons:  personTokens,
+    persons: personTokens,
     locations: locationTokens,
   });
 }
@@ -165,7 +193,7 @@ async function appendAssistantMessage(text, sources, parsedQuery) {
         filterDiv.appendChild(_filterChip('📍', clearLoc, 'bg-amber-900 text-amber-300'));
       }
     }
-    
+
     if (filterDiv.children.length > 0) {
       div.appendChild(filterDiv);
     }
@@ -282,7 +310,7 @@ function _renderPhotoSource(src, meta, info, pct) {
   // Thumbnail
   const filename = meta.filename || '';
   const thumbUrl = filename ? `/api/media/${encodeURIComponent(filename)}?size=thumb` : '';
-  const fullUrl  = filename ? `/api/media/${encodeURIComponent(filename)}?size=full`  : '';
+  const fullUrl = filename ? `/api/media/${encodeURIComponent(filename)}?size=full` : '';
 
   if (thumbUrl) {
     const imgWrap = document.createElement('div');
@@ -315,10 +343,10 @@ function _renderPhotoSource(src, meta, info, pct) {
   </div>`;
 
   const metaParts = [];
-  if (meta.date_iso)    metaParts.push(`📅 ${formatDate(meta.date_iso)}`);
-  if (meta.place_name)  metaParts.push(`📍 ${meta.place_name}`);
+  if (meta.date_iso) metaParts.push(`📅 ${formatDate(meta.date_iso)}`);
+  if (meta.place_name) metaParts.push(`📍 ${meta.place_name}`);
   else if (meta.lat && meta.lat !== 0) metaParts.push(`🗺 ${meta.lat.toFixed(3)}°N`);
-  if (meta.persons)     metaParts.push(`👤 ${meta.persons}`);
+  if (meta.persons) metaParts.push(`👤 ${meta.persons}`);
 
   const metaHtml = metaParts.length
     ? `<div class="text-gray-400 flex flex-wrap gap-x-2 gap-y-0.5">${metaParts.map(l => `<span>${escHtml(l)}</span>`).join('')}</div>`
@@ -348,9 +376,9 @@ function _renderReviewSource(src, meta, info, pct) {
   </div>`;
 
   const metaParts = [];
-  if (meta.address)  metaParts.push(`📍 ${meta.address}`);
+  if (meta.address) metaParts.push(`📍 ${meta.address}`);
   if (meta.date_iso) metaParts.push(`📅 ${formatDate(meta.date_iso)}`);
-  if (stars)         metaParts.push(stars);
+  if (stars) metaParts.push(stars);
 
   const metaHtml = metaParts.length
     ? `<div class="text-gray-400 flex flex-wrap gap-x-2">${metaParts.map(l => `<span>${escHtml(l)}</span>`).join('')}</div>`
@@ -378,8 +406,8 @@ function _renderSavedSource(src, meta, info, pct) {
   </div>`;
 
   const metaParts = [];
-  if (meta.address)  metaParts.push(`🏠 ${meta.address}`);
-  if (meta.country)  metaParts.push(`🌍 ${meta.country}`);
+  if (meta.address) metaParts.push(`🏠 ${meta.address}`);
+  if (meta.country) metaParts.push(`🌍 ${meta.country}`);
   if (meta.date_iso) metaParts.push(`📅 ${formatDate(meta.date_iso)}`);
 
   const metaHtml = metaParts.length
@@ -418,18 +446,18 @@ function _renderMessageSource(src, meta, info, pct) {
   const chatHtml = lines.length
     ? `<div class="flex flex-col gap-0.5 bg-gray-900 rounded px-2 py-1 max-h-32 overflow-y-auto">
         ${lines.map(line => {
-          const m = line.match(/^\[(.+?)\] (.+?): (.+)$/);
-          if (!m) return `<div class="text-gray-500">${escHtml(line)}</div>`;
-          const [, time, sender, text] = m;
-          const isMe = sender.toLowerCase().includes('josh');
-          return `<div class="flex gap-1 ${isMe ? 'justify-end' : ''}">
+      const m = line.match(/^\[(.+?)\] (.+?): (.+)$/);
+      if (!m) return `<div class="text-gray-500">${escHtml(line)}</div>`;
+      const [, time, sender, text] = m;
+      const isMe = sender.toLowerCase().includes('josh');
+      return `<div class="flex gap-1 ${isMe ? 'justify-end' : ''}">
             <span class="text-gray-600 text-[9px] self-end">${escHtml(time)}</span>
             <span class="rounded px-1.5 py-0.5 text-[11px] max-w-[80%] ${isMe ? 'bg-blue-900 text-blue-100' : 'bg-gray-700 text-gray-100'}">
               ${isMe ? '' : `<span class="text-gray-400 text-[9px] block">${escHtml(sender)}</span>`}
               ${escHtml(text)}
             </span>
           </div>`;
-        }).join('')}
+    }).join('')}
       </div>`
     : `<div class="text-gray-500 leading-snug">${escHtml(src.document.substring(0, 200))}</div>`;
 
@@ -457,9 +485,9 @@ function _openLightbox(fullUrl, meta) {
 
   const caption = document.createElement('div');
   caption.className = 'text-white text-sm text-center flex flex-wrap justify-center gap-4';
-  if (meta.date_iso)   caption.innerHTML += `<span>📅 ${formatDate(meta.date_iso)}</span>`;
+  if (meta.date_iso) caption.innerHTML += `<span>📅 ${formatDate(meta.date_iso)}</span>`;
   if (meta.place_name) caption.innerHTML += `<span>📍 ${escHtml(meta.place_name)}</span>`;
-  if (meta.persons)    caption.innerHTML += `<span>👤 ${escHtml(meta.persons)}</span>`;
+  if (meta.persons) caption.innerHTML += `<span>👤 ${escHtml(meta.persons)}</span>`;
 
   const close = document.createElement('button');
   close.className = 'absolute -top-3 -right-3 w-8 h-8 bg-gray-700 hover:bg-gray-600 rounded-full text-white flex items-center justify-center text-lg leading-none';
@@ -542,7 +570,7 @@ async function ingestSource(source) {
     } else {
       resultDiv.innerHTML = `<span class="text-red-400">✗ ${data.detail || 'Fehler'}</span>`;
     }
-  } catch(e) {
+  } catch (e) {
     progressDiv.classList.add('hidden');
     resultDiv.innerHTML = `<span class="text-red-400">✗ Verbindungsfehler: ${e.message}</span>`;
   }
@@ -565,7 +593,7 @@ async function uploadWhatsApp() {
       ? `<span class="text-green-400">✓ ${data.message}</span>`
       : `<span class="text-red-400">✗ ${data.detail}</span>`;
     if (res.ok) loadStatus();
-  } catch(e) {
+  } catch (e) {
     result.innerHTML = `<span class="text-red-400">✗ ${e.message}</span>`;
   }
 }
@@ -587,7 +615,7 @@ async function uploadSignal() {
       ? `<span class="text-green-400">✓ ${data.message}</span>`
       : `<span class="text-red-400">✗ ${data.detail}</span>`;
     if (res.ok) loadStatus();
-  } catch(e) {
+  } catch (e) {
     result.innerHTML = `<span class="text-red-400">✗ ${e.message}</span>`;
   }
 }
@@ -596,12 +624,12 @@ async function uploadSignal() {
 // Hilfsfunktionen
 // -------------------------------------------------------------------------
 function chatMessages() { return document.getElementById('chat-messages'); }
-function scrollBottom()  { const c = chatMessages(); c.scrollTop = c.scrollHeight; }
+function scrollBottom() { const c = chatMessages(); c.scrollTop = c.scrollHeight; }
 
 function escHtml(str) {
   return String(str)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 function formatAnswer(text) {
@@ -615,7 +643,7 @@ function formatAnswer(text) {
 function formatDate(iso) {
   try {
     const d = new Date(iso);
-    return d.toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric' });
+    return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
   } catch { return iso; }
 }
 

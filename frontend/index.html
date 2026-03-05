@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,407 +9,671 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    #map { height: 400px; }
-    .source-photo   { border-left: 4px solid #3b82f6; }
-    .source-reviews { border-left: 4px solid #10b981; }
-    .source-saved_places { border-left: 4px solid #f59e0b; }
-    .source-messages { border-left: 4px solid #8b5cf6; }
-    .typing-dot { animation: blink 1.2s infinite; }
-    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes blink { 0%,80%,100%{opacity:0} 40%{opacity:1} }
-    pre { white-space: pre-wrap; word-break: break-word; }
-    #ner-overlay { backdrop-filter: blur(4px); }
+    #map {
+      height: 400px;
+    }
+
+    .source-photo {
+      border-left: 4px solid #3b82f6;
+    }
+
+    .source-reviews {
+      border-left: 4px solid #10b981;
+    }
+
+    .source-saved_places {
+      border-left: 4px solid #f59e0b;
+    }
+
+    .source-messages {
+      border-left: 4px solid #8b5cf6;
+    }
+
+    .typing-dot {
+      animation: blink 1.2s infinite;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes blink {
+
+      0%,
+      80%,
+      100% {
+        opacity: 0
+      }
+
+      40% {
+        opacity: 1
+      }
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    #ner-overlay {
+      backdrop-filter: blur(4px);
+    }
   </style>
 </head>
+
 <body class="bg-gray-950 text-gray-100 min-h-screen font-sans">
 
-<!-- NER-Ladeoverlay: blockiert UI bis Modell bereit -->
-<div id="ner-overlay" class="fixed inset-0 bg-gray-950 bg-opacity-90 z-50 flex flex-col items-center justify-center gap-6">
-  <span class="text-5xl">🦕</span>
-  <div class="flex flex-col items-center gap-3 max-w-sm w-full px-6">
-    <p class="font-semibold text-gray-100">memosaur startet…</p>
-    <p class="text-xs text-gray-400 text-center">
-      Das NER-Modell für lokale Datenmaskierung wird geladen (~90 MB).
-      Nach dem ersten Download wird es im Browser gecacht.
-    </p>
-    <div class="w-full bg-gray-800 rounded-full h-2">
-      <div id="ner-progress-bar" class="bg-blue-500 h-2 rounded-full transition-all" style="width:0%"></div>
-    </div>
-    <span id="ner-status" class="text-xs text-yellow-200 bg-yellow-900 px-3 py-1 rounded-full">Lade Modell…</span>
-  </div>
-</div>
-
-<!-- Consent-Modal -->
-<div id="consent-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 z-40 flex items-center justify-center p-4">
-  <div class="bg-gray-900 border border-gray-700 rounded-2xl max-w-md w-full p-6 flex flex-col gap-4">
-    <h2 class="font-bold text-lg">Datenverarbeitung – Ihre Einwilligung</h2>
-    <p class="text-sm text-gray-400">
-      Für folgende Features verarbeiten wir sensible personenbezogene Daten
-      gemäß <strong>Art. 9 DSGVO</strong>. Sie können einzelne Features aktivieren
-      oder deaktivieren.
-    </p>
-    <div class="flex flex-col gap-3">
-      <label class="flex items-start gap-3 cursor-pointer">
-        <input type="checkbox" id="consent-photos" class="mt-1 w-4 h-4 accent-blue-500">
-        <div>
-          <div class="font-medium text-sm">Fotos &amp; KI-Bilderkennung</div>
-          <div class="text-xs text-gray-500">
-            Bilder werden lokal an Ollama (Vision-KI) gesendet. Bildbeschreibungen
-            werden vor der Speicherung im Browser anonymisiert (Klarnamen → Tokens).
-          </div>
-        </div>
-      </label>
-      <label class="flex items-start gap-3 cursor-pointer">
-        <input type="checkbox" id="consent-gps" class="mt-1 w-4 h-4 accent-blue-500">
-        <div>
-          <div class="font-medium text-sm">GPS-Standortdaten</div>
-          <div class="text-xs text-gray-500">
-            GPS-Koordinaten werden für Reverse Geocoding an OpenStreetMap/Nominatim
-            gesendet (Koordinaten, keine Namen).
-          </div>
-        </div>
-      </label>
-      <label class="flex items-start gap-3 cursor-pointer">
-        <input type="checkbox" id="consent-messages" class="mt-1 w-4 h-4 accent-blue-500">
-        <div>
-          <div class="font-medium text-sm">Nachrichten (WhatsApp, Signal)</div>
-          <div class="text-xs text-gray-500">
-            Nachrichten werden vor dem Upload im Browser maskiert – nur Tokens
-            verlassen Ihren Browser. Klarnamen bleiben lokal in der IndexedDB.
-          </div>
-        </div>
-      </label>
-    </div>
-    <p class="text-xs text-gray-500">
-      Ohne Einwilligung sind die jeweiligen Features deaktiviert.
-      Diese Einstellung kann jederzeit im Einstellungen-Tab geändert werden.
-    </p>
-    <div class="flex gap-3">
-      <button onclick="saveConsent(false)" class="flex-1 bg-gray-700 hover:bg-gray-600 rounded-lg px-4 py-2 text-sm">
-        Ablehnen
-      </button>
-      <button onclick="saveConsent(true)" class="flex-1 bg-blue-600 hover:bg-blue-500 rounded-lg px-4 py-2 text-sm font-medium">
-        Einwilligen &amp; Starten
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Header -->
-<header class="bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-  <div class="flex items-center gap-3">
-    <span class="text-2xl">🦕</span>
-    <h1 class="text-xl font-bold tracking-tight">memosaur</h1>
-    <span class="text-xs text-gray-500">v2 · Privacy-First</span>
-  </div>
-  <nav class="flex gap-4 text-sm">
-    <button onclick="showTab('chat')"     id="tab-chat"     class="tab-btn active px-3 py-1 rounded">Chat</button>
-    <button onclick="showTab('map')"      id="tab-map"      class="tab-btn px-3 py-1 rounded">Karte</button>
-    <button onclick="showTab('import')"   id="tab-import"   class="tab-btn px-3 py-1 rounded">Import</button>
-    <button onclick="showTab('settings')" id="tab-settings" class="tab-btn px-3 py-1 rounded">Einstellungen</button>
-  </nav>
-  <div id="status-bar" class="text-xs text-gray-500"></div>
-</header>
-
-<!-- Chat-Tab -->
-<div id="view-chat" class="view max-w-4xl mx-auto p-4 flex flex-col gap-4" style="height:calc(100vh - 70px)">
-  <div id="chat-messages" class="flex-1 overflow-y-auto flex flex-col gap-4 pr-2"></div>
-
-  <!-- Eingabe -->
-  <div class="flex gap-2">
-    <input id="chat-input"
-      type="text"
-      placeholder="Frage stellen, z.B. ›Wo war ich im August mit Nora?‹"
-      class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-500"
-      onkeydown="if(event.key==='Enter') sendQuery()"
-    />
-    <button onclick="sendQuery()"
-      class="bg-blue-600 hover:bg-blue-500 px-5 py-3 rounded-lg text-sm font-medium transition-colors">
-      Fragen
-    </button>
-  </div>
-
-  <!-- Schnellfilter -->
-  <div class="flex gap-2 flex-wrap text-xs">
-    <span class="text-gray-500">Schnell:</span>
-    <button onclick="quickQuery('Wo war ich im August?')"          class="quick-btn">August</button>
-    <button onclick="quickQuery('Mit wem war ich in München?')"    class="quick-btn">München</button>
-    <button onclick="quickQuery('Welche Restaurants habe ich besucht?')" class="quick-btn">Restaurants</button>
-    <button onclick="quickQuery('Was habe ich mit Nora gemacht?')" class="quick-btn">Nora</button>
-    <button onclick="quickQuery('Wo habe ich im November Fotos gemacht?')" class="quick-btn">November</button>
-  </div>
-</div>
-
-<!-- Karten-Tab -->
-<div id="view-map" class="view hidden p-4">
-  <div class="flex gap-3 mb-3 text-sm flex-wrap items-center">
-    <select id="map-source" onchange="loadMap()" class="bg-gray-800 border border-gray-700 rounded px-3 py-1">
-      <option value="">Alle Quellen</option>
-      <option value="photos">Fotos</option>
-      <option value="reviews">Bewertungen</option>
-      <option value="saved_places">Gespeicherte Orte</option>
-    </select>
-    <input type="date" id="map-from" onchange="loadMap()" class="bg-gray-800 border border-gray-700 rounded px-3 py-1">
-    <span class="text-gray-500">bis</span>
-    <input type="date" id="map-to" onchange="loadMap()" class="bg-gray-800 border border-gray-700 rounded px-3 py-1">
-    <span id="map-count" class="text-gray-500 ml-2"></span>
-  </div>
-  <div id="map" class="rounded-lg border border-gray-800"></div>
-  <div id="map-legend" class="flex gap-4 mt-3 text-xs text-gray-400">
-    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Fotos</span>
-    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Bewertungen</span>
-    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Gespeicherte Orte</span>
-  </div>
-</div>
-
-<!-- Import-Tab -->
-<div id="view-import" class="view hidden max-w-2xl mx-auto p-4 flex flex-col gap-6">
-  <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
-    <h2 class="font-semibold mb-4 flex items-center gap-2">📷 Google Fotos & Maps</h2>
-    <p class="text-sm text-gray-400 mb-4">
-      Indexiert die 50 Sample-Fotos mit GPS, Personen-Tags und KI-Bildbeschreibung
-      sowie alle Google Maps Bewertungen und gespeicherten Orte.
-    </p>
-    <div class="flex gap-3">
-      <button onclick="ingestSource('all')"     class="ingest-btn bg-blue-700 hover:bg-blue-600">Alles einlesen</button>
-      <button onclick="ingestSource('photos')"  class="ingest-btn bg-gray-700 hover:bg-gray-600">Nur Fotos</button>
-      <button onclick="ingestSource('reviews')" class="ingest-btn bg-gray-700 hover:bg-gray-600">Nur Bewertungen</button>
-      <button onclick="ingestSource('saved')"   class="ingest-btn bg-gray-700 hover:bg-gray-600">Nur Gespeicherte</button>
-    </div>
-    <div id="ingest-progress" class="mt-4 hidden">
-      <div class="flex justify-between text-xs text-gray-400 mb-1">
-        <span id="progress-text">Verarbeite…</span>
-        <span id="progress-pct"></span>
-      </div>
+  <!-- NER-Ladeoverlay: blockiert UI bis Modell bereit -->
+  <div id="ner-overlay"
+    class="fixed inset-0 bg-gray-950 bg-opacity-90 z-50 flex flex-col items-center justify-center gap-6">
+    <span class="text-5xl">🦕</span>
+    <div class="flex flex-col items-center gap-3 max-w-sm w-full px-6">
+      <p class="font-semibold text-gray-100">memosaur startet…</p>
+      <p class="text-xs text-gray-400 text-center">
+        Das NER-Modell für lokale Datenmaskierung wird geladen (~90 MB).
+        Nach dem ersten Download wird es im Browser gecacht.
+      </p>
       <div class="w-full bg-gray-800 rounded-full h-2">
-        <div id="progress-bar" class="bg-blue-500 h-2 rounded-full transition-all" style="width:0%"></div>
+        <div id="ner-progress-bar" class="bg-blue-500 h-2 rounded-full transition-all" style="width:0%"></div>
+      </div>
+      <span id="ner-status" class="text-xs text-yellow-200 bg-yellow-900 px-3 py-1 rounded-full">Lade Modell…</span>
+    </div>
+  </div>
+
+  <!-- Consent-Modal -->
+  <div id="consent-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 z-40 flex items-center justify-center p-4">
+    <div class="bg-gray-900 border border-gray-700 rounded-2xl max-w-md w-full p-6 flex flex-col gap-4">
+      <h2 class="font-bold text-lg">Datenverarbeitung – Ihre Einwilligung</h2>
+      <p class="text-sm text-gray-400">
+        Für folgende Features verarbeiten wir sensible personenbezogene Daten
+        gemäß <strong>Art. 9 DSGVO</strong>. Sie können einzelne Features aktivieren
+        oder deaktivieren.
+      </p>
+      <div class="flex flex-col gap-3">
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" id="consent-photos" class="mt-1 w-4 h-4 accent-blue-500">
+          <div>
+            <div class="font-medium text-sm">Fotos &amp; KI-Bilderkennung</div>
+            <div class="text-xs text-gray-500">
+              Bilder werden lokal an Ollama (Vision-KI) gesendet. Bildbeschreibungen
+              werden vor der Speicherung im Browser anonymisiert (Klarnamen → Tokens).
+            </div>
+          </div>
+        </label>
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" id="consent-gps" class="mt-1 w-4 h-4 accent-blue-500">
+          <div>
+            <div class="font-medium text-sm">GPS-Standortdaten</div>
+            <div class="text-xs text-gray-500">
+              GPS-Koordinaten werden für Reverse Geocoding an OpenStreetMap/Nominatim
+              gesendet (Koordinaten, keine Namen).
+            </div>
+          </div>
+        </label>
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" id="consent-messages" class="mt-1 w-4 h-4 accent-blue-500">
+          <div>
+            <div class="font-medium text-sm">Nachrichten (WhatsApp, Signal)</div>
+            <div class="text-xs text-gray-500">
+              Nachrichten werden vor dem Upload im Browser maskiert – nur Tokens
+              verlassen Ihren Browser. Klarnamen bleiben lokal in der IndexedDB.
+            </div>
+          </div>
+        </label>
+      </div>
+      <p class="text-xs text-gray-500">
+        Ohne Einwilligung sind die jeweiligen Features deaktiviert.
+        Diese Einstellung kann jederzeit im Einstellungen-Tab geändert werden.
+      </p>
+      <div class="flex gap-3">
+        <button onclick="saveConsent(false)" class="flex-1 bg-gray-700 hover:bg-gray-600 rounded-lg px-4 py-2 text-sm">
+          Ablehnen
+        </button>
+        <button onclick="saveConsent(true)"
+          class="flex-1 bg-blue-600 hover:bg-blue-500 rounded-lg px-4 py-2 text-sm font-medium">
+          Einwilligen &amp; Starten
+        </button>
       </div>
     </div>
-    <div id="ingest-result" class="mt-3 text-sm"></div>
   </div>
 
-  <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
-    <h2 class="font-semibold mb-4 flex items-center gap-2">💬 WhatsApp Export</h2>
-    <p class="text-sm text-gray-400 mb-3">
-      WhatsApp → Einstellungen → Chats → Chat exportieren → Ohne Medien → TXT-Datei hochladen.
-    </p>
-    <div class="flex gap-3 items-center">
-      <input type="file" id="wa-file" accept=".txt,.zip" class="text-sm text-gray-400">
-      <button onclick="uploadWhatsApp()" class="ingest-btn bg-emerald-700 hover:bg-emerald-600">Hochladen</button>
+  <!-- Header -->
+  <header class="bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="text-2xl">🦕</span>
+      <h1 class="text-xl font-bold tracking-tight">memosaur</h1>
+      <span class="text-xs text-gray-500">v2 · Privacy-First</span>
     </div>
-    <div id="wa-result" class="mt-3 text-sm"></div>
-  </div>
-
-  <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
-    <h2 class="font-semibold mb-4 flex items-center gap-2">🔒 Signal Export</h2>
-    <p class="text-sm text-gray-400 mb-3">
-      Signal Desktop → Einstellungen → Chats → Chats exportieren → messages.json hochladen.
-    </p>
-    <div class="flex gap-3 items-center">
-      <input type="file" id="signal-file" accept=".json,.zip" class="text-sm text-gray-400">
-      <button onclick="uploadSignal()" class="ingest-btn bg-purple-700 hover:bg-purple-600">Hochladen</button>
+    <nav class="flex gap-4 text-sm">
+      <button onclick="showTab('chat')" id="tab-chat" class="tab-btn active px-3 py-1 rounded">Chat</button>
+      <button onclick="showTab('map')" id="tab-map" class="tab-btn px-3 py-1 rounded">Karte</button>
+      <button onclick="showTab('import')" id="tab-import" class="tab-btn px-3 py-1 rounded">Import</button>
+      <button onclick="showTab('settings')" id="tab-settings" class="tab-btn px-3 py-1 rounded">Einstellungen</button>
+    </nav>
+    <div class="flex items-center gap-3">
+      <span id="sync-status-badge" class="text-xs text-gray-500">🔒 Kein Sync-PW</span>
+      <div id="status-bar" class="text-xs text-gray-500"></div>
     </div>
-    <div id="signal-result" class="mt-3 text-sm"></div>
+  </header>
+
+  <!-- Chat-Tab -->
+  <div id="view-chat" class="view max-w-4xl mx-auto p-4 flex flex-col gap-4" style="height:calc(100vh - 70px)">
+    <div id="chat-messages" class="flex-1 overflow-y-auto flex flex-col gap-4 pr-2"></div>
+
+    <!-- Eingabe -->
+    <div class="flex gap-2">
+      <input id="chat-input" type="text" placeholder="Frage stellen, z.B. ›Wo war ich im August mit Nora?‹"
+        class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-500"
+        onkeydown="if(event.key==='Enter') sendQuery()" />
+      <button onclick="sendQuery()"
+        class="bg-blue-600 hover:bg-blue-500 px-5 py-3 rounded-lg text-sm font-medium transition-colors">
+        Fragen
+      </button>
+    </div>
+
+    <!-- Schnellfilter -->
+    <div class="flex gap-2 flex-wrap text-xs">
+      <span class="text-gray-500">Schnell:</span>
+      <button onclick="quickQuery('Wo war ich im August?')" class="quick-btn">August</button>
+      <button onclick="quickQuery('Mit wem war ich in München?')" class="quick-btn">München</button>
+      <button onclick="quickQuery('Welche Restaurants habe ich besucht?')" class="quick-btn">Restaurants</button>
+      <button onclick="quickQuery('Was habe ich mit Nora gemacht?')" class="quick-btn">Nora</button>
+      <button onclick="quickQuery('Wo habe ich im November Fotos gemacht?')" class="quick-btn">November</button>
+    </div>
   </div>
 
-  <!-- DB-Status -->
-  <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
-    <h2 class="font-semibold mb-3">📊 Datenbank-Status</h2>
-    <div id="db-status" class="grid grid-cols-2 gap-3 text-sm"></div>
-    <button onclick="loadStatus()" class="mt-3 text-xs text-gray-500 hover:text-gray-300">Aktualisieren</button>
-  </div>
-</div>
-
-<style>
-  .tab-btn { color: #9ca3af; }
-  .tab-btn:hover { color: #e5e7eb; }
-  .tab-btn.active { color: #fff; background: #374151; }
-  .quick-btn { background:#1f2937; color:#9ca3af; border:1px solid #374151; padding:3px 10px; border-radius:9999px; cursor:pointer; }
-  .quick-btn:hover { background:#374151; color:#e5e7eb; }
-  .ingest-btn { padding:8px 16px; border-radius:8px; font-size:0.875rem; font-weight:500; cursor:pointer; transition:background 0.15s; }
-</style>
-
-<!-- Einstellungen-Tab -->
-<div id="view-settings" class="view hidden max-w-2xl mx-auto p-4 flex flex-col gap-6">
-
-  <!-- Consent -->
-  <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
-    <h2 class="font-semibold mb-3">🔒 Datenschutz &amp; Einwilligungen</h2>
-    <div id="consent-settings" class="flex flex-col gap-3 text-sm text-gray-400">Lädt…</div>
-    <button onclick="openConsentModal()" class="mt-4 ingest-btn bg-gray-700 hover:bg-gray-600 text-sm">
-      Einwilligungen ändern
-    </button>
+  <!-- Karten-Tab -->
+  <div id="view-map" class="view hidden p-4">
+    <div class="flex gap-3 mb-3 text-sm flex-wrap items-center">
+      <select id="map-source" onchange="loadMap()" class="bg-gray-800 border border-gray-700 rounded px-3 py-1">
+        <option value="">Alle Quellen</option>
+        <option value="photos">Fotos</option>
+        <option value="reviews">Bewertungen</option>
+        <option value="saved_places">Gespeicherte Orte</option>
+      </select>
+      <input type="date" id="map-from" onchange="loadMap()"
+        class="bg-gray-800 border border-gray-700 rounded px-3 py-1">
+      <span class="text-gray-500">bis</span>
+      <input type="date" id="map-to" onchange="loadMap()" class="bg-gray-800 border border-gray-700 rounded px-3 py-1">
+      <span id="map-count" class="text-gray-500 ml-2"></span>
+    </div>
+    <div id="map" class="rounded-lg border border-gray-800"></div>
+    <div id="map-legend" class="flex gap-4 mt-3 text-xs text-gray-400">
+      <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span>
+        Fotos</span>
+      <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+        Bewertungen</span>
+      <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+        Gespeicherte Orte</span>
+    </div>
   </div>
 
-  <!-- Sync -->
-  <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
-    <h2 class="font-semibold mb-3">🔄 Multi-Device Sync</h2>
-    <div id="sync-container">Sync wird geladen…</div>
+  <!-- Import-Tab -->
+  <div id="view-import" class="view hidden max-w-2xl mx-auto p-4 flex flex-col gap-6">
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <h2 class="font-semibold mb-4 flex items-center gap-2">📷 Google Fotos & Maps</h2>
+      <p class="text-sm text-gray-400 mb-4">
+        Indexiert die 50 Sample-Fotos mit GPS, Personen-Tags und KI-Bildbeschreibung
+        sowie alle Google Maps Bewertungen und gespeicherten Orte.
+      </p>
+      <div class="flex gap-3">
+        <button onclick="ingestSource('all')" class="ingest-btn bg-blue-700 hover:bg-blue-600">Alles einlesen</button>
+        <button onclick="ingestSource('photos')" class="ingest-btn bg-gray-700 hover:bg-gray-600">Nur Fotos</button>
+        <button onclick="ingestSource('reviews')" class="ingest-btn bg-gray-700 hover:bg-gray-600">Nur
+          Bewertungen</button>
+        <button onclick="ingestSource('saved')" class="ingest-btn bg-gray-700 hover:bg-gray-600">Nur
+          Gespeicherte</button>
+      </div>
+      <div id="ingest-progress" class="mt-4 hidden">
+        <div class="flex justify-between text-xs text-gray-400 mb-1">
+          <span id="progress-text">Verarbeite…</span>
+          <span id="progress-pct"></span>
+        </div>
+        <div class="w-full bg-gray-800 rounded-full h-2">
+          <div id="progress-bar" class="bg-blue-500 h-2 rounded-full transition-all" style="width:0%"></div>
+        </div>
+      </div>
+      <div id="ingest-result" class="mt-3 text-sm"></div>
+    </div>
+
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <h2 class="font-semibold mb-4 flex items-center gap-2">💬 WhatsApp Export</h2>
+      <p class="text-sm text-gray-400 mb-3">
+        WhatsApp → Einstellungen → Chats → Chat exportieren → Ohne Medien → TXT-Datei hochladen.
+      </p>
+      <div class="flex gap-3 items-center">
+        <input type="file" id="wa-file" accept=".txt,.zip" class="text-sm text-gray-400">
+        <button onclick="uploadWhatsApp()" class="ingest-btn bg-emerald-700 hover:bg-emerald-600">Hochladen</button>
+      </div>
+      <div id="wa-result" class="mt-3 text-sm"></div>
+    </div>
+
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <h2 class="font-semibold mb-4 flex items-center gap-2">🔒 Signal Export</h2>
+      <p class="text-sm text-gray-400 mb-3">
+        Signal Desktop → Einstellungen → Chats → Chats exportieren → messages.json hochladen.
+      </p>
+      <div class="flex gap-3 items-center">
+        <input type="file" id="signal-file" accept=".json,.zip" class="text-sm text-gray-400">
+        <button onclick="uploadSignal()" class="ingest-btn bg-purple-700 hover:bg-purple-600">Hochladen</button>
+      </div>
+      <div id="signal-result" class="mt-3 text-sm"></div>
+    </div>
+
+    <!-- DB-Status -->
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <h2 class="font-semibold mb-3">📊 Datenbank-Status</h2>
+      <div id="db-status" class="grid grid-cols-2 gap-3 text-sm"></div>
+      <button onclick="loadStatus()" class="mt-3 text-xs text-gray-500 hover:text-gray-300">Aktualisieren</button>
+    </div>
   </div>
 
-  <!-- User-Info -->
-  <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
-    <h2 class="font-semibold mb-3">👤 Aktiver Nutzer</h2>
-    <div id="user-info" class="text-sm text-gray-400">Lädt…</div>
-  </div>
-</div>
-
-<!-- Module laden -->
-<script src="/static/token_store.js"></script>
-<script src="/static/sync.js"></script>
-<script type="module">
-  // Schritt 1: Token-Wörterbuch vom Server importieren (einmalig, vor NER)
-  const statusEl = document.getElementById('ner-status');
-  if (statusEl) statusEl.textContent = 'Lade Token-Wörterbuch…';
-  const dictCount = await window.TokenStore.checkAndImportFromServer();
-  if (dictCount > 0 && statusEl) {
-    statusEl.textContent = `Wörterbuch geladen (${dictCount} Tokens)`;
-  }
-
-  // Schritt 2: NER-Modell laden
-  try {
-    const nerMod = await import('/static/ner.js');
-    window._nerReady = false;
-
-    await window.NER.loadNER((pct, name) => {
-      const bar = document.getElementById('ner-progress-bar');
-      if (bar) bar.style.width = pct + '%';
-    });
-
-    window._nerReady = true;
-  } catch (err) {
-    console.error('Kritischer Fehler beim Laden von NER:', err);
-    if (statusEl) {
-      statusEl.textContent = 'NER-Fehler: ' + err.message;
-      statusEl.className = 'text-xs px-3 py-1 rounded-full bg-red-900 text-red-200';
+  <style>
+    .tab-btn {
+      color: #9ca3af;
     }
-    // v0-Fallback: trotzdem starten
-    await new Promise(r => setTimeout(r, 2000));
-  }
 
-  // Overlay entfernen
-  const overlay = document.getElementById('ner-overlay');
-  if (overlay) overlay.remove();
-  
-  // App initialisieren
-  if (typeof window._appInit === 'function') {
-    window._appInit();
-  }
-</script>
-<script src="/static/chat.js"></script>
-<script src="/static/map.js"></script>
-<script>
-// Aktueller User (Default: ManfredMustermann)
-window._userId = '00000000-0000-0000-0000-000000000001';
+    .tab-btn:hover {
+      color: #e5e7eb;
+    }
 
-// -------------------------------------------------------------------------
-// App-Initialisierung (nach NER-Laden)
-// -------------------------------------------------------------------------
-window._appInit = async function() {
-  loadStatus();
-  loadConsentSettings();
-  loadUserInfo();
-  window.Sync?.renderSyncUI('sync-container', window._userId);
-  // Consent beim ersten Besuch prüfen
-  const seen = localStorage.getItem('memosaur_consent_seen');
-  if (!seen) openConsentModal();
-};
+    .tab-btn.active {
+      color: #fff;
+      background: #374151;
+    }
 
-// -------------------------------------------------------------------------
-// Tab-Navigation
-// -------------------------------------------------------------------------
-function showTab(name) {
-  document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('view-' + name).classList.remove('hidden');
-  document.getElementById('tab-' + name).classList.add('active');
-  if (name === 'map')      loadMap();
-  if (name === 'import')   loadStatus();
-  if (name === 'settings') { loadConsentSettings(); window.Sync?.renderSyncUI('sync-container', window._userId); }
-}
+    .quick-btn {
+      background: #1f2937;
+      color: #9ca3af;
+      border: 1px solid #374151;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      cursor: pointer;
+    }
 
-// -------------------------------------------------------------------------
-// Status laden
-// -------------------------------------------------------------------------
-async function loadStatus() {
-  try {
-    const r = await fetch(`/api/v1/ingest/status?user_id=${window._userId}`);
-    const d = await r.json();
-    const total = Object.values(d).reduce((a,b) => a+b, 0);
-    const el = document.getElementById('db-status');
-    if (el) el.innerHTML = `
-      <div class="bg-gray-800 rounded p-3"><span class="text-blue-400 font-bold text-lg">${d.photos||0}</span><br><span class="text-gray-400">Fotos</span></div>
-      <div class="bg-gray-800 rounded p-3"><span class="text-emerald-400 font-bold text-lg">${d.reviews||0}</span><br><span class="text-gray-400">Bewertungen</span></div>
-      <div class="bg-gray-800 rounded p-3"><span class="text-amber-400 font-bold text-lg">${d.saved_places||0}</span><br><span class="text-gray-400">Gespeicherte Orte</span></div>
-      <div class="bg-gray-800 rounded p-3"><span class="text-purple-400 font-bold text-lg">${d.messages||0}</span><br><span class="text-gray-400">Nachrichten</span></div>
+    .quick-btn:hover {
+      background: #374151;
+      color: #e5e7eb;
+    }
+
+    .ingest-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    /* Debug Panel */
+    #debug-panel {
+      position: fixed;
+      bottom: 1.25rem;
+      right: 1.25rem;
+      z-index: 9999;
+      width: 22rem;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: rgba(10, 10, 20, 0.97);
+      border: 1px solid #2d4a6e;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.15), 0 8px 32px rgba(0, 0, 0, 0.6);
+      font-family: ui-monospace, monospace;
+      font-size: 0.72rem;
+      color: #94a3b8;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+
+    #debug-panel.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+    }
+
+    #debug-panel h3 {
+      color: #60a5fa;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    #debug-panel .dbg-section {
+      margin-bottom: 0.75rem;
+      border-top: 1px solid #1e2d40;
+      padding-top: 0.5rem;
+    }
+
+    #debug-panel .dbg-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 1px 0;
+    }
+
+    #debug-panel .dbg-key {
+      color: #64748b;
+    }
+
+    #debug-panel .dbg-val {
+      color: #e2e8f0;
+      text-align: right;
+      max-width: 14rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #debug-panel .dbg-val.highlight {
+      color: #34d399;
+    }
+
+    #debug-panel .dbg-shortcut {
+      color: #475569;
+      font-size: 0.65rem;
+      margin-top: 0.5rem;
+      text-align: center;
+    }
+  </style>
+
+  <!-- Einstellungen-Tab -->
+  <div id="view-settings" class="view hidden max-w-2xl mx-auto p-4 flex flex-col gap-6">
+
+    <!-- Consent -->
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <h2 class="font-semibold mb-3">🔒 Datenschutz &amp; Einwilligungen</h2>
+      <div id="consent-settings" class="flex flex-col gap-3 text-sm text-gray-400">Lädt…</div>
+      <button onclick="openConsentModal()" class="mt-4 ingest-btn bg-gray-700 hover:bg-gray-600 text-sm">
+        Einwilligungen ändern
+      </button>
+    </div>
+
+    <!-- Sync -->
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <h2 class="font-semibold mb-3">🔄 Multi-Device Sync</h2>
+      <div id="sync-container">Sync wird geladen…</div>
+    </div>
+
+    <!-- User-Info -->
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <h2 class="font-semibold mb-3">👤 Aktiver Nutzer</h2>
+      <div id="user-info" class="text-sm text-gray-400">Lädt…</div>
+    </div>
+  </div>
+
+  <!-- Debug Panel (toggle: Ctrl+Shift+D) -->
+  <div id="debug-panel" class="hidden" aria-label="Debug Panel">
+    <h3>🛠 memosaur Debug</h3>
+    <div class="dbg-section">
+      <div class="dbg-row"><span class="dbg-key">LLM Provider</span><span class="dbg-val highlight"
+          id="dbg-provider">…</span></div>
+      <div class="dbg-row"><span class="dbg-key">Chat-Modell</span><span class="dbg-val" id="dbg-model">…</span></div>
+      <div class="dbg-row"><span class="dbg-key">Vision-Modell</span><span class="dbg-val" id="dbg-vision">…</span>
+      </div>
+      <div class="dbg-row"><span class="dbg-key">Embedding</span><span class="dbg-val" id="dbg-embed">…</span></div>
+    </div>
+    <div class="dbg-section">
+      <div class="dbg-row"><span class="dbg-key">RAG top_k</span><span class="dbg-val" id="dbg-topk">…</span></div>
+      <div class="dbg-row"><span class="dbg-key">RAG min_score</span><span class="dbg-val" id="dbg-minscore">…</span>
+      </div>
+      <div class="dbg-row"><span class="dbg-key">photo_sample_size</span><span class="dbg-val" id="dbg-photos">…</span>
+      </div>
+    </div>
+    <div class="dbg-section">
+      <div class="dbg-row"><span class="dbg-key">Tokens gesamt</span><span class="dbg-val highlight"
+          id="dbg-tok-total">…</span></div>
+      <div class="dbg-row"><span class="dbg-key"> PER (Personen)</span><span class="dbg-val" id="dbg-tok-per">…</span>
+      </div>
+      <div class="dbg-row"><span class="dbg-key"> LOC (Orte)</span><span class="dbg-val" id="dbg-tok-loc">…</span></div>
+      <div class="dbg-row"><span class="dbg-key"> ORG (Orgn.)</span><span class="dbg-val" id="dbg-tok-org">…</span>
+      </div>
+    </div>
+    <div class="dbg-section">
+      <div class="dbg-row"><span class="dbg-key">Sync-PW gesetzt</span><span class="dbg-val" id="dbg-sync-pw">…</span>
+      </div>
+      <div class="dbg-row"><span class="dbg-key">NER-Status</span><span class="dbg-val" id="dbg-ner-state">…</span>
+      </div>
+      <div class="dbg-row"><span class="dbg-key">User-ID</span><span class="dbg-val" id="dbg-uid">…</span></div>
+    </div>
+    <div class="dbg-shortcut">Strg+Shift+D zum Schließen · aktualisiert beim Öffnen</div>
+  </div>
+
+  <!-- Module laden -->
+  <script src="/static/token_store.js"></script>
+  <script src="/static/sync.js"></script>
+  <script type="module">
+    // Schritt 1a: Migrations-Wörterbuch vom Server importieren (einmalig, vor NER)
+    const statusEl = document.getElementById('ner-status');
+    if (statusEl) statusEl.textContent = 'Lade Token-Wörterbuch…';
+    const dictCount = await window.TokenStore.checkAndImportFromServer();
+    if (dictCount > 0 && statusEl) {
+      statusEl.textContent = `Migrations-Wörterbuch geladen (${dictCount} Tokens)`;
+    }
+
+    // Schritt 1b: Auto-Sync vom Server (merged fehlende Tokens aus anderen Geräten)
+    if (statusEl) statusEl.textContent = 'Synchronisiere Token-Wörterbuch…';
+    await window.Sync.autoDownload(window._userId);
+
+    // Schritt 2: NER-Modell laden
+    try {
+      const nerMod = await import('/static/ner.js');
+      window._nerReady = false;
+
+      await window.NER.loadNER((pct, name) => {
+        const bar = document.getElementById('ner-progress-bar');
+        if (bar) bar.style.width = pct + '%';
+      });
+
+      window._nerReady = true;
+    } catch (err) {
+      console.error('Kritischer Fehler beim Laden von NER:', err);
+      if (statusEl) {
+        statusEl.textContent = 'NER-Fehler: ' + err.message;
+        statusEl.className = 'text-xs px-3 py-1 rounded-full bg-red-900 text-red-200';
+      }
+      // v0-Fallback: trotzdem starten
+      await new Promise(r => setTimeout(r, 2000));
+    }
+
+    // Overlay entfernen
+    const overlay = document.getElementById('ner-overlay');
+    if (overlay) overlay.remove();
+
+    // App initialisieren
+    if (typeof window._appInit === 'function') {
+      window._appInit();
+    }
+  </script>
+  <script src="/static/chat.js"></script>
+  <script src="/static/map.js"></script>
+  <script>
+    // Aktueller User (Default: ManfredMustermann)
+    window._userId = '00000000-0000-0000-0000-000000000001';
+
+    // -------------------------------------------------------------------------
+    // App-Initialisierung (nach NER-Laden)
+    // -------------------------------------------------------------------------
+    window._appInit = async function () {
+      loadStatus();
+      loadConsentSettings();
+      loadUserInfo();
+      window.Sync?.renderSyncUI('sync-container', window._userId);
+      // Consent beim ersten Besuch prüfen
+      const seen = localStorage.getItem('memosaur_consent_seen');
+      if (!seen) openConsentModal();
+    };
+
+    // -------------------------------------------------------------------------
+    // Tab-Navigation
+    // -------------------------------------------------------------------------
+    function showTab(name) {
+      document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('view-' + name).classList.remove('hidden');
+      document.getElementById('tab-' + name).classList.add('active');
+      if (name === 'map') loadMap();
+      if (name === 'import') loadStatus();
+      if (name === 'settings') { loadConsentSettings(); window.Sync?.renderSyncUI('sync-container', window._userId); }
+    }
+
+    // -------------------------------------------------------------------------
+    // Status laden
+    // -------------------------------------------------------------------------
+    async function loadStatus() {
+      try {
+        const r = await fetch(`/api/v1/ingest/status?user_id=${window._userId}`);
+        const d = await r.json();
+        const total = Object.values(d).reduce((a, b) => a + b, 0);
+        const el = document.getElementById('db-status');
+        if (el) el.innerHTML = `
+      <div class="bg-gray-800 rounded p-3"><span class="text-blue-400 font-bold text-lg">${d.photos || 0}</span><br><span class="text-gray-400">Fotos</span></div>
+      <div class="bg-gray-800 rounded p-3"><span class="text-emerald-400 font-bold text-lg">${d.reviews || 0}</span><br><span class="text-gray-400">Bewertungen</span></div>
+      <div class="bg-gray-800 rounded p-3"><span class="text-amber-400 font-bold text-lg">${d.saved_places || 0}</span><br><span class="text-gray-400">Gespeicherte Orte</span></div>
+      <div class="bg-gray-800 rounded p-3"><span class="text-purple-400 font-bold text-lg">${d.messages || 0}</span><br><span class="text-gray-400">Nachrichten</span></div>
     `;
-    document.getElementById('status-bar').textContent = `${total} Einträge indexiert`;
-  } catch(e) {
-    const el = document.getElementById('db-status');
-    if (el) el.innerHTML = '<span class="text-red-400">Fehler beim Laden</span>';
-  }
-}
+        document.getElementById('status-bar').textContent = `${total} Einträge indexiert`;
+      } catch (e) {
+        const el = document.getElementById('db-status');
+        if (el) el.innerHTML = '<span class="text-red-400">Fehler beim Laden</span>';
+      }
+    }
 
-// -------------------------------------------------------------------------
-// Consent-Modal
-// -------------------------------------------------------------------------
-function openConsentModal() {
-  // Aktuellen Status laden
-  fetch(`/api/v1/consent/${window._userId}`)
-    .then(r => r.json())
-    .then(d => {
-      document.getElementById('consent-photos').checked   = d.biometric_photos;
-      document.getElementById('consent-gps').checked      = d.gps;
-      document.getElementById('consent-messages').checked = d.messages;
-    }).catch(() => {});
-  document.getElementById('consent-modal').classList.remove('hidden');
-}
+    // -------------------------------------------------------------------------
+    // Consent-Modal
+    // -------------------------------------------------------------------------
+    function openConsentModal() {
+      // Aktuellen Status laden
+      fetch(`/api/v1/consent/${window._userId}`)
+        .then(r => r.json())
+        .then(d => {
+          document.getElementById('consent-photos').checked = d.biometric_photos;
+          document.getElementById('consent-gps').checked = d.gps;
+          document.getElementById('consent-messages').checked = d.messages;
+        }).catch(() => { });
+      document.getElementById('consent-modal').classList.remove('hidden');
+    }
 
-async function saveConsent(acceptAll) {
-  const photos   = acceptAll ? true : document.getElementById('consent-photos').checked;
-  const gps      = acceptAll ? true : document.getElementById('consent-gps').checked;
-  const messages = acceptAll ? true : document.getElementById('consent-messages').checked;
-  if (acceptAll) {
-    document.getElementById('consent-photos').checked   = true;
-    document.getElementById('consent-gps').checked      = true;
-    document.getElementById('consent-messages').checked = true;
-  }
-  try {
-    await fetch(`/api/v1/consent/${window._userId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ biometric_photos: photos, gps, messages }),
-    });
-    localStorage.setItem('memosaur_consent_seen', '1');
-  } catch(e) { console.error('Consent-Fehler:', e); }
-  document.getElementById('consent-modal').classList.add('hidden');
-  loadConsentSettings();
-}
+    async function saveConsent(acceptAll) {
+      const photos = acceptAll ? true : document.getElementById('consent-photos').checked;
+      const gps = acceptAll ? true : document.getElementById('consent-gps').checked;
+      const messages = acceptAll ? true : document.getElementById('consent-messages').checked;
+      if (acceptAll) {
+        document.getElementById('consent-photos').checked = true;
+        document.getElementById('consent-gps').checked = true;
+        document.getElementById('consent-messages').checked = true;
+      }
+      try {
+        await fetch(`/api/v1/consent/${window._userId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ biometric_photos: photos, gps, messages }),
+        });
+        localStorage.setItem('memosaur_consent_seen', '1');
+      } catch (e) { console.error('Consent-Fehler:', e); }
+      document.getElementById('consent-modal').classList.add('hidden');
+      loadConsentSettings();
+    }
 
-async function loadConsentSettings() {
-  try {
-    const r = await fetch(`/api/v1/consent/${window._userId}`);
-    const d = await r.json();
-    const el = document.getElementById('consent-settings');
-    if (!el) return;
-    const icon = (v) => v ? '✅' : '❌';
-    el.innerHTML = `
+    async function loadConsentSettings() {
+      try {
+        const r = await fetch(`/api/v1/consent/${window._userId}`);
+        const d = await r.json();
+        const el = document.getElementById('consent-settings');
+        if (!el) return;
+        const icon = (v) => v ? '✅' : '❌';
+        el.innerHTML = `
       <div>${icon(d.biometric_photos)} Fotos &amp; KI-Bilderkennung</div>
       <div>${icon(d.gps)} GPS-Standortdaten</div>
       <div>${icon(d.messages)} Nachrichten</div>
     `;
-  } catch(e) {}
-}
+      } catch (e) { }
+    }
 
-async function loadUserInfo() {
-  try {
-    const r = await fetch(`/api/v1/users/${window._userId}`);
-    const d = await r.json();
-    const el = document.getElementById('user-info');
-    if (el) el.innerHTML = `<strong>${d.display_name}</strong> <span class="text-gray-600 text-xs">(${d.id})</span>`;
-  } catch(e) {}
-}
-</script>
+    async function loadUserInfo() {
+      try {
+        const r = await fetch(`/api/v1/users/${window._userId}`);
+        const d = await r.json();
+        const el = document.getElementById('user-info');
+        if (el) el.innerHTML = `<strong>${d.display_name}</strong> <span class="text-gray-600 text-xs">(${d.id})</span>`;
+      } catch (e) { }
+    }
+  </script>
+
+  <!-- Debug Panel: Ctrl+Shift+D -->
+  <script>
+    (function () {
+      const panel = document.getElementById('debug-panel');
+      let _panelOpen = false;
+
+      function set(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value ?? '–';
+      }
+
+      async function refreshDebugPanel() {
+        // 1. Config vom Server
+        try {
+          const r = await fetch('/api/config');
+          const cfg = await r.json();
+          const llm = cfg.llm || {};
+          set('dbg-provider', llm.provider || '–');
+          set('dbg-model', llm.model || '–');
+          set('dbg-vision', llm.vision_model || '–');
+          set('dbg-embed', llm.embedding_model || '–');
+          set('dbg-topk', cfg.rag?.top_k ?? '–');
+          set('dbg-minscore', cfg.rag?.min_score ?? '–');
+          set('dbg-photos', cfg.ingestion?.photo_sample_size ?? '–');
+        } catch (e) {
+          set('dbg-provider', 'Fehler beim Laden');
+        }
+
+        // 2. TokenStore-Statistiken
+        try {
+          const tokens = await window.TokenStore?.getAllTokens() || [];
+          const byType = tokens.reduce((acc, t) => {
+            acc[t.type] = (acc[t.type] || 0) + 1;
+            return acc;
+          }, {});
+          set('dbg-tok-total', tokens.length);
+          set('dbg-tok-per', byType['PER'] ?? 0);
+          set('dbg-tok-loc', byType['LOC'] ?? 0);
+          set('dbg-tok-org', byType['ORG'] ?? 0);
+        } catch (e) {
+          set('dbg-tok-total', 'Fehler');
+        }
+
+        // 3. Sync & NER Status
+        set('dbg-sync-pw', window.Sync?.hasSyncPassword() ? '✅ Ja' : '❌ Nein');
+        set('dbg-ner-state', window.NER ? window.NER.getNERState?.() ?? 'geladen' : 'nicht geladen');
+        set('dbg-uid', window._userId || '–');
+      }
+
+      function togglePanel() {
+        _panelOpen = !_panelOpen;
+        panel.classList.toggle('hidden', !_panelOpen);
+        if (_panelOpen) refreshDebugPanel();
+      }
+
+      // Ctrl+Shift+D (kein Browser-Standard-Shortcut)
+      document.addEventListener('keydown', function (e) {
+        if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+          e.preventDefault();
+          togglePanel();
+        }
+      });
+
+      // Panel auch schließen bei Klick außerhalb
+      document.addEventListener('click', function (e) {
+        if (_panelOpen && panel && !panel.contains(e.target)) {
+          _panelOpen = false;
+          panel.classList.add('hidden');
+        }
+      });
+    })();
+  </script>
 </body>
+
 </html>

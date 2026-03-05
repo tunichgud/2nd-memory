@@ -66,7 +66,7 @@ def _strip_thinking(text: str) -> str:
     return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
 
 
-def chat(messages: list[dict], model: str | None = None) -> str:
+def chat(messages: list[dict], model: str | None = None, tools: list | None = None) -> str:
     """Sendet eine Chat-Anfrage an das konfigurierte LLM und gibt den Antworttext zurück."""
     cfg = get_cfg()["llm"]
     provider = cfg["provider"]
@@ -101,6 +101,39 @@ def chat(messages: list[dict], model: str | None = None) -> str:
             messages=filtered,
         )
         return response.content[0].text.strip()
+
+    elif provider == "gemini":
+        import google.generativeai as genai
+        genai.configure(api_key=cfg.get("api_key", ""))
+        
+        # Gemini erwartet system_instruction separat, User/Assistant-Messages als History
+        system_msg = ""
+        history = []
+        last_user = None
+        for m in messages:
+            if m["role"] == "system":
+                system_msg = m["content"]
+            elif m["role"] == "user":
+                last_user = m["content"]
+            elif m["role"] == "assistant" and last_user:
+                history.append({"role": "user",  "parts": [last_user]})
+                history.append({"role": "model", "parts": [m["content"]]})
+                last_user = None
+                
+        kwargs = {}
+        if system_msg:
+            kwargs["system_instruction"] = system_msg
+        if tools:
+            kwargs["tools"] = tools
+            
+        gmodel = genai.GenerativeModel(model, **kwargs)
+        
+        chat_session = gmodel.start_chat(
+            history=history,
+            enable_automatic_function_calling=bool(tools)
+        )
+        response = chat_session.send_message(last_user or "")
+        return _strip_thinking(response.text.strip())
 
     else:
         raise ValueError(f"Unbekannter LLM-Provider: {provider}")
@@ -188,8 +221,8 @@ def describe_image(image_bytes: bytes, prompt: str | None = None) -> str:
                         }
                     ],
                     options={
-                        # Nach jedem Aufruf VRAM freigeben (0 = sofort entladen)
-                        "keep_alive": 0,
+                        # Nach jedem Aufruf VRAM für 5 Minuten behalten, gut für fortlaufende Ingestion
+                        "keep_alive": "5m",
                     },
                 )
                 return _strip_thinking(response["message"]["content"].strip())
@@ -199,6 +232,17 @@ def describe_image(image_bytes: bytes, prompt: str | None = None) -> str:
                 time.sleep(5 * attempt)  # 5s, 10s, 15s warten
 
         raise last_exc  # type: ignore[misc]
+
+    elif provider == "gemini":
+        import google.generativeai as genai
+        import io
+        from PIL import Image as PilImage
+        genai.configure(api_key=cfg.get("api_key", ""))
+        gmodel = genai.GenerativeModel(vision_model)
+        # Bild als PIL-Image übergeben (Gemini SDK nimmt PIL direkt)
+        img = PilImage.open(io.BytesIO(image_bytes))
+        response = gmodel.generate_content([prompt, img])
+        return _strip_thinking(response.text.strip())
 
     elif provider == "openai":
         from openai import OpenAI

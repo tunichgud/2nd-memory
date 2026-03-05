@@ -158,15 +158,25 @@ async def submit_photo_v1(
         parts.append(f"Bildbeschreibung: {req.masked_description}")
     doc_text = "\n".join(parts)
 
-    embedding = embed_single(doc_text)
+    embedding = await asyncio.get_event_loop().run_in_executor(
+        None, lambda: embed_single(doc_text)
+    )
 
-    # Person-Flags aus tokens ableiten (z.B. has_PER_1 = True)
+    # Person-Flags aus tokens ableiten (z.B. has_per_1 = True)
     person_flags = {}
     for tok in req.persons_tokens.split(","):
         tok = tok.strip()
         if tok.startswith("[") and tok.endswith("]"):
             field = "has_" + tok[1:-1].lower().replace("_", "_")
             person_flags[field] = True
+
+    # Location-Flag aus place_name_token ableiten (z.B. has_loc_3 = True)
+    location_flags = {}
+    if req.place_name_token:
+        tok = req.place_name_token.strip()
+        if tok.startswith("[") and tok.endswith("]"):
+            field = "has_" + tok[1:-1].lower()
+            location_flags[field] = True
 
     meta = {
         "source": "google_photos",
@@ -180,6 +190,7 @@ async def submit_photo_v1(
         "persons": req.persons_tokens,
         "cluster": req.cluster,
         **person_flags,
+        **location_flags,
     }
 
     upsert_documents_v2(

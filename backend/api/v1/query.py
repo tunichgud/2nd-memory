@@ -24,8 +24,12 @@ class V1QueryRequest(BaseModel):
     # Bereits maskierte Anfrage, z.B. "Wo war ich mit [PER_1] in [LOC_1]?"
     masked_query: str = Field(..., min_length=1, max_length=2000)
     # Optionale strukturierte Filter (aus Browser-NER extrahiert)
-    person_tokens: list[str] = Field(default_factory=list)   # ["PER_1", "PER_2"]
-    location_tokens: list[str] = Field(default_factory=list) # ["LOC_1"]
+    person_tokens: list[str] = Field(default_factory=list)   # ["[PER_1]", "[PER_2]"]
+    location_tokens: list[str] = Field(default_factory=list) # ["[LOC_1]"]
+    # Klarnamen der erkannten Orte (aus IndexedDB-Lookup im Browser)
+    # z.B. ["München"] für location_tokens = ["[LOC_11]"]
+    # Wird für cluster-basierten Post-Filter verwendet (robuster als Token-Matching)
+    location_names: list[str] = Field(default_factory=list)
     collections: list[str] | None = None
     n_results: int = Field(default=6, ge=1, le=50)
     min_score: float = Field(default=0.2, ge=0.0, le=1.0)
@@ -57,6 +61,12 @@ async def query_v1(
     """Token-aware RAG-Abfrage. Ein- und Ausgabe enthalten nur Tokens."""
     import asyncio
 
+    logger.info("=== DEBUG API /v1/query ===")
+    logger.info("  masked_query:    %s", req.masked_query)
+    logger.info("  location_tokens: %s", req.location_tokens)
+    logger.info("  location_names:  %s", req.location_names)
+    logger.info("===========================")
+
     # User prüfen
     cursor = await db.execute("SELECT id FROM users WHERE id = ? AND is_active = 1", (req.user_id,))
     if not await cursor.fetchone():
@@ -72,6 +82,7 @@ async def query_v1(
                 user_id=req.user_id,
                 person_tokens=req.person_tokens,
                 location_tokens=req.location_tokens,
+                location_names=req.location_names,
                 collections=req.collections,
                 n_per_collection=req.n_results,
                 min_score=req.min_score,

@@ -10,7 +10,7 @@
  *   ORG_1, ORG_2, ... → Organisationen
  */
 
-const DB_NAME    = 'memosaur_tokens';
+const DB_NAME = 'memosaur_tokens';
 const DB_VERSION = 1;
 const STORE_NAME = 'dictionary';
 
@@ -26,19 +26,19 @@ async function openTokenDB() {
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         const store = db.createObjectStore(STORE_NAME, { keyPath: 'token_id' });
         store.createIndex('cleartext_lc', 'cleartext_lc', { unique: false });
-        store.createIndex('type',         'type',         { unique: false });
+        store.createIndex('type', 'type', { unique: false });
       }
     };
-    req.onsuccess  = (e) => { _db = e.target.result; resolve(_db); };
-    req.onerror    = (e) => reject(e.target.error);
+    req.onsuccess = (e) => { _db = e.target.result; resolve(_db); };
+    req.onerror = (e) => reject(e.target.error);
   });
 }
 
 /** Gibt den Typ-Präfix für eine NER-Entitäts-Kategorie zurück. */
 function _typePrefix(nerType) {
-  if (nerType === 'PER')  return 'PER';
-  if (nerType === 'LOC')  return 'LOC';
-  if (nerType === 'ORG')  return 'ORG';
+  if (nerType === 'PER') return 'PER';
+  if (nerType === 'LOC') return 'LOC';
+  if (nerType === 'ORG') return 'ORG';
   return 'UNK';
 }
 
@@ -57,21 +57,21 @@ async function getOrCreateToken(cleartext, nerType) {
 
   // Schon vorhanden?
   const existing = await new Promise((resolve, reject) => {
-    const tx  = db.transaction(STORE_NAME, 'readonly');
+    const tx = db.transaction(STORE_NAME, 'readonly');
     const idx = tx.objectStore(STORE_NAME).index('cleartext_lc');
     const req = idx.getAll(lc);
     req.onsuccess = (e) => resolve(e.target.result.find(r => r.type === prefix) || null);
-    req.onerror   = (e) => reject(e.target.error);
+    req.onerror = (e) => reject(e.target.error);
   });
   if (existing) {
     // Zähler erhöhen
     await new Promise((resolve, reject) => {
-      const tx    = db.transaction(STORE_NAME, 'readwrite');
+      const tx = db.transaction(STORE_NAME, 'readwrite');
       const store = tx.objectStore(STORE_NAME);
       existing.count++;
       const req = store.put(existing);
       req.onsuccess = () => resolve();
-      req.onerror   = (e) => reject(e.target.error);
+      req.onerror = (e) => reject(e.target.error);
     });
     return `[${existing.token_id}]`;
   }
@@ -87,20 +87,24 @@ async function getOrCreateToken(cleartext, nerType) {
   const newId = `${prefix}_${maxN + 1}`;
 
   await new Promise((resolve, reject) => {
-    const tx    = db.transaction(STORE_NAME, 'readwrite');
+    const tx = db.transaction(STORE_NAME, 'readwrite');
     const store = tx.objectStore(STORE_NAME);
-    const req   = store.add({
-      token_id:    newId,
+    const req = store.add({
+      token_id: newId,
       cleartext,
       cleartext_lc: lc,
-      type:        prefix,
-      first_seen:  new Date().toISOString(),
-      count:       1,
+      type: prefix,
+      first_seen: new Date().toISOString(),
+      count: 1,
     });
     req.onsuccess = () => resolve();
-    req.onerror   = (e) => reject(e.target.error);
+    req.onerror = (e) => reject(e.target.error);
   });
 
+  // Neues Token angelegt → Auto-Sync auslösen (debounced 2s)
+  if (window.Sync && window._userId) {
+    window.Sync.scheduleUpload(window._userId);
+  }
   return `[${newId}]`;
 }
 
@@ -110,13 +114,13 @@ async function getOrCreateToken(cleartext, nerType) {
  * @returns {Promise<string>}
  */
 async function lookupToken(token) {
-  const db  = await openTokenDB();
+  const db = await openTokenDB();
   const key = token.replace(/[\[\]]/g, '');
   return new Promise((resolve, reject) => {
-    const tx  = db.transaction(STORE_NAME, 'readonly');
+    const tx = db.transaction(STORE_NAME, 'readonly');
     const req = tx.objectStore(STORE_NAME).get(key);
     req.onsuccess = (e) => resolve(e.target.result ? e.target.result.cleartext : token);
-    req.onerror   = (e) => reject(e.target.error);
+    req.onerror = (e) => reject(e.target.error);
   });
 }
 
@@ -144,10 +148,10 @@ async function unmaskText(text) {
 async function getAllTokens() {
   const db = await openTokenDB();
   return new Promise((resolve, reject) => {
-    const tx  = db.transaction(STORE_NAME, 'readonly');
+    const tx = db.transaction(STORE_NAME, 'readonly');
     const req = tx.objectStore(STORE_NAME).getAll();
     req.onsuccess = (e) => resolve(e.target.result);
-    req.onerror   = (e) => reject(e.target.error);
+    req.onerror = (e) => reject(e.target.error);
   });
 }
 
@@ -164,12 +168,12 @@ async function importTokens(entries) {
     await new Promise((res, rej) => {
       const req = store.put(entry);
       req.onsuccess = () => res();
-      req.onerror   = () => res(); // Konflikt ignorieren
+      req.onerror = () => res(); // Konflikt ignorieren
     });
   }
   return new Promise((resolve, reject) => {
     tx.oncomplete = () => resolve(entries.length);
-    tx.onerror    = (e) => reject(e.target.error);
+    tx.onerror = (e) => reject(e.target.error);
   });
 }
 
@@ -177,10 +181,10 @@ async function importTokens(entries) {
 async function clearTokens() {
   const db = await openTokenDB();
   return new Promise((resolve, reject) => {
-    const tx  = db.transaction(STORE_NAME, 'readwrite');
+    const tx = db.transaction(STORE_NAME, 'readwrite');
     const req = tx.objectStore(STORE_NAME).clear();
     req.onsuccess = () => resolve();
-    req.onerror   = (e) => reject(e.target.error);
+    req.onerror = (e) => reject(e.target.error);
   });
 }
 
@@ -216,7 +220,7 @@ async function checkAndImportFromServer() {
     console.log(`[TokenStore] ${count} Tokens aus Server-Wörterbuch importiert.`);
 
     // Server-Datei löschen (enthält Klarnamen)
-    await fetch('/api/v1/dictionary', { method: 'DELETE' }).catch(() => {});
+    await fetch('/api/v1/dictionary', { method: 'DELETE' }).catch(() => { });
     console.log('[TokenStore] Server-Wörterbuch-Datei gelöscht.');
 
     return count;
