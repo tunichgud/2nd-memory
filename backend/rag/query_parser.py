@@ -28,8 +28,7 @@ from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
-# Aktuelles Jahr als Fallback
-_CURRENT_YEAR = datetime.now().year
+
 
 # Monatsnamen → Nummer (deutsch + englisch)
 _MONTH_MAP: dict[str, int] = {
@@ -47,8 +46,9 @@ _MONTH_MAP: dict[str, int] = {
     "dezember": 12, "december": 12, "dec": 12, "dez": 12,
 }
 
-# Systempr0mpt für Query-Parsing
-_PARSE_SYSTEM = """Du bist ein Query-Parser für ein persönliches Gedächtnis-System.
+def _get_parse_system_prompt() -> str:
+    current_year = datetime.now().year
+    return f"""Du bist ein Query-Parser für ein persönliches Gedächtnis-System.
 
 Analysiere die Anfrage und extrahiere strukturierte Informationen als JSON.
 Antworte NUR mit gültigem JSON, ohne Erklärungen oder Markdown-Blöcke.
@@ -60,7 +60,7 @@ Verfügbare Collections:
 - "messages": WhatsApp/Signal Nachrichten (Personen im Text erwähnt)
 
 JSON-Schema:
-{
+{{
   "persons": [],           // Genannte Personennamen, exakt wie geschrieben
   "locations": [],         // Genannte Ortsnamen oder Regionen
   "month": null,           // Monatsnummer 1-12 oder null
@@ -69,12 +69,12 @@ JSON-Schema:
   "date_to": null,         // ISO-Datum YYYY-MM-DD oder null
   "topics": [],            // Themen: "restaurant", "location", "activity", "person"
   "relevant_collections": [] // Subset von ["photos","reviews","saved_places","messages"]
-}
+}}
 
 Regeln:
 - persons: Nur echte Personennamen extrahieren, keine Pronomen
 - relevant_collections: photos+messages wenn Personen gefragt; reviews+saved_places wenn Orte/Restaurants gefragt
-- Bei Monatsnennung ohne Jahr: nimm das aktuellste Jahr mit Daten (""" + str(_CURRENT_YEAR) + """)
+- Bei Monatsnennung ohne Jahr: nimm das aktuellste Jahr mit Daten ({current_year})
 - date_from/date_to: Berechne den exakten Zeitraum aus Monat/Jahr"""
 
 
@@ -170,7 +170,7 @@ def _extract_llm(pq: ParsedQuery) -> None:
     from backend.llm.connector import chat
 
     messages = [
-        {"role": "system", "content": _PARSE_SYSTEM},
+        {"role": "system", "content": _get_parse_system_prompt()},
         {"role": "user", "content": pq.raw},
     ]
 

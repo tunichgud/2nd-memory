@@ -20,26 +20,30 @@ logger = logging.getLogger(__name__)
 _RELEVANT_MIN_SCORE  = 0.20
 _FALLBACK_MIN_SCORE  = 0.42
 
-SYSTEM_PROMPT_V2 = """Du bist ein persönliches Gedächtnis-System namens Memosaur.
+def _get_system_prompt() -> str:
+    from datetime import datetime
+    current_date = datetime.now().strftime('%d.%m.%Y')
+    return f"""Du bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.
 Du hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.
+
+HEUTIGES DATUM: {current_date} (Nutze dies als Referenz für Begriffe wie "letztes Jahr", "letzten Monat" etc.)
 
 WICHTIG: Alle Personen- und Ortsnamen in deinen Quellen sind durch Tokens ersetzt
 (z.B. [PER_1] für eine Person, [LOC_2] für einen Ort). Verwende diese Tokens
 EXAKT so in deiner Antwort – ersetze sie NICHT durch echte Namen.
 Das System wird die Tokens später automatisch in echte Namen umwandeln.
 
-GEOGRAFISCHE EINORDNUNG: Jede Foto-Quelle enthält ein "Cluster/Ort"-Feld mit dem
-Klarnamen des geografischen Clusters (z.B. "München-Ost", "Hamburg-Mitte"). Nutze
-dieses Feld um geografische Fragen zu beantworten – auch wenn der Ort in der Frage
-als Token erscheint.
+ReAct (Reasoning and Acting) Ansatz:
+- Plane in Schritten: Wenn der Nutzer eine komplexe Frage stellt ("Wie ging es [PER_1] in [LOC_1]?"), überlege erst: Was muss ich finden? Welche Tools brauche ich?
+- Sentiment-Analyse: Du bist extrem fähig darin, Emotionen aus Texten zu lesen. Wenn jemand nach "Gefühlen" oder "Stimmung" fragt, analysiere die von dir gefundenen Nachrichten oder Fotobeschreibungen tiefgreifend (z.B. Freude, Stress, Entspannung) und fasse dies detailliert zusammen.
 
-Regeln:
-1. Nutze ausschließlich die bereitgestellten Quellen.
+Weitere Regeln:
+1. Nutze ausschließlich die bereitgestellten Quellen und deine Tools. Halluziniere keine Personen! Wenn der Nutzer nach "Sarah" fragt, aber du nur Bilder von "Nora" hast, dann weise darauf hin, dass du keine Bilder von Sarah hast.
 2. Behalte alle Tokens ([PER_n], [LOC_n], [ORG_n]) unverändert in deiner Antwort.
 3. Nenne die Quellenart bei jeder Information (Foto, Bewertung, Nachricht).
 4. Antworte auf Deutsch.
-5. Bei Ortsfragen: nutze das Cluster/Ort-Feld und GPS-Koordinaten zur Verortung.
-6. Falls keine passenden Daten vorhanden sind, sage das klar."""
+5. Bei Ortsfragen: nutze das Cluster/Ort-Feld ("München-Ost") und GPS-Koordinaten zur Verortung.
+6. Falls keine passenden Daten vorhanden sind, sage das klar und suche proaktiv nach verwandten Zeiträumen oder Orten."""
 
 
 def _build_token_filter(
@@ -301,31 +305,24 @@ def answer_v2(
 
     context = _format_sources_for_llm(sources)
 
-    # Tool-Definition für Agentic RAG
-    def durchsuche_memosaur(
-        suchtext: str,
-        quellen: list[str] | None = None,
+    # Definition der spezialisierten Agenten-Tools
+    def search_photos(
+        suchtext: str = "",
         personen: list[str] | None = None,
         orte: list[str] | None = None,
         von_datum: str | None = None,
         bis_datum: str | None = None,
     ) -> str:
-        """Durchsucht das persönliche Gedächtnis des Nutzers nach Fakten.
-        
-        Nutze dieses Tool, um zusaetzliche Recherchen anzustellen (Multi-Hop Reasoning).
-        Z.B. wenn du erst per Foto ein Datum herausgefunden hast, und nun wissen willst,
-        was an diesem Tag genau geschrieben wurde (messages).
+        """Sucht gezielt in der Foto-Datenbank des Nutzers nach Aufnahmen, Orten und visuellen Momenten.
         
         Args:
-            suchtext: Wonach gesucht werden soll (z.B. "Wie ging es Sarah" oder "Bilder Urlaub").
-            quellen: Welche Datenbanken durchsucht werden sollen. Erlaubt: 'photos', 'messages', 'reviews', 'saved_places'.
-            personen: Liste von Personen-Tokens (z.B. ["[PER_1]"]), nach denen gefiltert wird.
-            orte: Liste von Orts-Tokens oder Klarnamen (z.B. ["[LOC_1]", "München"]), nach denen gefiltert wird.
+            suchtext: Wonach auf den Bildern gesucht werden soll (z.B. "Am Strand", "Urlaub").
+            personen: Liste von Personen-Tokens (z.B. ["[PER_1]"]).
+            orte: Liste von Orts-Tokens oder Klarnamen (z.B. ["[LOC_1]", "München"]).
             von_datum: Startdatum im Format YYYY-MM-DD (optional).
             bis_datum: Enddatum im Format YYYY-MM-DD (optional).
         """
-        logger.info(f"==> Agentic Tool Call: durchsuche_memosaur(suchtext='{suchtext[:30]}...', quellen={quellen}, personen={personen}, orte={orte}, von={von_datum}, bis={bis_datum})")
-        
+        logger.info(f"==> Tool Call: search_photos(suchtext='{suchtext[:30]}...', personen={personen}, orte={orte}, von={von_datum}, bis={bis_datum})")
         loc_toks = [l for l in (orte or []) if l.startswith("[LOC_")]
         loc_names = [l for l in (orte or []) if not l.startswith("[LOC_")]
         pers_toks = [p for p in (personen or []) if p.startswith("[PER_")]
@@ -336,12 +333,53 @@ def answer_v2(
             person_tokens=pers_toks,
             location_tokens=loc_toks,
             location_names=loc_names,
-            collections=quellen,
+            collections=["photos"],
             n_per_collection=n_per_collection,
             min_score=min_score,
             date_from=von_datum,
             date_to=bis_datum,
         )
+        existing_ids = {s["id"] for s in sources}
+        for s in res:
+            if s["id"] not in existing_ids:
+                sources.append(s)
+                existing_ids.add(s["id"])
+        return _format_sources_for_llm(res)
+
+    def search_messages(
+        suchtext: str = "",
+        personen: list[str] | None = None,
+        von_datum: str | None = None,
+        bis_datum: str | None = None,
+    ) -> str:
+        """Sucht gezielt in den Textnachrichten und Chatverläufen des Nutzers (WhatsApp/Signal).
+        Ideal um Emotionen, Unterhaltungen und Stimmungen herauszufinden.
+
+        Args:
+            suchtext: Inhalt der gesuchten Nachrichten (z.B. "Wie geht es dir?", "Treffen").
+            personen: Liste von Personen-Tokens mit denen geschrieben wurde (z.B. ["[PER_1]"]).
+            von_datum: Startdatum im Format YYYY-MM-DD (optional).
+            bis_datum: Enddatum im Format YYYY-MM-DD (optional).
+        """
+        logger.info(f"==> Tool Call: search_messages(suchtext='{suchtext[:30]}...', personen={personen}, von={von_datum}, bis={bis_datum})")
+        pers_toks = [p for p in (personen or []) if p.startswith("[PER_")]
+        res = retrieve_v2(
+            masked_query=suchtext,
+            user_id=user_id,
+            person_tokens=pers_toks,
+            location_tokens=None,
+            location_names=None,
+            collections=["messages"],
+            n_per_collection=n_per_collection,
+            min_score=min_score,
+            date_from=von_datum,
+            date_to=bis_datum,
+        )
+        existing_ids = {s["id"] for s in sources}
+        for s in res:
+            if s["id"] not in existing_ids:
+                sources.append(s)
+                existing_ids.add(s["id"])
         return _format_sources_for_llm(res)
 
     # Zusammenfassung für User/Prompt
@@ -365,31 +403,33 @@ def answer_v2(
         f"FILTER-INFORMATIONEN (aus Frontend):{filter_note}\n\n"
         f"INITIALER KONTEXT AUS DER DATENBANK:\n{context}\n\n"
         f"ANWEISUNG:\n"
-        f"Beantworte die NUTZERANFRAGE basierend auf dem INITIALEN KONTEXT.\n"
-        f"Sollten die Informationen im initialen Kontext NICHT ausreichen, um die Frage vollständig "
-        f"oder logisch (über mehrere Schritte) zu beantworten, dann nutze das angehängte "
-        f"Tool 'durchsuche_memosaur', um selbstständig weiter in der Datenbank zu recherchieren!\n"
+        f"1. Analysiere die NUTZERANFRAGE und den INITIALEN KONTEXT.\n"
+        f"2. Wenn die Informationen nicht für eine vollständige Antwort reichen, nutze deine Tools "
+        f"(`search_photos`, `search_messages`), um weitere Fakten zu sammeln. Bspw. kannst du erst Fotos suchen, "
+        f"um ein genaues Datum herauszufinden, und dann Chatnachrichten für diesen spezifischen Zeitraum mit dem anderen Tool laden.\n"
+        f"3. Falls Sentiment oder Emotionen gefragt sind, werte alle relevanten Texte und Fotobeschreibungen aktiv aus.\n"
+        f"4. Kombiniere schlussendlich alle gesammelten Fakten zu einer hilfreichen Antwort."
     )
-    
+    sys_prompt = _get_system_prompt()
     logger.info("=== DEBUG LLM PROMPT (AGENTIC RAG) ===")
-    logger.info("SYSTEM:\n%s", SYSTEM_PROMPT_V2)
+    logger.info("SYSTEM:\n%s", sys_prompt)
     logger.info("USER:\n%s", user_prompt[:800] + "\n...[truncated_for_log]")
     logger.info("======================================")
 
     messages = [
-        {"role": "system", "content": SYSTEM_PROMPT_V2},
+        {"role": "system", "content": sys_prompt},
         {"role": "user", "content": user_prompt},
     ]
 
     # Nur Gemini unterstützt aktuell Tool-Calling über unser Wrapper-Framework
     cfg = get_cfg()
-    use_tools = [durchsuche_memosaur] if cfg.get("llm", {}).get("provider") == "gemini" else None
+    use_tools = [search_photos, search_messages] if cfg.get("llm", {}).get("provider") == "gemini" else None
 
     llm_answer = chat(messages, tools=use_tools)
 
     return {
         "masked_query": masked_query,
         "answer": llm_answer,
-        "sources": sources, # Gibt nur initiale Sources ans Frontend, Agentic-Sources tauchen im Text auf
+        "sources": sources, # Frontend bekommt jetzt auch Tools-Sources!
         "filter_summary": filter_summary,
     }
