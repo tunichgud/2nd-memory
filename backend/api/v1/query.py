@@ -113,3 +113,54 @@ async def query_v1(
     except Exception as exc:
         logger.exception("Fehler bei v1 RAG-Abfrage")
         raise HTTPException(status_code=500, detail=str(exc))
+
+
+from fastapi.responses import StreamingResponse
+
+@router.post("/query_stream")
+async def query_stream_v1(
+    req: V1QueryRequest,
+    db: aiosqlite.Connection = Depends(get_db),
+):
+    """Token-aware RAG-Abfrage per Server-Sent Events (SSE). 
+    Yields JSON Chunks mit {"type": "plan"|"text"|"sources", "content": ...}
+    """
+    logger.info("=== DEBUG API /v1/query_stream ===")
+    logger.info("  masked_query:    %s", req.masked_query)
+    logger.info("  location_tokens: %s", req.location_tokens)
+    logger.info("==================================")
+
+    # User prüfen
+    cursor = await db.execute("SELECT id FROM users WHERE id = ? AND is_active = 1", (req.user_id,))
+    if not await cursor.fetchone():
+        raise HTTPException(status_code=404, detail="User nicht gefunden oder inaktiv")
+
+    from backend.rag.retriever_v2 import answer_v2_stream
+    
+    # Da answer_v2_stream asynchrone DB Reads via aiosqlite/Chroma in asyncio.run laufen lässt
+    # und wir hier schon in async def sind, muss der Generator so gebaut sein, 
+    # dass FastAPI ihn direkt konsumieren kann.
+    # Da unser chat_stream bereits asynchron funktioniert, können wir ihn als
+    # media_type "text/event-stream" ausgeben:
+
+    async def stream_generator():
+        try:
+            async for chunk in answer_v2_stream(
+                masked_query=req.masked_query,
+                user_id=req.user_id,
+                person_tokens=req.person_tokens,
+                location_tokens=req.location_tokens,
+                location_names=req.location_names,
+                collections=req.collections,
+                n_per_collection=req.n_results,
+                min_score=req.min_score,
+                date_from=req.date_from,
+                date_to=req.date_to,
+            ):
+                yield chunk
+        except Exception as e:
+            logger.exception("Stream unterbrochen oder Fehler")
+            import json
+            yield json.dumps({"type": "error", "content": str(e)}) + "\n\n"
+
+    return StreamingResponse(stream_generator(), media_type="text/event-stream")

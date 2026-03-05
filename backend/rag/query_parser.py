@@ -28,6 +28,8 @@ from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
+_CURRENT_YEAR = datetime.now().year
+
 
 
 # Monatsnamen → Nummer (deutsch + englisch)

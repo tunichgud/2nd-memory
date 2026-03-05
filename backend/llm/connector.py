@@ -139,6 +139,117 @@ def chat(messages: list[dict], model: str | None = None, tools: list | None = No
         raise ValueError(f"Unbekannter LLM-Provider: {provider}")
 
 
+async def chat_stream(messages: list[dict], model: str | None = None, tools: list | None = None):
+    """Asynchroner Generator für Chat-Streams. 
+    Wertet Tool-Calls manuell aus, um dem Frontend "Plan"-Ereignisse zu senden.
+    
+    Yields:
+        {'type': 'plan', 'content': '...'} für Tool-Nutzung
+        {'type': 'text', 'content': '...'} für finale Text-Chunks
+    """
+    import asyncio
+    cfg = get_cfg()["llm"]
+    provider = cfg["provider"]
+    model = model or cfg["model"]
+
+    if provider != "gemini":
+        # Fallback: Kein Stream/Tools für andere Modelle (reicht für MVP)
+        res = chat(messages, model, tools)
+        yield {"type": "text", "content": res}
+        return
+
+    import google.generativeai as genai
+    genai.configure(api_key=cfg.get("api_key", ""))
+
+    system_msg = ""
+    history = []
+    last_user = None
+    for m in messages:
+        if m["role"] == "system":
+            system_msg = m["content"]
+        elif m["role"] == "user":
+            last_user = m["content"]
+        elif m["role"] == "assistant" and last_user:
+            history.append({"role": "user",  "parts": [last_user]})
+            history.append({"role": "model", "parts": [m["content"]]})
+            last_user = None
+
+    kwargs = {}
+    if system_msg:
+        kwargs["system_instruction"] = system_msg
+    if tools:
+        kwargs["tools"] = tools
+
+    gmodel = genai.GenerativeModel(model, **kwargs)
+    
+    # NICHT automatic function calling aktivieren! Wir reifen die Tools manuell ab.
+    chat_session = gmodel.start_chat(history=history)
+
+    current_prompt = last_user or ""
+    tool_map = {t.__name__: t for t in tools} if tools else {}
+
+    # Event-Loop-Abbruch-Check (CancelledError) wird von uvicorn geworfen,
+    # wenn der Client die SSE-Verbindung trennt.
+    MAX_STEPS = 5
+    logger.info("=== chat_stream SYSTEM_PROMPT (first 500 chars): %s...", system_msg[:500])
+    logger.info("=== chat_stream USER_PROMPT (first 800 chars): %s...", (last_user or "")[:800])
+    for step in range(MAX_STEPS):
+        # Wir streamen die Antwort NICHT solange er Tools ruft, sondern erst am Ende.
+        response = chat_session.send_message(current_prompt, stream=False)
+
+        # Prüfen ob Gemini ein Tool aufrufen möchte
+        function_calls = response.parts if hasattr(response, 'parts') else []
+        fc = None
+        for part in function_calls:
+            if hasattr(part, 'function_call') and part.function_call:
+                fc = part.function_call
+                break
+                
+        if fc and fc.name in tool_map:
+            # Informiere Frontend: Agent denkt nach
+            yield {"type": "plan", "content": f"Durchsuche Gedächtnis mit '{fc.name}'..."}
+            
+            # Tool ausführen
+            tool_func = tool_map[fc.name]
+            args = {k: v for k, v in fc.args.items()}
+            logger.info(f"Manual Tool Call: {fc.name}({args})")
+            
+            # Da Tools blocking sein könnten, mit asyncio abfangen
+            try:
+                tool_res = tool_func(**args)
+            except Exception as e:
+                logger.error(f"Tool error: {e}")
+                tool_res = f"Fehler bei Tool-Ausführung: {e}"
+
+            # Das Resultat als Antwort von uns (dem "System") ins Model füttern
+            current_prompt = genai.protos.Content(
+                role="user", # Bei manual calls oft als "function" role
+                parts=[
+                    genai.protos.Part(
+                        function_response=genai.protos.FunctionResponse(
+                            name=fc.name,
+                            response={"result": tool_res}
+                        )
+                    )
+                ]
+            )
+        else:
+            # Keine Tools mehr -> Text Finale
+            yield {"type": "plan", "content": "Formuliere Antwort..."}
+            # Trick: Wir senden den current_prompt (sollte leer sein, oder die letzte func response)
+            # noch einmal als Stream, um den Text chunk-weise zu Frontend zu feuern.
+            # Da wir oben schon send_message ohne stream gemacht haben...
+            # Eigentlich haben wir hier schon den Text.
+            # Für echtes Streaming müssten wir send_message(stream=True) nutzen,
+            # was aber mit function calls bei Gemini kompliziert ist. 
+            # -> Wir streamen den fertigen Text künstlich oder geben ihn am Stück.
+            text = _strip_thinking(response.text.strip())
+            
+            # Wir stückeln ihn für eine "Tipp-Animation" (oder reichen ihn am Stück durch, 
+            # Frontend macht sowieso markdown rendering)
+            yield {"type": "text", "content": text}
+            break
+
 # ---------------------------------------------------------------------------
 # Vision (Bildbeschreibung)
 # ---------------------------------------------------------------------------

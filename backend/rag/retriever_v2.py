@@ -34,16 +34,20 @@ EXAKT so in deiner Antwort – ersetze sie NICHT durch echte Namen.
 Das System wird die Tokens später automatisch in echte Namen umwandeln.
 
 ReAct (Reasoning and Acting) Ansatz:
-- Plane in Schritten: Wenn der Nutzer eine komplexe Frage stellt ("Wie ging es [PER_1] in [LOC_1]?"), überlege erst: Was muss ich finden? Welche Tools brauche ich?
-- Sentiment-Analyse: Du bist extrem fähig darin, Emotionen aus Texten zu lesen. Wenn jemand nach "Gefühlen" oder "Stimmung" fragt, analysiere die von dir gefundenen Nachrichten oder Fotobeschreibungen tiefgreifend (z.B. Freude, Stress, Entspannung) und fasse dies detailliert zusammen.
+- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:
+  * Gibt es mehrere Entitäten (Personen/Orte), die NICHT im selben Kontext auftauchen?
+  * Beispiel: "Wie ging es [PER_1], als ich mit [PER_2] in [LOC_1] war?"
+    -> FALSCH: search_photos(personen=["[PER_1]", "[PER_2]"]). Das findet Bilder, auf denen BEIDE sind (die es nicht gibt).
+    -> RICHTIG Schritt 1: Finde das Datum des Ausflugs via search_photos(personen=["[PER_2]"], orte=["[LOC_1]"]).
+    -> RICHTIG Schritt 2: Suche Nachrichten von [PER_1] in dem gefundenen Datums-Zeitraum via search_messages(personen=["[PER_1]"], von_datum="...", bis_datum="...").
 
 Weitere Regeln:
-1. Nutze ausschließlich die bereitgestellten Quellen und deine Tools. Halluziniere keine Personen! Wenn der Nutzer nach "Sarah" fragt, aber du nur Bilder von "Nora" hast, dann weise darauf hin, dass du keine Bilder von Sarah hast.
+1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere keine Orte oder Personen.
 2. Behalte alle Tokens ([PER_n], [LOC_n], [ORG_n]) unverändert in deiner Antwort.
-3. Nenne die Quellenart bei jeder Information (Foto, Bewertung, Nachricht).
-4. Antworte auf Deutsch.
+3. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).
+4. Antworte auf Deutsch. Falls Sentiment oder Emotionen gefragt sind, werte alle relevanten Texte tiefgreifend aus.
 5. Bei Ortsfragen: nutze das Cluster/Ort-Feld ("München-Ost") und GPS-Koordinaten zur Verortung.
-6. Falls keine passenden Daten vorhanden sind, sage das klar und suche proaktiv nach verwandten Zeiträumen oder Orten."""
+6. Falls keine passenden Daten gefunden wurden, erkläre logisch, was du versucht hast zu suchen und warum es keine Treffer gab."""
 
 
 def _build_token_filter(
@@ -189,8 +193,9 @@ def retrieve_v2(
                             col_name, len(col_hits), len(filtered), location_names)
                 col_hits = filtered
             else:
-                logger.info("  [%s] cluster-Post-Filter ohne Treffer (Namen=%s) – behalte alle",
+                logger.info("  [%s] cluster-Post-Filter ohne Treffer (Namen=%s) – verwerfe alle!",
                             col_name, location_names)
+                col_hits = []
 
         # Kürzen auf n_per_collection, falls wir vorher fetch_n hochgesetzt haben
         if len(col_hits) > n_per_collection:
@@ -212,6 +217,8 @@ def retrieve_v2(
     return all_results
 
 
+
+import json
 
 def _format_sources_for_llm(sources: list[dict]) -> str:
     """Bereitet die Retrieval-Ergebnisse als str auf."""
@@ -433,3 +440,261 @@ def answer_v2(
         "sources": sources, # Frontend bekommt jetzt auch Tools-Sources!
         "filter_summary": filter_summary,
     }
+
+async def answer_v2_stream(
+    masked_query: str,
+    user_id: str,
+    person_tokens: list[str] | None = None,
+    location_tokens: list[str] | None = None,
+    location_names: list[str] | None = None,
+    collections: list[str] | None = None,
+    n_per_collection: int = 6,
+    min_score: float = 0.2,
+    date_from: str | None = None,
+    date_to: str | None = None,
+):
+    """Asynchroner Generator für Agentic RAG.
+    Yields JSON-Strings für Server-Sent Events (SSE).
+    """
+    from backend.llm.connector import chat_stream, get_cfg
+    import json
+
+    # Fallback: Parse die Anfrage via LLM, um Klarnamen-Orte zu extrahieren,
+    # die das Frontend-NER möglicherweise nicht erkannt hat (z.B. "München" statt "[LOC_1]").
+    try:
+        from backend.rag.query_parser import parse_query
+        parsed = parse_query(masked_query)
+        if parsed.locations:
+            plain_locs = [l for l in parsed.locations if not l.startswith("[LOC_")]
+            if plain_locs:
+                logger.info("Stream-Fallback: LLM-Parser fand Klarnamen-Orte: %s", plain_locs)
+                location_names = list(location_names or []) + plain_locs
+        if parsed.persons:
+            plain_pers = [p for p in parsed.persons if not p.startswith("[PER_")]
+            if plain_pers:
+                logger.info("Stream-Fallback: LLM-Parser fand Klarnamen-Personen: %s", plain_pers)
+                person_tokens = list(person_tokens or []) + plain_pers
+        if parsed.date_from and not date_from:
+            date_from = parsed.date_from
+        if parsed.date_to and not date_to:
+            date_to = parsed.date_to
+    except Exception as exc:
+        logger.warning("Query-Parser Fallback fehlgeschlagen: %s", exc)
+
+    # 1. Start-Kontext: Für echte ReAct-Agenten starten wir leer, 
+    # damit die Tools explizit und präzise aufgerufen werden.
+    cfg = get_cfg()
+    provider = cfg.get("llm", {}).get("provider")
+    is_gemini = provider == "gemini"
+
+    if is_gemini:
+        sources = []
+        # Initiale Quellen (leer) sofort ans Frontend schicken
+        yield json.dumps({
+            "type": "sources",
+            "content": sources
+        }) + "\n\n"
+    else:
+        # Fallback für dumme Modelle
+        sources = retrieve_v2(
+            masked_query=masked_query,
+            user_id=user_id,
+            person_tokens=person_tokens,
+            location_tokens=location_tokens,
+            location_names=location_names,
+            collections=collections,
+            n_per_collection=n_per_collection,
+            min_score=min_score,
+            date_from=date_from,
+            date_to=date_to,
+        )
+        yield json.dumps({
+            "type": "sources",
+            "content": sources
+        }) + "\n\n"
+
+    def search_photos(
+        suchtext: str = "",
+        personen: list[str] | None = None,
+        orte: list[str] | None = None,
+        von_datum: str | None = None,
+        bis_datum: str | None = None,
+    ) -> str:
+        logger.info(f"==> Stream Tool Call: search_photos({suchtext}, {personen}, {orte}, {von_datum}, {bis_datum})")
+        loc_toks = [l for l in (orte or []) if l.startswith("[LOC_")]
+        loc_names = [l for l in (orte or []) if not l.startswith("[LOC_")]
+        pers_toks = [p for p in (personen or []) if p.startswith("[PER_")]
+
+        # Token-to-Name Mapping aus Frontend-Kontext
+        if location_tokens and location_names:
+            for tok in loc_toks:
+                try:
+                    idx = location_tokens.index(tok)
+                    resolved = location_names[idx]
+                    if resolved not in loc_names:
+                        loc_names.append(resolved)
+                except ValueError:
+                    pass
+
+        # WICHTIG: Wenn ein Ort gefiltert wird, darf der Personen-Filter NICHT
+        # als harter ChromaDB-Filter laufen – Fotos in München haben oft nur
+        # `has_per_1=True` (den User selbst), aber der Agent sucht nach `[PER_2]` (z.B. Nora).
+        # Der Orts-Cluster-Post-Filter ist robuster. Personen-Prüfung passiert durch den LLM.
+        effective_pers_toks = [] if loc_names else pers_toks
+
+        # Suchtext anreichern mit aufgelösten Ortsnamen wenn vorhanden
+        effective_query = suchtext or ""
+        if loc_names and not effective_query:
+            effective_query = " ".join(loc_names)
+
+        res = retrieve_v2(
+            masked_query=effective_query,
+            user_id=user_id,
+            person_tokens=effective_pers_toks,
+            location_tokens=loc_toks,
+            location_names=loc_names,
+            collections=["photos"],
+            n_per_collection=n_per_collection,
+            min_score=min_score,
+            date_from=von_datum,
+            date_to=bis_datum,
+        )
+        logger.info(f"===> search_photos GOT {len(res)} results. effective_pers_toks={effective_pers_toks}, loc_names={loc_names}")
+        for r in res[:3]:
+            logger.info(f"     -> {r['id']}: cluster={r['metadata'].get('cluster')}, score={r['score']}")
+        existing_ids = {s["id"] for s in sources}
+        new_sources = []
+        for s in res:
+            if s["id"] not in existing_ids:
+                sources.append(s)
+                new_sources.append(s)
+                existing_ids.add(s["id"])
+        
+        return json.dumps({"new_sources": new_sources, "formatted_context": _format_sources_for_llm(res)})
+
+    def search_messages(
+        suchtext: str = "",
+        personen: list[str] | None = None,
+        von_datum: str | None = None,
+        bis_datum: str | None = None,
+    ) -> str:
+        logger.info(f"==> Stream Tool Call: search_messages({suchtext}, {personen}, {von_datum}, {bis_datum})")
+        pers_toks = [p for p in (personen or []) if p.startswith("[PER_")]
+        res = retrieve_v2(
+            masked_query=suchtext,
+            user_id=user_id,
+            person_tokens=pers_toks,
+            location_tokens=None,
+            location_names=None,
+            collections=["messages"],
+            n_per_collection=n_per_collection,
+            min_score=min_score,
+            date_from=von_datum,
+            date_to=bis_datum,
+        )
+        existing_ids = {s["id"] for s in sources}
+        new_sources = []
+        for s in res:
+            if s["id"] not in existing_ids:
+                sources.append(s)
+                new_sources.append(s)
+                existing_ids.add(s["id"])
+                
+        return json.dumps({"new_sources": new_sources, "formatted_context": _format_sources_for_llm(res)})
+
+    def search_places(
+        suchtext: str = "",
+        orte: list[str] | None = None,
+        von_datum: str | None = None,
+        bis_datum: str | None = None,
+    ) -> str:
+        logger.info(f"==> Stream Tool Call: search_places({suchtext}, {orte}, {von_datum}, {bis_datum})")
+        loc_toks = [l for l in (orte or []) if l.startswith("[LOC_")]
+        loc_names = [l for l in (orte or []) if not l.startswith("[LOC_")]
+
+        # Token-to-Name Mapping aus Frontend-Kontext
+        if location_tokens and location_names:
+            for tok in loc_toks:
+                try:
+                    idx = location_tokens.index(tok)
+                    resolved = location_names[idx]
+                    if resolved not in loc_names:
+                        loc_names.append(resolved)
+                except ValueError:
+                    pass
+
+        res = retrieve_v2(
+            masked_query=suchtext,
+            user_id=user_id,
+            person_tokens=None,
+            location_tokens=loc_toks,
+            location_names=loc_names,
+            collections=["reviews", "saved_places"],
+            n_per_collection=n_per_collection,
+            min_score=min_score,
+            date_from=von_datum,
+            date_to=bis_datum,
+        )
+        existing_ids = {s["id"] for s in sources}
+        new_sources = []
+        for s in res:
+            if s["id"] not in existing_ids:
+                sources.append(s)
+                new_sources.append(s)
+                existing_ids.add(s["id"])
+                
+        return json.dumps({"new_sources": new_sources, "formatted_context": _format_sources_for_llm(res)})
+
+    context = _format_sources_for_llm(sources)
+
+    # Baue eine Token→Klarname-Tabelle für den Agenten
+    token_map_parts = []
+    if location_tokens and location_names:
+        for tok, name in zip(location_tokens, location_names):
+            token_map_parts.append(f"  {tok} = '{name}'")
+    
+    token_map_note = ""
+    if token_map_parts:
+        token_map_note = "\n\nTOKEN-MAPPING (nutze diese echten Namen in Tool-Aufrufen!):\n" + "\n".join(token_map_parts)
+    elif location_names:
+        # Nur Klarnamen vorhanden (aus Fallback-Parser), kein Mapping
+        token_map_note = f"\n\nRELEVANTE ORTE (aus Anfrage erkannt): {', '.join(location_names)}"
+
+    filter_parts = []
+    if date_from or date_to:
+        filter_parts.append(f"Datum: {date_from or '?'} bis {date_to or '?'}")
+
+    filter_note = f"\nErkannte Zeitfilter: {'; '.join(filter_parts)}" if filter_parts else ""
+
+    user_prompt = (
+        f"NUTZERANFRAGE:\n{masked_query}\n"
+        f"{token_map_note}"
+        f"{filter_note}\n\n"
+        f"INITIALER KONTEXT AUS DER DATENBANK:\n{context}\n\n"
+        f"ANWEISUNG:\n"
+        f"1. Analysiere die NUTZERANFRAGE.\n"
+        f"2. Da der INITIALE KONTEXT leer ist, MUSST du aktiv Tools "
+        f"(`search_photos`, `search_messages`, `search_places`) nutzen, um Fakten zu sammeln. "
+        f"(`search_places` sucht in Restaurantbewertungen und gespeicherten Orten).\n"
+        f"3. Falls Sentiment oder Emotionen gefragt sind, werte alle relevanten Texte und Fotobeschreibungen aktiv aus.\n"
+        f"4. Kombiniere schlussendlich alle gesammelten Fakten zu einer hilfreichen Antwort."
+    )
+    sys_prompt = _get_system_prompt()
+
+    messages = [
+        {"role": "system", "content": sys_prompt},
+        {"role": "user", "content": user_prompt},
+    ]
+
+    use_tools = [search_photos, search_messages, search_places] if is_gemini else None
+
+    # LLM Stream asynchron konsumieren
+    async for chunk in chat_stream(messages, tools=use_tools):
+        # chunk ist dict: {"type": "plan" | "text", "content": "..."}
+        if chunk["type"] == "plan":
+            yield json.dumps({"type": "plan", "content": chunk["content"]}) + "\n\n"
+        elif chunk["type"] == "text":
+            # Bei Tool-Calls haben die Tools evtl. neue Sources an das globale sources array gehangen
+            # Wir feuern nochmal ein Source-Update mit dem kompletten Set (oder Frontend merged)
+            yield json.dumps({"type": "sources", "content": sources}) + "\n\n"
+            yield json.dumps({"type": "text", "content": chunk["content"]}) + "\n\n"

@@ -77,13 +77,11 @@ def extract_mentioned_persons(text: str, sender_names: list[str] | None = None) 
         if name.lower() in text_lower:
             found.add(name)
 
-    # LLM nur wenn Text wahrscheinlich unbekannte Personennamen enthält
-    # Heuristik: Großgeschriebene Wörter die nicht am Satzanfang stehen
-    # und nicht in den bekannten Namen sind
+    # LLM (bzw. ab jetzt lokales NER via spaCy) nur wenn Text potenziell unbekannte Namen enthält
     unknown_caps = _find_unknown_capitalized(text, found, known)
     if unknown_caps:
-        llm_names = _extract_persons_llm(text)
-        found.update(llm_names)
+        spacy_names = _extract_persons_spacy(text)
+        found.update(spacy_names)
 
     result = sorted(found)
     logger.debug("Erwähnte Personen in Chunk: %s", result)
@@ -101,26 +99,36 @@ def _find_unknown_capitalized(text: str, already_found: set[str], known: list[st
     return unknown
 
 
-def _extract_persons_llm(text: str) -> list[str]:
-    """Extrahiert Personennamen via LLM (nur für kurze Chunks)."""
-    # Auf 500 Zeichen kürzen um Tokens zu sparen
-    excerpt = text[:500]
+# Lazy-Loading für spaCy-Modell
+_nlp = None
 
-    from backend.llm.connector import chat
-    prompt = (
-        "Extrahiere alle Personennamen aus folgendem Chat-Text. "
-        "Antworte NUR mit einer kommagetrennten Liste der Namen, "
-        "oder 'keine' wenn keine Personennamen vorhanden. "
-        "Keine Erklärungen.\n\n"
-        f"Text: {excerpt}"
-    )
-    response = chat([{"role": "user", "content": prompt}])
-    response = response.strip()
+def _extract_persons_spacy(text: str) -> list[str]:
+    """Extrahiert Personennamen via lokalem spaCy NER (schnell, offline)."""
+    global _nlp
+    if _nlp is None:
+        try:
+            import spacy
+            logger.info("Lade lokales NER Modell (de_core_news_sm)...")
+            _nlp = spacy.load("de_core_news_sm")
+        except ImportError:
+            logger.error("spaCy nicht installiert! Bitte 'pip install spacy' und 'python -m spacy download de_core_news_sm' ausführen.")
+            return []
+        except Exception as e:
+            logger.error(f"Fehler beim Laden des spaCy Modells: {e}")
+            return []
 
-    if response.lower() in ("keine", "keine.", "none", "-"):
-        return []
-
-    names = [n.strip() for n in response.split(",") if n.strip()]
-    # Plausibilitätscheck: max 10 Namen, jeder max 30 Zeichen
-    names = [n for n in names if len(n) <= 30 and len(n) >= 2][:10]
-    return names
+    # Auf ca. 1000 Zeichen kürzen (für Chunks meist ausreichend, verhindert CPU Spikes)
+    excerpt = text[:1000]
+    doc = _nlp(excerpt)
+    
+    names = []
+    for ent in doc.ents:
+        if ent.label_ == "PER":
+            # Bereinigung: Oft werden Wörter wie "Die", "Hallo" fälschlicherweise als PER markiert
+            name = ent.text.strip()
+            # Plausibilität: Mindestens 2 Zeichen, unter 30 Zeichen, keine Sonderzeichen, fängt mit Großbuchstaben an
+            if len(name) >= 2 and len(name) <= 30 and name[0].isupper() and not any(char in "!?,;:\"'" for char in name):
+                names.append(name)
+                
+    # Deduplizieren und max 10 zurückgeben
+    return list(dict.fromkeys(names))[:10]

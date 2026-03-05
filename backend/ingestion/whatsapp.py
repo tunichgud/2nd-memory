@@ -102,6 +102,7 @@ def ingest_whatsapp(
     chat_name: str | None = None,
     progress_callback: Callable[[int, int, str], None] | None = None,
     reset: bool = False,
+    user_id: str = "00000000-0000-0000-0000-000000000001",
 ) -> dict:
     """Importiert einen WhatsApp-Chat in ChromaDB.
 
@@ -110,9 +111,7 @@ def ingest_whatsapp(
         chat_name: Optionaler Name des Chats (z.B. Gruppenname)
         progress_callback: Fortschritts-Callback
         reset: Collection vorher leeren
-
-    Returns:
-        Statistiken: total, success, errors
+        user_id: ID des Benutzers
     """
     from backend.rag.embedder import embed_single
     from backend.rag.store import upsert_documents, reset_collection
@@ -175,6 +174,7 @@ def ingest_whatsapp(
             "lon": 0.0,
             "persons": ",".join(senders),
             "mentioned_persons": ",".join(mentioned),
+            "user_id": user_id,
         }
 
         ids.append(f"wa_{name[:20]}_{chunk_idx:05d}")
@@ -182,6 +182,11 @@ def ingest_whatsapp(
         embeddings.append(embedding)
         metadatas.append(chroma_meta)
         stats["success"] += len(chunk)
+
+        # In Batches speichern (100 Chunks = 1000 Nachrichten pro Batch)
+        if len(ids) >= 100:
+            upsert_documents("messages", ids, documents, embeddings, metadatas)
+            ids, documents, embeddings, metadatas = [], [], [], []
 
     if ids:
         upsert_documents("messages", ids, documents, embeddings, metadatas)

@@ -117,28 +117,28 @@
         <label class="flex items-start gap-3 cursor-pointer">
           <input type="checkbox" id="consent-messages" class="mt-1 w-4 h-4 accent-blue-500">
           <div>
-            <div class="font-medium text-sm">Nachrichten (WhatsApp, Signal)</div>
-            <div class="text-xs text-gray-500">
-              Nachrichten werden vor dem Upload im Browser maskiert – nur Tokens
-              verlassen Ihren Browser. Klarnamen bleiben lokal in der IndexedDB.
-            </div>
+            Sdiv class="font-medium text-sm">Nachrichten (WhatsApp, Signal)</div>
+          <div class="text-xs text-gray-500">
+            Nachrichten werden vor dem Upload im Browser maskiert – nur Tokens
+            verlassen Ihren Browser. Klarnamen bleiben lokal in der IndexedDB.
           </div>
-        </label>
       </div>
-      <p class="text-xs text-gray-500">
-        Ohne Einwilligung sind die jeweiligen Features deaktiviert.
-        Diese Einstellung kann jederzeit im Einstellungen-Tab geändert werden.
-      </p>
-      <div class="flex gap-3">
-        <button onclick="saveConsent(false)" class="flex-1 bg-gray-700 hover:bg-gray-600 rounded-lg px-4 py-2 text-sm">
-          Ablehnen
-        </button>
-        <button onclick="saveConsent(true)"
-          class="flex-1 bg-blue-600 hover:bg-blue-500 rounded-lg px-4 py-2 text-sm font-medium">
-          Einwilligen &amp; Starten
-        </button>
-      </div>
+      </label>
     </div>
+    <p class="text-xs text-gray-500">
+      Ohne Einwilligung sind die jeweiligen Features deaktiviert.
+      Diese Einstellung kann jederzeit im Einstellungen-Tab geändert werden.
+    </p>
+    <div class="flex gap-3">
+      <button onclick="saveConsent(false)" class="flex-1 bg-gray-700 hover:bg-gray-600 rounded-lg px-4 py-2 text-sm">
+        Ablehnen
+      </button>
+      <button onclick="saveConsent(true)"
+        class="flex-1 bg-blue-600 hover:bg-blue-500 rounded-lg px-4 py-2 text-sm font-medium">
+        Einwilligen &amp; Starten
+      </button>
+    </div>
+  </div>
   </div>
 
   <!-- Header -->
@@ -172,6 +172,11 @@
       <button onclick="sendQuery()"
         class="bg-blue-600 hover:bg-blue-500 px-5 py-3 rounded-lg text-sm font-medium transition-colors">
         Fragen
+      </button>
+      <button id="stop-btn" onclick="abortQuery()"
+        class="bg-red-900 border border-red-700 hover:bg-red-800 text-red-100 px-5 py-3 rounded-lg text-sm font-medium transition-colors hidden z-[9999]"
+        title="Abbruch der Anfrage">
+        <span class="text-sm">Stop</span>
       </button>
     </div>
 

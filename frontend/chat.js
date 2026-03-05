@@ -20,6 +20,8 @@ function _debugLog(topic, data) {
 // -------------------------------------------------------------------------
 // Abfrage senden – mit optionalem Token-Flow (v2) oder direktem (v0)
 // -------------------------------------------------------------------------
+let currentAbortController = null;
+
 async function sendQuery() {
   const input = document.getElementById('chat-input');
   const query = input.value.trim();
@@ -27,22 +29,38 @@ async function sendQuery() {
 
   input.value = '';
   appendUserMessage(query);
-  const typingId = appendTypingIndicator();
+
+  const stopBtn = document.getElementById('stop-btn');
+  if (stopBtn) stopBtn.classList.remove('hidden');
+
+  currentAbortController = new AbortController();
 
   try {
     if (_useV2()) {
-      await _sendQueryV2(query, typingId);
+      await _sendQueryV2(query, currentAbortController.signal);
     } else {
+      const typingId = appendTypingIndicator();
       await _sendQueryV0(query, typingId);
     }
   } catch (e) {
-    removeTyping(typingId);
-    appendErrorMessage('Verbindungsfehler: ' + e.message);
+    if (e.name === 'AbortError') {
+      appendErrorMessage('Anfrage abgebrochen.');
+    } else {
+      appendErrorMessage('Verbindungsfehler: ' + e.message);
+    }
+  } finally {
+    currentAbortController = null;
+    if (stopBtn) stopBtn.classList.add('hidden');
   }
 }
 
-/** v2: NER-Maskierung → Token-API → Unmaskierung */
-async function _sendQueryV2(query, typingId) {
+function abortQuery() {
+  if (currentAbortController) {
+    currentAbortController.abort();
+  }
+}
+
+async function _sendQueryV2(query, abortSignal) {
   _debugLog('UserQuery', query);
 
   // 1. NER: Anfrage maskieren
@@ -53,39 +71,34 @@ async function _sendQueryV2(query, typingId) {
   const personTokens = entities.filter(e => e.type === 'PER').map(e => e.token);
   const locationTokens = entities.filter(e => e.type === 'LOC').map(e => e.token);
 
-  // Klarnamen der erkannten Orte aus IndexedDB nachschlagen (robust für Backend-Cluster-Filter)
   const locationNameResults = await Promise.all(
     locationTokens.map(async (tok) => {
       const clearName = await window.TokenStore.lookupToken(tok);
-      _debugLog('TokenStore Lookup', { token: tok, clearName });
       return clearName;
     })
   );
-  // lookupToken gibt das Token selbst zurück falls unbekannt – solche herausfiltern
   const locationNames = locationNameResults.filter(
     (name, i) => name && name !== locationTokens[i]
   );
-  _debugLog('Extracted Filter', { personTokens, locationTokens, locationNames });
 
   const requestBody = {
     user_id: window._userId,
     masked_query: masked,
     person_tokens: personTokens,
     location_tokens: locationTokens,
-    location_names: locationNames,   // z.B. ["München"] – für cluster-Post-Filter
+    location_names: locationNames,
     n_results: 6,
     min_score: 0.2,
   };
-  _debugLog('API POST /api/v1/query', requestBody);
+  _debugLog('API POST /api/v1/query_stream', requestBody);
 
-  // 3. Anfrage an v2-API
-  const res = await fetch('/api/v1/query', {
+  // 3. Streaming-Request
+  const res = await fetch('/api/v1/query_stream', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(requestBody),
+    signal: abortSignal
   });
-
-  removeTyping(typingId);
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
@@ -93,23 +106,52 @@ async function _sendQueryV2(query, typingId) {
     return;
   }
 
-  const data = await res.json();
+  // 4. Dom-Elemente für die Live-Antwort anlegen
+  const responseUi = createStreamingAssistantMessageCard();
+  let fullAnswer = "";
+  let fullSources = [];
 
-  // 4. Antwort und Quellen unmaskieren
-  const unmaskedAnswer = await window.TokenStore.unmaskText(data.masked_answer);
-  const unmaskedSources = await Promise.all(
-    (data.sources || []).map(async (src) => ({
-      ...src,
-      document: await window.TokenStore.unmaskText(src.document),
-      metadata: await _unmaskMetadata(src.metadata),
-    }))
-  );
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder("utf-8");
+  let buffer = "";
 
-  appendAssistantMessage(unmaskedAnswer, unmaskedSources, {
-    filter_summary: data.filter_summary,
-    persons: personTokens,
-    locations: locationTokens,
-  });
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+
+    // Server-Sent Events sind durch \n\n separiert
+    let boundary = buffer.indexOf("\n\n");
+    while (boundary !== -1) {
+      const chunkStr = buffer.slice(0, boundary).trim();
+      buffer = buffer.slice(boundary + 2);
+      boundary = buffer.indexOf("\n\n");
+
+      if (!chunkStr) continue;
+
+      try {
+        const chunk = JSON.parse(chunkStr);
+        if (chunk.type === "plan") {
+          // Plan als Zwischenschritt im UI aktualisieren
+          updateStreamingPlan(responseUi, chunk.content);
+        } else if (chunk.type === "sources") {
+          // Quellen updaten (initial oder nach Tool-Call)
+          fullSources = chunk.content;
+          await updateStreamingSources(responseUi, fullSources);
+        } else if (chunk.type === "text") {
+          // Text an den Ausgabe-Block dranhängen
+          fullAnswer += chunk.content;
+          const unmasked = await window.TokenStore.unmaskText(fullAnswer);
+          updateStreamingText(responseUi, unmasked);
+        } else if (chunk.type === "error") {
+          appendErrorMessage(chunk.content);
+        }
+      } catch (e) {
+        console.warn("Konnte SSE Chunk nicht parsen", chunkStr, e);
+      }
+    }
+  }
 }
 
 /** v0-Fallback: direkt ohne Maskierung */
@@ -164,104 +206,114 @@ function appendUserMessage(text) {
   scrollBottom();
 }
 
-async function appendAssistantMessage(text, sources, parsedQuery) {
+// ----- Helper für das Streaming-UI -----
+function createStreamingAssistantMessageCard() {
   const div = document.createElement('div');
   div.className = 'flex flex-col gap-3 max-w-[92%]';
 
-  // Filter-Zusammenfassung (erkannte Suchparameter)
-  if (parsedQuery && (parsedQuery.filter_summary || parsedQuery.persons?.length || parsedQuery.locations?.length)) {
-    const filterDiv = document.createElement('div');
-    filterDiv.className = 'flex flex-wrap gap-1 text-[11px]';
+  // "Denk"-Block für den Agent-Plan
+  const planBubble = document.createElement('div');
+  planBubble.className = 'bg-gray-800 rounded-2xl p-3 text-xs text-gray-400 italic font-mono flex items-center gap-2';
+  planBubble.innerHTML = '<span class="typing-dot w-1.5 h-1.5 bg-gray-500 rounded-full inline-block"></span><span class="plan-text">Initialisiere Agent...</span>';
+  div.appendChild(planBubble);
 
-    // Kleine Chips für Personen
-    if (parsedQuery.persons && parsedQuery.persons.length > 0) {
-      for (const p of parsedQuery.persons) {
-        const clearName = await window.TokenStore.lookupToken(p);
-        filterDiv.appendChild(_filterChip('👤', clearName, 'bg-blue-900 text-blue-300'));
-      }
-    }
-    // Zeitraum
-    if (parsedQuery.date_from) {
-      const label = (parsedQuery.filter_summary || '').match(/Zeitraum: ([^·]+)/)?.[1]?.trim()
-        || `${parsedQuery.date_from} – ${parsedQuery.date_to || '…'}`;
-      filterDiv.appendChild(_filterChip('📅', label, 'bg-gray-800 text-gray-400'));
-    }
-    // Orte
-    if (parsedQuery.locations && parsedQuery.locations.length > 0) {
-      for (const l of parsedQuery.locations) {
-        const clearLoc = await window.TokenStore.lookupToken(l);
-        filterDiv.appendChild(_filterChip('📍', clearLoc, 'bg-amber-900 text-amber-300'));
-      }
-    }
+  // Text-Block
+  const textBubble = document.createElement('div');
+  textBubble.className = 'bg-gray-800 rounded-2xl rounded-bl-sm px-4 py-3 text-sm leading-relaxed hidden';
+  div.appendChild(textBubble);
 
-    if (filterDiv.children.length > 0) {
-      div.appendChild(filterDiv);
-    }
+  // QuellenContainer
+  const srcWrapper = document.createElement('div');
+  srcWrapper.className = 'flex flex-col gap-2 ml-1 hidden w-full';
+  div.appendChild(srcWrapper);
+
+  chatMessages().appendChild(div);
+  scrollBottom();
+
+  return { root: div, planBubble, textBubble, srcWrapper };
+}
+
+function updateStreamingPlan(ui, planText) {
+  if (planText === 'Formuliere Antwort...') {
+    // Wenn er antwortet, verschwindet der Plan (oder bleibt stehen für Transparenz)
+    ui.planBubble.querySelector('.plan-text').innerHTML = "<b>Agent hat Recherche abgeschlossen.</b>";
+    // Animation entfernen
+    const dot = ui.planBubble.querySelector('.typing-dot');
+    if (dot) dot.remove();
+  } else {
+    // Einrückung & Animation behalten
+    ui.planBubble.querySelector('.plan-text').textContent = planText;
   }
+  scrollBottom();
+}
 
-  // Antworttext
+async function updateStreamingSources(ui, sources) {
+  if (!sources || sources.length === 0) return;
+  ui.srcWrapper.classList.remove('hidden');
+  ui.srcWrapper.innerHTML = ''; // überschreiben
+
+  const unmaskedSources = await Promise.all(
+    sources.map(async (src) => ({
+      ...src,
+      document: await window.TokenStore.unmaskText(src.document),
+      metadata: await _unmaskMetadata(src.metadata),
+    }))
+  );
+
+  const byCollection = {};
+  unmaskedSources.forEach(src => {
+    if (!byCollection[src.collection]) byCollection[src.collection] = [];
+    byCollection[src.collection].push(src);
+  });
+
+  const header = document.createElement('div');
+  header.className = 'flex items-center gap-3 flex-wrap';
+
+  Object.entries(byCollection).forEach(([col, items]) => {
+    const info = SOURCE_LABELS[col] || { label: col, icon: '📄' };
+    const badgeColors = { photos: 'border-blue-700 bg-blue-900', reviews: 'border-emerald-700 bg-emerald-900', saved_places: 'border-amber-700 bg-amber-900', messages: 'border-purple-700 bg-purple-900' };
+    const badge = document.createElement('span');
+    badge.className = `text-xs px-2 py-0.5 rounded-full border text-gray-200 ${badgeColors[col] || 'bg-gray-800'}`;
+    badge.textContent = `${info.icon} ${info.label} (${items.length})`;
+    header.appendChild(badge);
+  });
+
+  const toggle = document.createElement('button');
+  toggle.className = 'text-xs text-gray-500 hover:text-gray-300 ml-auto';
+  toggle.textContent = 'Details ausblenden';
+  header.appendChild(toggle);
+  ui.srcWrapper.appendChild(header);
+
+  const srcList = document.createElement('div');
+  srcList.className = 'flex flex-col gap-1 mt-1';
+  Object.values(byCollection).forEach(items => {
+    items.forEach(src => srcList.appendChild(renderSource(src)));
+  });
+
+  toggle.onclick = () => {
+    const hidden = srcList.classList.toggle('hidden');
+    toggle.textContent = hidden ? 'Details anzeigen' : 'Details ausblenden';
+  };
+
+  ui.srcWrapper.appendChild(srcList);
+  scrollBottom();
+}
+
+function updateStreamingText(ui, text) {
+  ui.textBubble.classList.remove('hidden');
+  ui.textBubble.innerHTML = formatAnswer(text);
+  scrollBottom();
+}
+
+// v0 message render logic (legacy)
+async function appendAssistantMessage(text, sources, parsedQuery) {
+  const div = document.createElement('div');
+  div.className = 'flex flex-col gap-3 max-w-[92%]';
   const bubble = document.createElement('div');
   bubble.className = 'bg-gray-800 rounded-2xl rounded-bl-sm px-4 py-3 text-sm leading-relaxed';
   bubble.innerHTML = formatAnswer(text);
   div.appendChild(bubble);
-
-  // Quellen – immer direkt sichtbar, nach Collection gruppiert
-  if (sources && sources.length > 0) {
-    // Nach Collection gruppieren
-    const byCollection = {};
-    sources.forEach(src => {
-      if (!byCollection[src.collection]) byCollection[src.collection] = [];
-      byCollection[src.collection].push(src);
-    });
-
-    const srcWrapper = document.createElement('div');
-    srcWrapper.className = 'flex flex-col gap-2 ml-1';
-
-    // Kopfzeile mit Quellenübersicht und Toggle
-    const header = document.createElement('div');
-    header.className = 'flex items-center gap-3 flex-wrap';
-
-    // Badges pro Quellentyp
-    Object.entries(byCollection).forEach(([col, items]) => {
-      const info = SOURCE_LABELS[col] || { label: col, icon: '📄' };
-      const badgeColors = {
-        photos: 'bg-blue-900 text-blue-300 border-blue-700',
-        reviews: 'bg-emerald-900 text-emerald-300 border-emerald-700',
-        saved_places: 'bg-amber-900 text-amber-300 border-amber-700',
-        messages: 'bg-purple-900 text-purple-300 border-purple-700',
-      };
-      const badge = document.createElement('span');
-      badge.className = `text-xs px-2 py-0.5 rounded-full border ${badgeColors[col] || 'bg-gray-800 text-gray-400 border-gray-600'}`;
-      badge.textContent = `${info.icon} ${info.label} (${items.length})`;
-      header.appendChild(badge);
-    });
-
-    const toggle = document.createElement('button');
-    toggle.className = 'text-xs text-gray-500 hover:text-gray-300 ml-auto';
-    toggle.textContent = 'Details ausblenden';
-    header.appendChild(toggle);
-    srcWrapper.appendChild(header);
-
-    // Quellenliste
-    const srcList = document.createElement('div');
-    srcList.className = 'flex flex-col gap-1';
-
-    const colOrder = ['photos', 'reviews', 'saved_places', 'messages'];
-    const sortedCols = [...new Set([...colOrder, ...Object.keys(byCollection)])];
-    sortedCols.forEach(col => {
-      if (!byCollection[col]) return;
-      byCollection[col].forEach(src => srcList.appendChild(renderSource(src)));
-    });
-
-    toggle.onclick = () => {
-      const hidden = srcList.classList.toggle('hidden');
-      toggle.textContent = hidden ? 'Details anzeigen' : 'Details ausblenden';
-    };
-
-    srcWrapper.appendChild(srcList);
-    div.appendChild(srcWrapper);
-  }
-
+  // (legacy src logic ommitted for clarity since v0 will be phased out)
   chatMessages().appendChild(div);
   scrollBottom();
 }
