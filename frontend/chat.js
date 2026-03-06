@@ -77,14 +77,25 @@ async function _sendQueryV2(query, abortSignal) {
       return clearName;
     })
   );
-  const locationNames = locationNameResults.filter(
-    (name, i) => name && name !== locationTokens[i]
+  const locationNames = locationNameResults.map(
+    (name, i) => (name && name !== locationTokens[i]) ? name : ""
+  );
+
+  const personNameResults = await Promise.all(
+    personTokens.map(async (tok) => {
+      const clearName = await window.TokenStore.lookupToken(tok);
+      return clearName;
+    })
+  );
+  const personNames = personNameResults.map(
+    (name, i) => (name && name !== personTokens[i]) ? name : ""
   );
 
   const requestBody = {
     user_id: window._userId,
     masked_query: masked,
     person_tokens: personTokens,
+    person_names: personNames,
     location_tokens: locationTokens,
     location_names: locationNames,
     n_results: 6,
@@ -214,7 +225,7 @@ function createStreamingAssistantMessageCard() {
   // "Denk"-Block für den Agent-Plan
   const planBubble = document.createElement('div');
   planBubble.className = 'bg-gray-800 rounded-2xl p-3 text-xs text-gray-400 italic font-mono flex items-center gap-2';
-  planBubble.innerHTML = '<span class="typing-dot w-1.5 h-1.5 bg-gray-500 rounded-full inline-block"></span><span class="plan-text">Initialisiere Agent...</span>';
+  planBubble.innerHTML = '<span class="typing-dot w-1.5 h-1.5 bg-gray-500 rounded-full inline-block mt-1"></span><div class="plan-text flex-1"></div>';
   div.appendChild(planBubble);
 
   // Text-Block
@@ -235,14 +246,21 @@ function createStreamingAssistantMessageCard() {
 
 function updateStreamingPlan(ui, planText) {
   if (planText === 'Formuliere Antwort...') {
-    // Wenn er antwortet, verschwindet der Plan (oder bleibt stehen für Transparenz)
-    ui.planBubble.querySelector('.plan-text').innerHTML = "<b>Agent hat Recherche abgeschlossen.</b>";
+    // Wenn er antwortet, füge einen abschließenden Text hinzu
+    const finalSpan = document.createElement('div');
+    finalSpan.className = 'mt-2 text-gray-300 font-bold';
+    finalSpan.innerHTML = "Agent hat Recherche abgeschlossen.";
+    ui.planBubble.appendChild(finalSpan);
     // Animation entfernen
     const dot = ui.planBubble.querySelector('.typing-dot');
     if (dot) dot.remove();
   } else {
-    // Einrückung & Animation behalten
-    ui.planBubble.querySelector('.plan-text').textContent = planText;
+    // Neuen Gedanken-Schritt anhängen statt überschreiben
+    const textContainer = ui.planBubble.querySelector('.plan-text');
+    const newStep = document.createElement('div');
+    newStep.className = 'mb-1 last:mb-0 text-gray-300';
+    newStep.textContent = "• " + planText;
+    textContainer.appendChild(newStep);
   }
   scrollBottom();
 }

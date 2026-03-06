@@ -200,14 +200,19 @@ async def chat_stream(messages: list[dict], model: str | None = None, tools: lis
         # Prüfen ob Gemini ein Tool aufrufen möchte
         function_calls = response.parts if hasattr(response, 'parts') else []
         fc = None
+        plan_text = None
         for part in function_calls:
-            if hasattr(part, 'function_call') and part.function_call:
+            if hasattr(part, 'text') and part.text.strip():
+                # Text-Part vor dem Tool-Aufruf gefunden (ReAct-Gedanke)
+                plan_text = part.text.strip()
+            elif hasattr(part, 'function_call') and part.function_call:
                 fc = part.function_call
                 break
                 
         if fc and fc.name in tool_map:
-            # Informiere Frontend: Agent denkt nach
-            yield {"type": "plan", "content": f"Durchsuche Gedächtnis mit '{fc.name}'..."}
+            # Informiere Frontend: Agent denkt nach (nutze Geminis echten Gedanken, falls vorhanden)
+            friendly_plan = plan_text if plan_text else f"Nutze Werkzeug '{fc.name}'..."
+            yield {"type": "plan", "content": friendly_plan}
             
             # Tool ausführen
             tool_func = tool_map[fc.name]

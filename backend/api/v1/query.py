@@ -25,6 +25,7 @@ class V1QueryRequest(BaseModel):
     masked_query: str = Field(..., min_length=1, max_length=2000)
     # Optionale strukturierte Filter (aus Browser-NER extrahiert)
     person_tokens: list[str] = Field(default_factory=list)   # ["[PER_1]", "[PER_2]"]
+    person_names: list[str] = Field(default_factory=list)
     location_tokens: list[str] = Field(default_factory=list) # ["[LOC_1]"]
     # Klarnamen der erkannten Orte (aus IndexedDB-Lookup im Browser)
     # z.B. ["München"] für location_tokens = ["[LOC_11]"]
@@ -149,6 +150,7 @@ async def query_stream_v1(
                 masked_query=req.masked_query,
                 user_id=req.user_id,
                 person_tokens=req.person_tokens,
+                person_names=req.person_names,
                 location_tokens=req.location_tokens,
                 location_names=req.location_names,
                 collections=req.collections,

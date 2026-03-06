@@ -35,7 +35,6 @@ async function loadNER(onProgress) {
     _updateLoadingUI('Initialisiere NER-Modell…');
 
     _pipe = await pipeline('token-classification', MODEL_ID, {
-      aggregation_strategy: 'simple',
       progress_callback: (info) => {
         if (info.status === 'progress') {
           const pct = Math.round(info.progress || 0);
@@ -79,9 +78,31 @@ async function recognizeEntities(text) {
   }
   if (!text || !text.trim()) return [];
 
-  const results = await _pipe(text);
-  // Nur PER, LOC, ORG – MISC ignorieren
-  return results.filter(r => ['PER', 'LOC', 'ORG'].includes(r.entity_group));
+  // Versuche mit aggregation_strategy (fasst B-PER/I-PER zu "PER" zusammen)
+  let results;
+  try {
+    results = await _pipe(text, { aggregation_strategy: 'simple' });
+  } catch (e) {
+    // Fallback ohne Aggregation – z.B. bei manchen Transformers.js Versionen
+    console.warn('[NER] aggregation_strategy nicht unterstützt, fahre ohne fort:', e.message);
+    results = await _pipe(text);
+  }
+
+  console.log('[NER] Rohergebnis Pipeline:', JSON.stringify(results));
+
+  // Transformers.js kann `entity_group` ODER `entity` liefern
+  // Bei keiner Aggregation kommen BERT-Tags wie "B-PER", "I-PER" — wir normalisieren:
+  const normalized = results.map(r => {
+    const rawTag = r.entity_group || r.entity || '';
+    // B-PER → PER, I-LOC → LOC usw.
+    const group = rawTag.replace(/^[BIS]-/, '');
+    return { ...r, entity_group: group };
+  });
+
+  console.log('[NER] Normalisiert:', JSON.stringify(normalized));
+
+  // Nur PER, LOC, ORG – MISC und I-Tokens ignorieren
+  return normalized.filter(r => ['PER', 'LOC', 'ORG'].includes(r.entity_group));
 }
 
 /**
@@ -109,11 +130,13 @@ async function maskText(text) {
     const token = await window.TokenStore.getOrCreateToken(ent.word, ent.entity_group);
     assigned.push({ word: ent.word, token, type: ent.entity_group, score: ent.score });
 
-    // Ersetzen via String-Suche (robuster als Offset bei Unicode)
-    if (ent.start !== undefined && ent.end !== undefined) {
+    // WICHTIG: start/end können null (nicht undefined!) sein wenn die Pipeline
+    // ohne Aggregation läuft. `null !== undefined` ist true in JS, deshalb
+    // müssen wir `!= null` benutzen (fängt sowohl null als auch undefined ab).
+    if (ent.start != null && ent.end != null) {
       masked = masked.slice(0, ent.start) + token + masked.slice(ent.end);
     } else {
-      // Fallback: ersten Treffer ersetzen
+      // Fallback: erstes Vorkommen ersetzen (robuster als Offset wenn null)
       masked = masked.replace(ent.word, token);
     }
   }

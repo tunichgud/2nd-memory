@@ -21,7 +21,6 @@ _RELEVANT_MIN_SCORE  = 0.20
 _FALLBACK_MIN_SCORE  = 0.42
 
 def _get_system_prompt() -> str:
-    from datetime import datetime
     current_date = datetime.now().strftime('%d.%m.%Y')
     return f"""Du bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.
 Du hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.
@@ -41,17 +40,20 @@ ReAct (Reasoning and Acting) Ansatz:
     -> RICHTIG Schritt 1: Finde das Datum des Ausflugs via search_photos(personen=["[PER_2]"], orte=["[LOC_1]"]).
     -> RICHTIG Schritt 2: Suche Nachrichten von [PER_1] in dem gefundenen Datums-Zeitraum via search_messages(personen=["[PER_1]"], von_datum="...", bis_datum="...").
 
+- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum (z.B. "Ich muss zuerst herausfinden, wann der Ausflug nach [LOC_1] stattfand. Dazu suche ich nach Fotos..."). Sende diese Gedanken ALS TEXT, BEVOR du den Tool-Aufruf auslöst.
+
 Weitere Regeln:
 1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere keine Orte oder Personen.
 2. Behalte alle Tokens ([PER_n], [LOC_n], [ORG_n]) unverändert in deiner Antwort.
 3. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).
-4. Antworte auf Deutsch. Falls Sentiment oder Emotionen gefragt sind, werte alle relevanten Texte tiefgreifend aus.
+4. Antworte auf Deutsch. Falls nach "Gefühlen", "Befinden", "Emotionen" oder der "Beziehung" gefragt wird, MUSST du zwingend das Tool `search_messages` verwenden, da Fotos allein keine innere Gefühlswelt oder Kommunikation abbilden!
 5. Bei Ortsfragen: nutze das Cluster/Ort-Feld ("München-Ost") und GPS-Koordinaten zur Verortung.
 6. Falls keine passenden Daten gefunden wurden, erkläre logisch, was du versucht hast zu suchen und warum es keine Treffer gab."""
 
 
 def _build_token_filter(
     person_tokens: list[str],
+    person_names: list[str],
     location_tokens: list[str],
     date_from: str | None,
     date_to: str | None,
@@ -59,7 +61,7 @@ def _build_token_filter(
     collection: str,
 ) -> dict | None:
     """
-    Baut ChromaDB where-Filter aus Token-IDs und Datumsangaben.
+    Baut ChromaDB where-Filter aus Token-IDs, Klarnamen und Datumsangaben.
     Token-Flags sind im Format: has_per_1, has_loc_2 etc.
     """
     conditions = []
@@ -78,13 +80,21 @@ def _build_token_filter(
         except ValueError:
             pass
 
-    # Personen-Filter via Boolean-Felder (has_per_1, has_per_2 ...)
-    if collection in ("photos", "messages") and person_tokens:
-        for tok in person_tokens:
-            # "[PER_1]" → "has_per_1"
+    # Personen-Filter via Boolean-Felder (has_per_1, has_nora ...)
+    if collection in ("photos", "messages") and (person_tokens or person_names):
+        all_fields = set()
+        for tok in (person_tokens or []):
             clean = tok.strip("[]").lower()
-            field = f"has_{clean}"
-            conditions.append({field: {"$eq": True}})
+            all_fields.add(f"has_{clean}")
+        for name in (person_names or []):
+            all_fields.add(f"has_{name.lower().strip()}")
+            
+        if all_fields:
+            or_conds = [{field: {"$eq": True}} for field in all_fields]
+            if len(or_conds) == 1:
+                conditions.append(or_conds[0])
+            else:
+                conditions.append({"$or": or_conds})
 
     # HINWEIS: has_loc_x-Filter wird NICHT angewendet, da Token-IDs
     # zwischen Browser-Sessions inkonsistent sein können (Token-Inkonsistenz-Bug).
@@ -101,6 +111,7 @@ def retrieve_v2(
     masked_query: str,
     user_id: str,
     person_tokens: list[str] | None = None,
+    person_names: list[str] | None = None,
     location_tokens: list[str] | None = None,
     location_names: list[str] | None = None,
     collections: list[str] | None = None,
@@ -112,11 +123,12 @@ def retrieve_v2(
     """User-scoped semantisches Retrieval mit Token-Filtern."""
     query_embedding = embed_single(masked_query)
     person_tokens   = person_tokens or []
+    person_names    = [n.strip() for n in (person_names or []) if n.strip()]
     location_tokens = location_tokens or []
     location_names  = [n.strip() for n in (location_names or []) if n.strip()]
 
     # Relevante Collections bestimmen
-    has_person = bool(person_tokens)
+    has_person = bool(person_tokens) or bool(person_names)
     has_location = bool(location_tokens)
     if collections:
         relevant = set(collections)
@@ -128,8 +140,8 @@ def retrieve_v2(
         relevant = set(COLLECTIONS)
 
     logger.info(
-        "v2 retrieve | query='%s' | persons=%s | locations=%s | relevant=%s",
-        masked_query[:60], person_tokens, location_tokens, sorted(relevant),
+        "v2 retrieve | query='%s' | persons=%s (names=%s) | locations=%s | relevant=%s",
+        masked_query[:60], person_tokens, person_names, location_tokens, sorted(relevant),
     )
 
     all_results: list[dict] = []
@@ -139,7 +151,7 @@ def retrieve_v2(
         threshold = min_score if is_relevant else _FALLBACK_MIN_SCORE
 
         where = _build_token_filter(
-            person_tokens, location_tokens, date_from, date_to, user_id, col_name
+            person_tokens, person_names, location_tokens, date_from, date_to, user_id, col_name
         )
 
         logger.info("  [%s] relevant=%s | where=%s", col_name, is_relevant, where)
@@ -246,8 +258,10 @@ def _format_sources_for_llm(sources: list[dict]) -> str:
             meta_parts.append(meta["place_name"])
         if meta.get("lat") and meta.get("lat") != 0.0:
             meta_parts.append(f"GPS: {meta['lat']:.3f}°N {meta['lon']:.3f}°E")
-        if meta.get("persons"):
-            meta_parts.append(f"Personen: {meta['persons']}")
+        # HINWEIS: 'persons'-Feld absichtlich weggelassen – unterschiedliche Token-Namespaces
+        # zwischen Foto-Import und Anfrage würden den Agenten verwirren (z.B. [PER_1] bedeutet
+        # im Foto-Import eine andere Person als [PER_1] in der Nutzeranfrage).
+        # Der Agent soll Personen aus dem Dokumenttext (Fotobeschreibung) ableiten.
         if meta.get("name"):
             meta_parts.append(meta["name"])
         if meta.get("address"):
@@ -445,6 +459,7 @@ async def answer_v2_stream(
     masked_query: str,
     user_id: str,
     person_tokens: list[str] | None = None,
+    person_names: list[str] | None = None,
     location_tokens: list[str] | None = None,
     location_names: list[str] | None = None,
     collections: list[str] | None = None,
@@ -473,7 +488,7 @@ async def answer_v2_stream(
             plain_pers = [p for p in parsed.persons if not p.startswith("[PER_")]
             if plain_pers:
                 logger.info("Stream-Fallback: LLM-Parser fand Klarnamen-Personen: %s", plain_pers)
-                person_tokens = list(person_tokens or []) + plain_pers
+                person_names = list(person_names or []) + plain_pers
         if parsed.date_from and not date_from:
             date_from = parsed.date_from
         if parsed.date_to and not date_to:
@@ -500,6 +515,7 @@ async def answer_v2_stream(
             masked_query=masked_query,
             user_id=user_id,
             person_tokens=person_tokens,
+            person_names=person_names,
             location_tokens=location_tokens,
             location_names=location_names,
             collections=collections,
@@ -531,15 +547,26 @@ async def answer_v2_stream(
                 try:
                     idx = location_tokens.index(tok)
                     resolved = location_names[idx]
-                    if resolved not in loc_names:
+                    if resolved and resolved not in loc_names:
                         loc_names.append(resolved)
                 except ValueError:
                     pass
 
+        # Token-to-Name Mapping für Personen
+        pers_names = []
+        if person_tokens and person_names:
+            for tok in pers_toks:
+                try:
+                    idx = person_tokens.index(tok)
+                    resolved = person_names[idx]
+                    if resolved and resolved not in pers_names:
+                        pers_names.append(resolved)
+                except ValueError:
+                    pass
+
         # WICHTIG: Wenn ein Ort gefiltert wird, darf der Personen-Filter NICHT
-        # als harter ChromaDB-Filter laufen – Fotos in München haben oft nur
-        # `has_per_1=True` (den User selbst), aber der Agent sucht nach `[PER_2]` (z.B. Nora).
-        # Der Orts-Cluster-Post-Filter ist robuster. Personen-Prüfung passiert durch den LLM.
+        # als harter ChromaDB-Filter laufen, da alte Fotos oft nur has_per_1 haben.
+        # Person_names werden nun in retrieve_v2 via "has_nora" weich verodert!
         effective_pers_toks = [] if loc_names else pers_toks
 
         # Suchtext anreichern mit aufgelösten Ortsnamen wenn vorhanden
@@ -551,6 +578,7 @@ async def answer_v2_stream(
             masked_query=effective_query,
             user_id=user_id,
             person_tokens=effective_pers_toks,
+            person_names=pers_names,
             location_tokens=loc_toks,
             location_names=loc_names,
             collections=["photos"],
@@ -580,10 +608,23 @@ async def answer_v2_stream(
     ) -> str:
         logger.info(f"==> Stream Tool Call: search_messages({suchtext}, {personen}, {von_datum}, {bis_datum})")
         pers_toks = [p for p in (personen or []) if p.startswith("[PER_")]
+        
+        pers_names = []
+        if person_tokens and person_names:
+            for tok in pers_toks:
+                try:
+                    idx = person_tokens.index(tok)
+                    resolved = person_names[idx]
+                    if resolved and resolved not in pers_names:
+                        pers_names.append(resolved)
+                except ValueError:
+                    pass
+                    
         res = retrieve_v2(
             masked_query=suchtext,
             user_id=user_id,
             person_tokens=pers_toks,
+            person_names=pers_names,
             location_tokens=None,
             location_names=None,
             collections=["messages"],
