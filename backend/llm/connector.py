@@ -20,6 +20,13 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
+# Noise-Loggers drosseln (HuggingFace/HTTPX-Gequassel vermeiden)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("huggingface_hub").setLevel(logging.ERROR)
+logging.getLogger("sentence_transformers").setLevel(logging.WARNING)
+
 # ---------------------------------------------------------------------------
 # Konfiguration laden
 # ---------------------------------------------------------------------------
@@ -301,7 +308,7 @@ def describe_image(image_bytes: bytes, prompt: str | None = None) -> str:
     import time
 
     cfg = get_cfg()["llm"]
-    provider = cfg["provider"]
+    provider = cfg.get("vision_provider") or cfg["provider"]
     vision_model = cfg["vision_model"]
 
     if prompt is None:
@@ -423,9 +430,18 @@ def _get_st_model():
     global _st_model
     if _st_model is None:
         from sentence_transformers import SentenceTransformer
-        logger.info("Lade Embedding-Modell paraphrase-multilingual-MiniLM-L12-v2 …")
-        _st_model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
-        logger.info("Embedding-Modell geladen.")
+        model_name = "paraphrase-multilingual-MiniLM-L12-v2"
+        logger.info("Lade Embedding-Modell %s …", model_name)
+        
+        try:
+            # Versuche erst lokal (schaltet Hub-Check aus)
+            _st_model = SentenceTransformer(model_name, local_files_only=True)
+            logger.info("Embedding-Modell lokal geladen (Offline-Modus).")
+        except Exception:
+            # Fallback: Normal laden (darf ins Netz)
+            _st_model = SentenceTransformer(model_name)
+            logger.info("Embedding-Modell geladen (Online-Modus).")
+            
     return _st_model
 
 

@@ -108,3 +108,11 @@ def reset_collection(collection_name: str) -> None:
     client = get_client()
     client.delete_collection(collection_name)
     logger.warning("Collection '%s' gelöscht.", collection_name)
+
+
+def get_indexed_ids(collection_name: str) -> set[str]:
+    """Gibt eine Menge aller bereits indexierten IDs zurück."""
+    col = get_collection(collection_name)
+    if col.count() == 0:
+        return set()
+    return set(col.get(include=[])["ids"])

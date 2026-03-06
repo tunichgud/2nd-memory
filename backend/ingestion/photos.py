@@ -239,45 +239,87 @@ def ingest_photos(
     progress_callback: Callable[[int, int, str], None] | None = None,
     reset: bool = False,
     user_id: str = "00000000-0000-0000-0000-000000000001",
+    limit: int | None = None,
 ) -> dict:
-    """Liest alle 50 Sample-Fotos ein, beschreibt sie per KI und speichert sie in ChromaDB.
+    """Liest Fotos ein, beschreibt sie per KI und speichert sie in ChromaDB & ES.
 
     Args:
         progress_callback: Wird mit (aktuell, gesamt, status_text) aufgerufen.
         reset: Falls True, wird die Collection vorher geleert.
+        user_id: Die ID des Nutzers.
+        limit: Maximale Anzahl an neuen Fotos (zusätzlich zum Sample falls konfiguriert).
 
     Returns:
         Dict mit Statistiken: total, success, skipped, errors
     """
     from backend.llm.connector import describe_image
     from backend.rag.embedder import embed_single
-    from backend.rag.store import upsert_documents, reset_collection
+    from backend.rag.store import upsert_documents, reset_collection, get_indexed_ids
 
     cfg = _load_config()
-    takeout_base = BASE_DIR / cfg["paths"]["takeout_dir"]
     photos_dir = BASE_DIR / cfg["paths"]["photos_dir"]
-    takeout_root = BASE_DIR / "takeout"  # für ZIP-Suche
+    takeout_root = BASE_DIR / "takeout"
+    
+    # 1. Bereits indexierte IDs laden (falls kein Reset)
+    indexed_ids = set()
+    if not reset:
+        try:
+            indexed_ids = get_indexed_ids("photos")
+            logger.info("Bereits %d Fotos in DB vorhanden (Skip-Modus aktiv).", len(indexed_ids))
+        except Exception:
+            pass
+    
+    # 1. Sample-Liste laden (Basis-Set)
+    sample_list: list[dict] = []
+    if SAMPLE_FILE.exists():
+        sample_list = json.loads(SAMPLE_FILE.read_text(encoding="utf-8"))
+    
+    sample_filenames = {s["filename"] for s in sample_list}
+    
+    # 2. Ordner scannen für zusätzliche Bilder (falls gewünscht)
+    target_count = cfg.get("ingestion", {}).get("photo_sample_size", 50)
+    if limit:
+        target_count = limit
+        
+    all_files = sorted([f.name for f in photos_dir.glob("*") if f.suffix.lower() in IMAGE_EXTENSIONS])
+    
+    # Kombinierte Liste erstellen: erst Samples, dann neue
+    final_list = []
+    # Zuerst Sample-Einträge
+    for s in sample_list:
+        final_list.append(s)
+        
+    # Dann restliche Dateien auffüllen bis target_count oder alle
+    for fname in all_files:
+        if fname not in sample_filenames:
+            final_list.append({"filename": fname})
+        
+        if len(final_list) >= target_count and target_count > 0:
+            break
 
-    # Sample-Liste laden
-    sample_list: list[dict] = json.loads(SAMPLE_FILE.read_text(encoding="utf-8"))
-    total = len(sample_list)
-
+    total = len(final_list)
     if reset:
         reset_collection("photos")
         logger.info("Photos-Collection zurückgesetzt.")
 
     stats = {"total": total, "success": 0, "skipped": 0, "errors": 0}
-
     ids, documents, embeddings, metadatas = [], [], [], []
 
-    for idx, entry in enumerate(sample_list, start=1):
+    for idx, entry in enumerate(final_list, start=1):
         filename = entry["filename"]
+        
+        # Skip falls bereits indexiert
+        if f"photo_{filename}" in indexed_ids:
+            # logger.debug("Überspringe bereits indexiertes Foto: %s", filename)
+            stats["skipped"] += 1
+            continue
+
         status = f"Verarbeite [{idx}/{total}]: {filename}"
         logger.info(status)
         if progress_callback:
             progress_callback(idx, total, status)
 
-        # Foto laden (erst extrahiertes Verzeichnis, dann ZIPs)
+        # Foto laden
         result = _find_photo_in_dir(filename, photos_dir)
         if result is None:
             result = _find_photo_in_zips(filename, takeout_root)
@@ -288,44 +330,41 @@ def ingest_photos(
             continue
 
         image_bytes, meta = result
-
-        # Metadaten parsen
         parsed = _parse_metadata(meta, filename)
 
-        # NEU: Fallback auf Sample-Daten (falls Sidecar leer/0.0)
-        if not parsed["lat"] or parsed["lat"] == 0.0:
-            parsed["lat"] = entry.get("lat")
-            parsed["lon"] = entry.get("lon")
-            logger.info("  Nutze Sample-Koordinaten: %.4f, %.4f", parsed["lat"] or 0, parsed["lon"] or 0)
+        # Fallback auf Koordinaten aus der Liste (falls vorhanden und Sidecar leer)
+        if (not parsed["lat"] or parsed["lat"] == 0.0) and "lat" in entry:
+            parsed["lat"] = entry["lat"]
+            parsed["lon"] = entry["lon"]
+            logger.info("  Nutze Fallback-Koordinaten: %.4f, %.4f", parsed["lat"], parsed["lon"])
         
-        # Personen aus Sample ergänzen
+        # Personen aus Liste ergänzen
         sample_people = entry.get("persons", [])
         if isinstance(sample_people, str):
             sample_people = [p.strip() for p in sample_people.split(",") if p.strip()]
-        
         for p in sample_people:
             if p not in parsed["people"]:
                 parsed["people"].append(p)
-        # Reverse Geocoding (vor Vision, damit Ortsname im Log erscheint)
+
+        # Reverse Geocoding
         place_name = ""
         if parsed["lat"] and parsed["lon"]:
             place_name = _reverse_geocode(parsed["lat"], parsed["lon"])
             if place_name:
                 logger.info("  Ort: %s", place_name)
 
+        # KI-Beschreibung
         try:
             description = describe_image(image_bytes)
-            # Kurze Pause damit der VRAM nach keep_alive=0 entladen werden kann
-            time.sleep(2)
+            # Kurze Pause für VRAM
+            time.sleep(1)
         except Exception as exc:
             logger.warning("Vision-Fehler für %s: %s", filename, exc)
             description = ""
-            time.sleep(5)  # Längere Pause nach Fehler
+            time.sleep(2)
 
-        # Dokument aufbauen (mit Ortsname)
         doc_text = _build_document(filename, parsed, description, place_name=place_name)
 
-        # Embedding
         try:
             embedding = embed_single(doc_text)
         except Exception as exc:
@@ -333,7 +372,7 @@ def ingest_photos(
             stats["errors"] += 1
             continue
 
-        # Boolean-Personen-Flags für ChromaDB-Filter
+        # Metadaten
         from backend.rag.query_parser import _person_field
         from backend.ingestion.persons import get_known_persons
         known = get_known_persons()
@@ -343,7 +382,6 @@ def ingest_photos(
             for n in known
         }
 
-        # Metadaten für ChromaDB (nur skalare Typen erlaubt)
         chroma_meta = {
             "source": "google_photos",
             "filename": filename,
@@ -365,16 +403,28 @@ def ingest_photos(
         metadatas.append(chroma_meta)
         stats["success"] += 1
 
-    # Batch-Upsert
+        # Regelmäßiger Checkpoint-Upsert (Batching)
+        if len(ids) >= 10:
+            _flush_to_stores(ids, documents, embeddings, metadatas, reset and idx <= 10)
+            ids, documents, embeddings, metadatas = [], [], [], []
+
+    # Finaler Flush
     if ids:
-        from backend.rag.store import upsert_documents
-        from backend.rag.es_store import upsert_documents_es, reset_es_index
-        
-        if reset:
-            reset_es_index("photos")
-            
-        upsert_documents("photos", ids, documents, embeddings, metadatas)
-        upsert_documents_es("photos", ids, documents, embeddings, metadatas)
+        _flush_to_stores(ids, documents, embeddings, metadatas, reset and total <= 10)
 
     logger.info("Foto-Ingestion abgeschlossen: %s", stats)
     return stats
+
+
+def _flush_to_stores(ids, documents, embeddings, metadatas, first_batch_reset):
+    from backend.rag.store import upsert_documents
+    from backend.rag.es_store import upsert_documents_es, reset_es_index
+    
+    if first_batch_reset:
+        # Falls reset=True, haben wir ChromaDB schon oben geleert, 
+        # aber ES machen wir hier paketweise (oder einmalig)
+        # reset_es_index("photos") # Eher oben einmalig
+        pass
+        
+    upsert_documents("photos", ids, documents, embeddings, metadatas)
+    upsert_documents_es("photos", ids, documents, embeddings, metadatas)
