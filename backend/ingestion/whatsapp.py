@@ -185,11 +185,26 @@ def ingest_whatsapp(
 
         # In Batches speichern (100 Chunks = 1000 Nachrichten pro Batch)
         if len(ids) >= 100:
+            from backend.rag.store import upsert_documents
+            from backend.rag.es_store import upsert_documents_es, reset_es_index
+            
+            if reset:
+                reset_es_index("messages")
+                reset = False # Nur einmal beim ersten Batch
+                
             upsert_documents("messages", ids, documents, embeddings, metadatas)
+            upsert_documents_es("messages", ids, documents, embeddings, metadatas)
             ids, documents, embeddings, metadatas = [], [], [], []
 
     if ids:
+        from backend.rag.store import upsert_documents
+        from backend.rag.es_store import upsert_documents_es, reset_es_index
+        
+        if reset:
+            reset_es_index("messages")
+            
         upsert_documents("messages", ids, documents, embeddings, metadatas)
+        upsert_documents_es("messages", ids, documents, embeddings, metadatas)
 
     logger.info("WhatsApp-Ingestion abgeschlossen: %s", stats)
     return stats

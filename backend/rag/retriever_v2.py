@@ -110,6 +110,37 @@ def retrieve_v2(
         query[:60], person_names, location_names, sorted(relevant),
     )
 
+    # --- NEU: Elasticsearch Integration ---
+    from backend.rag.es_store import query_es as _query_es
+    try:
+        es_results = []
+        for col_name in collections:
+            is_relevant = col_name in (relevant or [])
+            es_hits = _query_es(
+                collection_name=col_name,
+                query_vector=query_embedding,
+                user_id=user_id,
+                n_results=n_per_collection,
+                person_names=person_names,
+                location_names=location_names,
+                date_from=date_from,
+                date_to=date_to
+            )
+            if es_hits:
+                logger.debug("  [%s] Elasticsearch Treffer: %d", col_name, len(es_hits))
+                for h in es_hits:
+                    h["is_relevant"] = is_relevant
+                es_results.extend(es_hits)
+        
+        if es_results:
+            es_results.sort(key=lambda r: (r.get("is_relevant", False), r.get("score", 0)), reverse=True)
+            logger.info("v2 ES retrieve GESAMT: %d Ergebnisse", len(es_results))
+            return es_results
+            
+    except Exception as exc:
+        logger.warning("Elasticsearch Suche fehlgeschlagen, Fallback auf ChromaDB: %s", exc)
+
+    # --- ALT: ChromaDB + Python Post-Filtering (Fallback) ---
     all_results: list[dict] = []
 
     for col_name in COLLECTIONS:

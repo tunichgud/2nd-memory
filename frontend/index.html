@@ -67,31 +67,13 @@
 
 <body class="bg-gray-950 text-gray-100 min-h-screen font-sans">
 
-  <!-- NER-Ladeoverlay: blockiert UI bis Modell bereit -->
-  <div id="ner-overlay"
-    class="fixed inset-0 bg-gray-950 bg-opacity-90 z-50 flex flex-col items-center justify-center gap-6">
-    <span class="text-5xl">🦕</span>
-    <div class="flex flex-col items-center gap-3 max-w-sm w-full px-6">
-      <p class="font-semibold text-gray-100">memosaur startet…</p>
-      <p class="text-xs text-gray-400 text-center">
-        Das NER-Modell für lokale Datenmaskierung wird geladen (~90 MB).
-        Nach dem ersten Download wird es im Browser gecacht.
-      </p>
-      <div class="w-full bg-gray-800 rounded-full h-2">
-        <div id="ner-progress-bar" class="bg-blue-500 h-2 rounded-full transition-all" style="width:0%"></div>
-      </div>
-      <span id="ner-status" class="text-xs text-yellow-200 bg-yellow-900 px-3 py-1 rounded-full">Lade Modell…</span>
-    </div>
-  </div>
-
   <!-- Consent-Modal -->
   <div id="consent-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 z-40 flex items-center justify-center p-4">
     <div class="bg-gray-900 border border-gray-700 rounded-2xl max-w-md w-full p-6 flex flex-col gap-4">
       <h2 class="font-bold text-lg">Datenverarbeitung – Ihre Einwilligung</h2>
       <p class="text-sm text-gray-400">
-        Für folgende Features verarbeiten wir sensible personenbezogene Daten
-        gemäß <strong>Art. 9 DSGVO</strong>. Sie können einzelne Features aktivieren
-        oder deaktivieren.
+        Für folgende Features verarbeiten wir Ihre Daten lokal oder auf dem Server.
+        Sie können einzelne Bereiche aktivieren oder deaktivieren.
       </p>
       <div class="flex flex-col gap-3">
         <label class="flex items-start gap-3 cursor-pointer">
@@ -99,8 +81,7 @@
           <div>
             <div class="font-medium text-sm">Fotos &amp; KI-Bilderkennung</div>
             <div class="text-xs text-gray-500">
-              Bilder werden lokal an Ollama (Vision-KI) gesendet. Bildbeschreibungen
-              werden vor der Speicherung im Browser anonymisiert (Klarnamen → Tokens).
+              Bilder werden für die Analyse (GPS, Personen, Beschreibungen) verarbeitet.
             </div>
           </div>
         </label>
@@ -109,36 +90,34 @@
           <div>
             <div class="font-medium text-sm">GPS-Standortdaten</div>
             <div class="text-xs text-gray-500">
-              GPS-Koordinaten werden für Reverse Geocoding an OpenStreetMap/Nominatim
-              gesendet (Koordinaten, keine Namen).
+              Koordinaten werden zur Ortsbestimmung genutzt.
             </div>
           </div>
         </label>
         <label class="flex items-start gap-3 cursor-pointer">
           <input type="checkbox" id="consent-messages" class="mt-1 w-4 h-4 accent-blue-500">
           <div>
-            Sdiv class="font-medium text-sm">Nachrichten (WhatsApp, Signal)</div>
-          <div class="text-xs text-gray-500">
-            Nachrichten werden vor dem Upload im Browser maskiert – nur Tokens
-            verlassen Ihren Browser. Klarnamen bleiben lokal in der IndexedDB.
+            <div class="font-medium text-sm">Nachrichten (WhatsApp, Signal)</div>
+            <div class="text-xs text-gray-500">
+              Ihre Chats werden indexiert, um sie für Sie durchsuchbar zu machen.
+            </div>
           </div>
+        </label>
       </div>
-      </label>
+      <p class="text-xs text-gray-500">
+        Ohne Einwilligung sind die jeweiligen Features deaktiviert.
+        Diese Einstellung kann jederzeit im Einstellungen-Tab geändert werden.
+      </p>
+      <div class="flex gap-3">
+        <button onclick="saveConsent(false)" class="flex-1 bg-gray-700 hover:bg-gray-600 rounded-lg px-4 py-2 text-sm">
+          Ablehnen
+        </button>
+        <button onclick="saveConsent(true)"
+          class="flex-1 bg-blue-600 hover:bg-blue-500 rounded-lg px-4 py-2 text-sm font-medium">
+          Einwilligen &amp; Starten
+        </button>
+      </div>
     </div>
-    <p class="text-xs text-gray-500">
-      Ohne Einwilligung sind die jeweiligen Features deaktiviert.
-      Diese Einstellung kann jederzeit im Einstellungen-Tab geändert werden.
-    </p>
-    <div class="flex gap-3">
-      <button onclick="saveConsent(false)" class="flex-1 bg-gray-700 hover:bg-gray-600 rounded-lg px-4 py-2 text-sm">
-        Ablehnen
-      </button>
-      <button onclick="saveConsent(true)"
-        class="flex-1 bg-blue-600 hover:bg-blue-500 rounded-lg px-4 py-2 text-sm font-medium">
-        Einwilligen &amp; Starten
-      </button>
-    </div>
-  </div>
   </div>
 
   <!-- Header -->
@@ -396,11 +375,6 @@
       </button>
     </div>
 
-    <!-- Sync -->
-    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
-      <h2 class="font-semibold mb-3">🔄 Multi-Device Sync</h2>
-      <div id="sync-container">Sync wird geladen…</div>
-    </div>
 
     <!-- User-Info -->
     <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
@@ -428,88 +402,31 @@
       </div>
     </div>
     <div class="dbg-section">
-      <div class="dbg-row"><span class="dbg-key">Tokens gesamt</span><span class="dbg-val highlight"
-          id="dbg-tok-total">…</span></div>
-      <div class="dbg-row"><span class="dbg-key"> PER (Personen)</span><span class="dbg-val" id="dbg-tok-per">…</span>
-      </div>
-      <div class="dbg-row"><span class="dbg-key"> LOC (Orte)</span><span class="dbg-val" id="dbg-tok-loc">…</span></div>
-      <div class="dbg-row"><span class="dbg-key"> ORG (Orgn.)</span><span class="dbg-val" id="dbg-tok-org">…</span>
-      </div>
-    </div>
-    <div class="dbg-section">
-      <div class="dbg-row"><span class="dbg-key">Sync-PW gesetzt</span><span class="dbg-val" id="dbg-sync-pw">…</span>
-      </div>
-      <div class="dbg-row"><span class="dbg-key">NER-Status</span><span class="dbg-val" id="dbg-ner-state">…</span>
-      </div>
+      <div class="dbg-row"><span class="dbg-key">Elasticsearch</span><span class="dbg-val highlight">bereit</span></div>
       <div class="dbg-row"><span class="dbg-key">User-ID</span><span class="dbg-val" id="dbg-uid">…</span></div>
     </div>
     <div class="dbg-shortcut">Strg+Shift+D zum Schließen · aktualisiert beim Öffnen</div>
   </div>
 
   <!-- Module laden -->
-  <script src="/static/token_store.js"></script>
-  <script src="/static/sync.js"></script>
-  <script type="module">
-    // Schritt 1a: Migrations-Wörterbuch vom Server importieren (einmalig, vor NER)
-    const statusEl = document.getElementById('ner-status');
-    if (statusEl) statusEl.textContent = 'Lade Token-Wörterbuch…';
-    const dictCount = await window.TokenStore.checkAndImportFromServer();
-    if (dictCount > 0 && statusEl) {
-      statusEl.textContent = `Migrations-Wörterbuch geladen (${dictCount} Tokens)`;
-    }
-
-    // Schritt 1b: Auto-Sync vom Server (merged fehlende Tokens aus anderen Geräten)
-    if (statusEl) statusEl.textContent = 'Synchronisiere Token-Wörterbuch…';
-    await window.Sync.autoDownload(window._userId);
-
-    // Schritt 2: NER-Modell laden
-    try {
-      const nerMod = await import('/static/ner.js');
-      window._nerReady = false;
-
-      await window.NER.loadNER((pct, name) => {
-        const bar = document.getElementById('ner-progress-bar');
-        if (bar) bar.style.width = pct + '%';
-      });
-
-      window._nerReady = true;
-    } catch (err) {
-      console.error('Kritischer Fehler beim Laden von NER:', err);
-      if (statusEl) {
-        statusEl.textContent = 'NER-Fehler: ' + err.message;
-        statusEl.className = 'text-xs px-3 py-1 rounded-full bg-red-900 text-red-200';
-      }
-      // v0-Fallback: trotzdem starten
-      await new Promise(r => setTimeout(r, 2000));
-    }
-
-    // Overlay entfernen
-    const overlay = document.getElementById('ner-overlay');
-    if (overlay) overlay.remove();
-
-    // App initialisieren
-    if (typeof window._appInit === 'function') {
-      window._appInit();
-    }
-  </script>
   <script src="/static/chat.js"></script>
   <script src="/static/map.js"></script>
   <script>
     // Aktueller User (Default: ManfredMustermann)
     window._userId = '00000000-0000-0000-0000-000000000001';
 
-    // -------------------------------------------------------------------------
-    // App-Initialisierung (nach NER-Laden)
-    // -------------------------------------------------------------------------
-    window._appInit = async function () {
+    // App-Initialisierung
+    async function initApp() {
       loadStatus();
       loadConsentSettings();
       loadUserInfo();
-      window.Sync?.renderSyncUI('sync-container', window._userId);
       // Consent beim ersten Besuch prüfen
       const seen = localStorage.getItem('memosaur_consent_seen');
       if (!seen) openConsentModal();
-    };
+    }
+
+    // Start
+    window.onload = initApp;
 
     // -------------------------------------------------------------------------
     // Tab-Navigation
@@ -635,24 +552,7 @@
           set('dbg-provider', 'Fehler beim Laden');
         }
 
-        // 2. TokenStore-Statistiken
-        try {
-          const tokens = await window.TokenStore?.getAllTokens() || [];
-          const byType = tokens.reduce((acc, t) => {
-            acc[t.type] = (acc[t.type] || 0) + 1;
-            return acc;
-          }, {});
-          set('dbg-tok-total', tokens.length);
-          set('dbg-tok-per', byType['PER'] ?? 0);
-          set('dbg-tok-loc', byType['LOC'] ?? 0);
-          set('dbg-tok-org', byType['ORG'] ?? 0);
-        } catch (e) {
-          set('dbg-tok-total', 'Fehler');
-        }
-
-        // 3. Sync & NER Status
-        set('dbg-sync-pw', window.Sync?.hasSyncPassword() ? '✅ Ja' : '❌ Nein');
-        set('dbg-ner-state', window.NER ? window.NER.getNERState?.() ?? 'geladen' : 'nicht geladen');
+        // 3. Status
         set('dbg-uid', window._userId || '–');
       }
 

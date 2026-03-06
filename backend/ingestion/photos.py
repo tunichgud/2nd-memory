@@ -238,6 +238,7 @@ def _build_document(filename: str, parsed: dict, description: str, place_name: s
 def ingest_photos(
     progress_callback: Callable[[int, int, str], None] | None = None,
     reset: bool = False,
+    user_id: str = "00000000-0000-0000-0000-000000000001",
 ) -> dict:
     """Liest alle 50 Sample-Fotos ein, beschreibt sie per KI und speichert sie in ChromaDB.
 
@@ -291,7 +292,20 @@ def ingest_photos(
         # Metadaten parsen
         parsed = _parse_metadata(meta, filename)
 
-        # KI-Bildbeschreibung
+        # NEU: Fallback auf Sample-Daten (falls Sidecar leer/0.0)
+        if not parsed["lat"] or parsed["lat"] == 0.0:
+            parsed["lat"] = entry.get("lat")
+            parsed["lon"] = entry.get("lon")
+            logger.info("  Nutze Sample-Koordinaten: %.4f, %.4f", parsed["lat"] or 0, parsed["lon"] or 0)
+        
+        # Personen aus Sample ergänzen
+        sample_people = entry.get("persons", [])
+        if isinstance(sample_people, str):
+            sample_people = [p.strip() for p in sample_people.split(",") if p.strip()]
+        
+        for p in sample_people:
+            if p not in parsed["people"]:
+                parsed["people"].append(p)
         # Reverse Geocoding (vor Vision, damit Ortsname im Log erscheint)
         place_name = ""
         if parsed["lat"] and parsed["lon"]:
@@ -341,6 +355,7 @@ def ingest_photos(
             "persons": persons_str,
             "cluster": entry.get("cluster", ""),
             "place_name": place_name,
+            "user_id": user_id,
             **person_flags,
         }
 
@@ -352,7 +367,14 @@ def ingest_photos(
 
     # Batch-Upsert
     if ids:
+        from backend.rag.store import upsert_documents
+        from backend.rag.es_store import upsert_documents_es, reset_es_index
+        
+        if reset:
+            reset_es_index("photos")
+            
         upsert_documents("photos", ids, documents, embeddings, metadatas)
+        upsert_documents_es("photos", ids, documents, embeddings, metadatas)
 
     logger.info("Foto-Ingestion abgeschlossen: %s", stats)
     return stats
