@@ -19,18 +19,15 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1", tags=["v1/query"])
 
 
+class ChatMessageDict(BaseModel):
+    role: str
+    content: str
+
+
 class V1QueryRequest(BaseModel):
     user_id: str
-    # Bereits maskierte Anfrage, z.B. "Wo war ich mit [PER_1] in [LOC_1]?"
-    masked_query: str = Field(..., min_length=1, max_length=2000)
-    # Optionale strukturierte Filter (aus Browser-NER extrahiert)
-    person_tokens: list[str] = Field(default_factory=list)   # ["[PER_1]", "[PER_2]"]
-    person_names: list[str] = Field(default_factory=list)
-    location_tokens: list[str] = Field(default_factory=list) # ["[LOC_1]"]
-    # Klarnamen der erkannten Orte (aus IndexedDB-Lookup im Browser)
-    # z.B. ["München"] für location_tokens = ["[LOC_11]"]
-    # Wird für cluster-basierten Post-Filter verwendet (robuster als Token-Matching)
-    location_names: list[str] = Field(default_factory=list)
+    query: str = Field(..., min_length=1, max_length=2000)
+    chat_history: list[ChatMessageDict] = Field(default_factory=list)
     collections: list[str] | None = None
     n_results: int = Field(default=6, ge=1, le=50)
     min_score: float = Field(default=0.2, ge=0.0, le=1.0)
@@ -47,8 +44,8 @@ class V1SourceItem(BaseModel):
 
 
 class V1QueryResponse(BaseModel):
-    masked_query: str
-    masked_answer: str      # Antwort mit Tokens statt Klarnamen
+    query: str
+    answer: str
     sources: list[V1SourceItem]
     source_count: int
     filter_summary: str = ""
@@ -127,8 +124,7 @@ async def query_stream_v1(
     Yields JSON Chunks mit {"type": "plan"|"text"|"sources", "content": ...}
     """
     logger.info("=== DEBUG API /v1/query_stream ===")
-    logger.info("  masked_query:    %s", req.masked_query)
-    logger.info("  location_tokens: %s", req.location_tokens)
+    logger.info("  query:    %s", req.query)
     logger.info("==================================")
 
     # User prüfen
@@ -147,12 +143,9 @@ async def query_stream_v1(
     async def stream_generator():
         try:
             async for chunk in answer_v2_stream(
-                masked_query=req.masked_query,
+                query=req.query,
+                chat_history=[{"role": msg.role, "content": msg.content} for msg in req.chat_history],
                 user_id=req.user_id,
-                person_tokens=req.person_tokens,
-                person_names=req.person_names,
-                location_tokens=req.location_tokens,
-                location_names=req.location_names,
                 collections=req.collections,
                 n_per_collection=req.n_results,
                 min_score=req.min_score,

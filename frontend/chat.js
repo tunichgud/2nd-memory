@@ -7,8 +7,10 @@ const SOURCE_LABELS = {
   messages: { label: 'Nachricht', color: 'purple', icon: '💬' },
 };
 
-// v2-API aktiv wenn NER geladen ist, sonst v0-Fallback
-function _useV2() { return window._nerReady === true; }
+
+
+// Session Historie für Folgefragen
+window._chatHistory = [];
 
 // Hilfsfunktion: Schreibt ins `console.log` wenn `localStorage.getItem('DEBUG') === 'true'`
 function _debugLog(topic, data) {
@@ -36,12 +38,7 @@ async function sendQuery() {
   currentAbortController = new AbortController();
 
   try {
-    if (_useV2()) {
-      await _sendQueryV2(query, currentAbortController.signal);
-    } else {
-      const typingId = appendTypingIndicator();
-      await _sendQueryV0(query, typingId);
-    }
+    await _sendQueryStream(query, currentAbortController.signal);
   } catch (e) {
     if (e.name === 'AbortError') {
       appendErrorMessage('Anfrage abgebrochen.');
@@ -60,44 +57,13 @@ function abortQuery() {
   }
 }
 
-async function _sendQueryV2(query, abortSignal) {
+async function _sendQueryStream(query, abortSignal) {
   _debugLog('UserQuery', query);
-
-  // 1. NER: Anfrage maskieren
-  const { masked, entities } = await window.NER.maskText(query);
-  _debugLog('NER', { masked, entities });
-
-  // 2. Token-IDs für Filter extrahieren
-  const personTokens = entities.filter(e => e.type === 'PER').map(e => e.token);
-  const locationTokens = entities.filter(e => e.type === 'LOC').map(e => e.token);
-
-  const locationNameResults = await Promise.all(
-    locationTokens.map(async (tok) => {
-      const clearName = await window.TokenStore.lookupToken(tok);
-      return clearName;
-    })
-  );
-  const locationNames = locationNameResults.map(
-    (name, i) => (name && name !== locationTokens[i]) ? name : ""
-  );
-
-  const personNameResults = await Promise.all(
-    personTokens.map(async (tok) => {
-      const clearName = await window.TokenStore.lookupToken(tok);
-      return clearName;
-    })
-  );
-  const personNames = personNameResults.map(
-    (name, i) => (name && name !== personTokens[i]) ? name : ""
-  );
 
   const requestBody = {
     user_id: window._userId,
-    masked_query: masked,
-    person_tokens: personTokens,
-    person_names: personNames,
-    location_tokens: locationTokens,
-    location_names: locationNames,
+    query: query,
+    chat_history: window._chatHistory,
     n_results: 6,
     min_score: 0.2,
   };
@@ -113,7 +79,7 @@ async function _sendQueryV2(query, abortSignal) {
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
-    appendErrorMessage(err.detail || 'Unbekannter Fehler (v2)');
+    appendErrorMessage(err.detail || 'Unbekannter Fehler');
     return;
   }
 
@@ -153,14 +119,22 @@ async function _sendQueryV2(query, abortSignal) {
         } else if (chunk.type === "text") {
           // Text an den Ausgabe-Block dranhängen
           fullAnswer += chunk.content;
-          const unmasked = await window.TokenStore.unmaskText(fullAnswer);
-          updateStreamingText(responseUi, unmasked);
+          updateStreamingText(responseUi, fullAnswer);
         } else if (chunk.type === "error") {
           appendErrorMessage(chunk.content);
         }
       } catch (e) {
         console.warn("Konnte SSE Chunk nicht parsen", chunkStr, e);
       }
+    }
+  }
+
+  // Session merken
+  if (fullAnswer) {
+    window._chatHistory.push({ role: "user", content: query });
+    window._chatHistory.push({ role: "model", content: fullAnswer });
+    if (window._chatHistory.length > 20) {
+      window._chatHistory = window._chatHistory.slice(window._chatHistory.length - 20);
     }
   }
 }
@@ -186,17 +160,6 @@ async function _sendQueryV0(query, typingId) {
 }
 
 /** Unmaskiert String-Felder in einem Metadaten-Objekt. */
-async function _unmaskMetadata(meta) {
-  if (!meta) return meta;
-  const result = { ...meta };
-  const stringFields = ['place_name', 'persons', 'mentioned_persons', 'name', 'address'];
-  for (const field of stringFields) {
-    if (result[field]) {
-      result[field] = await window.TokenStore.unmaskText(String(result[field]));
-    }
-  }
-  return result;
-}
 
 function quickQuery(text) {
   document.getElementById('chat-input').value = text;
@@ -273,8 +236,8 @@ async function updateStreamingSources(ui, sources) {
   const unmaskedSources = await Promise.all(
     sources.map(async (src) => ({
       ...src,
-      document: await window.TokenStore.unmaskText(src.document),
-      metadata: await _unmaskMetadata(src.metadata),
+      document: src.document,
+      metadata: src.metadata,
     }))
   );
 
