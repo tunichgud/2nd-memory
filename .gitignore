@@ -56,3 +56,4 @@ Thumbs.db
 # -------------------------------------------------------
 *.log
 logs/
+.wwebjs_auth/session/Default/WebStorage/QuotaManager-journal
