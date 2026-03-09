@@ -53,6 +53,10 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup_event():
+    # Elasticsearch Check
+    from backend.rag.es_store import verify_elasticsearch
+    verify_elasticsearch()
+
     from backend.db.database import init_db
     await init_db()
     logger.info("memosaur v2 gestartet.")
@@ -86,6 +90,7 @@ from backend.api.v1.dictionary import router as v1_dictionary_router
 from backend.api.v1.entities   import router as v1_entities_router
 from backend.api.v1.webhook    import router as v1_webhook_router
 from backend.api.v1.validation import router as v1_validation_router
+from backend.api.v1.whatsapp   import router as v1_whatsapp_router
 
 app.include_router(v1_users_router)
 app.include_router(v1_consent_router)
@@ -98,6 +103,7 @@ app.include_router(v1_map_router)
 app.include_router(v1_media_router)
 app.include_router(v1_webhook_router)
 app.include_router(v1_validation_router)
+app.include_router(v1_whatsapp_router)
 
 # ---------------------------------------------------------------------------
 # Frontend (statische Dateien)
@@ -110,6 +116,11 @@ if FRONTEND_DIR.exists():
     @app.get("/")
     async def serve_frontend() -> FileResponse:
         return FileResponse(str(FRONTEND_DIR / "index.html"))
+
+# Logs-Verzeichnis für WhatsApp-Logs
+LOGS_DIR = BASE_DIR / "logs"
+if LOGS_DIR.exists():
+    app.mount("/logs", StaticFiles(directory=str(LOGS_DIR)), name="logs")
 
 # ---------------------------------------------------------------------------
 # Shared Endpunkte

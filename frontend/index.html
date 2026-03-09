@@ -722,6 +722,183 @@
       <h2 class="font-semibold mb-3">👤 Aktiver Nutzer</h2>
       <div id="user-info" class="text-sm text-gray-400">Lädt…</div>
     </div>
+
+    <!-- WhatsApp Integration -->
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <h2 class="font-semibold mb-3">💬 WhatsApp Integration</h2>
+      <div id="whatsapp-status" class="text-sm text-gray-400">Prüfe Status...</div>
+
+      <!-- Bot-Konfiguration -->
+      <div class="mt-4">
+        <h3 class="text-sm font-semibold mb-2">⚙️ Bot-Konfiguration</h3>
+        <div id="whatsapp-config" class="text-xs text-gray-400 mb-2">Lade...</div>
+
+        <!-- User-Chat-ID setzen -->
+        <div class="mt-3 p-3 bg-gray-800 rounded">
+          <label class="text-xs font-semibold block mb-2">👤 Deine WhatsApp-ID (User-Chat-ID)</label>
+          <div class="text-xs text-gray-500 mb-2">
+            ℹ️ Der Bot antwortet nur auf Nachrichten AN dich in diesem Chat
+          </div>
+          <div class="flex gap-2">
+            <input
+              type="text"
+              id="user-chat-id-input"
+              placeholder="z.B. 4917012345678@c.us"
+              class="flex-1 bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm"
+            />
+            <button
+              onclick="setUserChatId()"
+              class="bg-green-600 hover:bg-green-500 text-sm px-4 py-2 rounded transition-all whitespace-nowrap"
+            >
+              💾 Speichern
+            </button>
+          </div>
+          <div class="mt-2">
+            <button
+              onclick="showAvailableChats()"
+              class="text-xs text-blue-400 hover:text-blue-300 underline"
+            >
+              📋 Verfügbare Chats anzeigen
+            </button>
+          </div>
+        </div>
+
+        <!-- Bot-Schalter -->
+        <div class="mt-3 flex items-center gap-3">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="bot-enabled-toggle" onchange="toggleBotEnabled()" />
+            <span class="text-xs">Bot aktiviert</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer ml-4">
+            <input type="checkbox" id="test-mode-toggle" onchange="toggleTestMode()" />
+            <span class="text-xs">TEST_MODE (eigene Nachrichten verarbeiten)</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Import-Bereich -->
+      <div class="mt-4 p-3 bg-gray-800 rounded">
+        <h3 class="text-sm font-semibold mb-2">📥 Chat-Historie importieren</h3>
+        <div class="text-xs text-gray-500 mb-3">
+          Intelligenter Import mit Priorisierung nach Aktivität und automatischer Deduplizierung.<br>
+          ⚠️ Import läuft nur 09:00-22:00 Uhr (Ban-Schutz). Rate-Limiting aktiv.
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="flex gap-2 mb-3">
+          <button
+            onclick="importAllChats()"
+            id="import-button"
+            class="bg-green-600 hover:bg-green-500 text-sm px-4 py-2 rounded transition-all"
+          >
+            📥 Alle Chats importieren
+          </button>
+          <button
+            onclick="showChatSelection()"
+            class="bg-blue-600 hover:bg-blue-500 text-sm px-4 py-2 rounded transition-all"
+          >
+            🎯 Chats auswählen
+          </button>
+          <button
+            onclick="loadImportStats()"
+            class="bg-gray-700 hover:bg-gray-600 text-sm px-4 py-2 rounded transition-all"
+          >
+            📊 Statistiken
+          </button>
+        </div>
+
+        <!-- Import Status & Progress -->
+        <div id="import-status" class="text-xs text-gray-400"></div>
+        <div id="import-progress" class="hidden mt-3 p-3 bg-gray-900 rounded border border-green-600">
+          <div class="text-xs font-semibold mb-2">⏳ Import läuft...</div>
+          <div class="text-xs space-y-1">
+            <div>📝 Chat: <span id="progress-chat-name" class="text-green-400">-</span></div>
+            <div>📊 Fortschritt: <span id="progress-count" class="text-blue-400">-</span></div>
+            <div>✨ Neue Nachrichten: <span id="progress-new" class="text-green-400">-</span></div>
+            <div>⏩ Übersprungen: <span id="progress-skipped" class="text-gray-500">-</span></div>
+            <div>⏰ Nächste Pause in: <span id="progress-pause" class="text-yellow-400">-</span></div>
+          </div>
+        </div>
+
+        <!-- Chat Selection Modal -->
+        <div id="chat-selection-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-semibold">🎯 Chats für Import auswählen</h3>
+              <button onclick="closeChatSelection()" class="text-gray-500 hover:text-white text-2xl">&times;</button>
+            </div>
+
+            <!-- Quick Select Buttons -->
+            <div class="flex gap-2 mb-4">
+              <button onclick="selectTopChats(10)" class="bg-blue-600 hover:bg-blue-500 text-xs px-3 py-1 rounded">
+                Top 10 aktive
+              </button>
+              <button onclick="selectRecentChats(30)" class="bg-blue-600 hover:bg-blue-500 text-xs px-3 py-1 rounded">
+                Letzte 30 Tage
+              </button>
+              <button onclick="selectAllChats()" class="bg-blue-600 hover:bg-blue-500 text-xs px-3 py-1 rounded">
+                Alle auswählen
+              </button>
+              <button onclick="deselectAllChats()" class="bg-gray-600 hover:bg-gray-500 text-xs px-3 py-1 rounded">
+                Alle abwählen
+              </button>
+            </div>
+
+            <!-- Sort Options & Stats -->
+            <div class="mb-3 flex items-center justify-between">
+              <div>
+                <label class="text-xs text-gray-400">Sortierung:</label>
+                <select id="chat-sort-order" onchange="sortChatList()" class="ml-2 bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs">
+                  <option value="activity">Aktivität (neueste zuerst)</option>
+                  <option value="name">Name (A-Z)</option>
+                  <option value="messages">Nachrichtenanzahl</option>
+                </select>
+              </div>
+              <div class="text-xs text-gray-400" id="chat-list-stats">
+                0 Chats
+              </div>
+            </div>
+
+            <!-- Chat List (scrollable, max 20 visible) -->
+            <div id="chat-selection-list" class="space-y-2 mb-4 max-h-96 overflow-y-auto">
+              <div class="text-xs text-gray-500 text-center py-4">Lade Chats...</div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-2 justify-end">
+              <button onclick="closeChatSelection()" class="bg-gray-700 hover:bg-gray-600 text-sm px-4 py-2 rounded">
+                Abbrechen
+              </button>
+              <button onclick="startSelectedImport()" class="bg-green-600 hover:bg-green-500 text-sm px-4 py-2 rounded">
+                Import starten (<span id="selected-count">0</span>)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Import Stats Modal -->
+        <div id="import-stats-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 max-w-3xl w-full max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-semibold">📊 Import-Statistiken</h3>
+              <button onclick="closeImportStats()" class="text-gray-500 hover:text-white text-2xl">&times;</button>
+            </div>
+            <div id="import-stats-content" class="text-xs space-y-3">
+              <div class="text-gray-500 text-center py-4">Lade Statistiken...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 flex gap-2">
+        <button onclick="checkWhatsAppStatus()" class="bg-gray-700 hover:bg-gray-600 text-sm px-4 py-2 rounded-lg transition-all">
+          🔄 Status aktualisieren
+        </button>
+        <button onclick="showWhatsAppLogs()" class="bg-blue-700 hover:bg-blue-600 text-sm px-4 py-2 rounded-lg transition-all">
+          📋 Logs anzeigen
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Debug Panel (toggle: Ctrl+Shift+D) -->
@@ -785,7 +962,11 @@
         window.Entities.loadSuggestedClusters();
         window.Entities.loadLinkedEntities();
       }
-      if (name === 'settings') { loadConsentSettings(); window.Sync?.renderSyncUI('sync-container', window._userId); }
+      if (name === 'settings') {
+        loadConsentSettings();
+        window.Sync?.renderSyncUI('sync-container', window._userId);
+        checkWhatsAppStatus();
+      }
     }
 
     // -------------------------------------------------------------------------
@@ -956,6 +1137,639 @@
         }
       });
     })();
+
+    // -------------------------------------------------------------------------
+    // WhatsApp Integration
+    // -------------------------------------------------------------------------
+    async function checkWhatsAppStatus() {
+      const statusEl = document.getElementById('whatsapp-status');
+      if (!statusEl) return;
+
+      statusEl.innerHTML = '<div class="text-gray-400">Prüfe WhatsApp-Status...</div>';
+
+      try {
+        const response = await fetch('http://localhost:3001/api/whatsapp/status');
+        const data = await response.json();
+
+        if (data.connected) {
+          statusEl.innerHTML = `
+            <div class="flex items-start gap-3">
+              <div class="text-4xl">✅</div>
+              <div class="flex-1">
+                <div class="text-green-400 font-semibold mb-1">WhatsApp verbunden</div>
+                <div class="text-gray-400 text-xs space-y-1">
+                  <div>👤 Benutzer: <span class="text-white">${data.user || 'Unbekannt'}</span></div>
+                  <div>📱 Telefon: <span class="text-white">+${data.phone || 'Unbekannt'}</span></div>
+                  <div class="mt-2 text-gray-500">
+                    Nachrichten werden automatisch an den AI-Agent weitergeleitet.
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+
+          // Lade Bot-Konfiguration
+          loadWhatsAppConfig();
+        } else {
+          statusEl.innerHTML = `
+            <div class="flex items-start gap-3">
+              <div class="text-4xl">⚠️</div>
+              <div class="flex-1">
+                <div class="text-yellow-400 font-semibold mb-1">WhatsApp nicht verbunden</div>
+                <div class="text-gray-400 text-xs space-y-2">
+                  <div>Die WhatsApp-Brücke läuft, aber ist nicht mit WhatsApp verbunden.</div>
+                  <div class="mt-2">
+                    <strong class="text-white">Erste Einrichtung:</strong>
+                    <ol class="list-decimal list-inside mt-1 space-y-1">
+                      <li>Öffne ein Terminal und führe aus: <code class="bg-gray-800 px-1 rounded">tail -f logs/whatsapp.log</code></li>
+                      <li>Scanne den QR-Code mit WhatsApp (Einstellungen → Verknüpfte Geräte)</li>
+                      <li>Warte auf "WhatsApp-Brücke ist online!"</li>
+                      <li>Klicke "Status aktualisieren"</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        statusEl.innerHTML = `
+          <div class="flex items-start gap-3">
+            <div class="text-4xl">❌</div>
+            <div class="flex-1">
+              <div class="text-red-400 font-semibold mb-1">WhatsApp-Brücke nicht erreichbar</div>
+              <div class="text-gray-400 text-xs space-y-2">
+                <div>Die WhatsApp-Brücke läuft nicht oder ist nicht erreichbar.</div>
+                <div class="mt-2">
+                  <strong class="text-white">Lösung:</strong>
+                  <ol class="list-decimal list-inside mt-1 space-y-1">
+                    <li>Stoppe das Backend mit CTRL+C</li>
+                    <li>Starte neu mit: <code class="bg-gray-800 px-1 rounded">./start.sh</code></li>
+                    <li>Warte bis beide Services laufen</li>
+                    <li>Klicke "Status aktualisieren"</li>
+                  </ol>
+                </div>
+                <div class="mt-2 text-gray-500">
+                  Fehler: ${error.message}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    async function loadWhatsAppConfig() {
+      const configEl = document.getElementById('whatsapp-config');
+      if (!configEl) return;
+
+      try {
+        const response = await fetch('/api/whatsapp/config');
+        const data = await response.json();
+
+        // Update UI
+        const userChatInput = document.getElementById('user-chat-id-input');
+        if (userChatInput && data.user_chat_id) {
+          userChatInput.value = data.user_chat_id;
+        }
+
+        const botEnabledToggle = document.getElementById('bot-enabled-toggle');
+        if (botEnabledToggle) {
+          botEnabledToggle.checked = data.bot_enabled;
+        }
+
+        const testModeToggle = document.getElementById('test-mode-toggle');
+        if (testModeToggle) {
+          testModeToggle.checked = data.test_mode;
+        }
+
+        // Status anzeigen
+        if (data.configured && data.user_chat_id) {
+          configEl.innerHTML = `
+            <div class="text-xs space-y-1">
+              <div>✅ <strong>Konfiguriert</strong></div>
+              <div>👤 User-Chat-ID: <span class="font-mono text-white">${data.user_chat_id}</span></div>
+              <div>🤖 Bot: ${data.bot_enabled ? '<span class="text-green-400">Aktiviert</span>' : '<span class="text-red-400">Deaktiviert</span>'}</div>
+              <div>🧪 TEST_MODE: ${data.test_mode ? '<span class="text-yellow-400">An</span>' : '<span class="text-gray-400">Aus</span>'}</div>
+            </div>
+          `;
+        } else {
+          configEl.innerHTML = `
+            <div class="text-xs text-yellow-400">
+              ⚠️ Keine User-Chat-ID konfiguriert - Bot ist inaktiv
+            </div>
+          `;
+        }
+      } catch (error) {
+        configEl.innerHTML = '<div class="text-red-400 text-xs">Fehler beim Laden der Config</div>';
+      }
+    }
+
+    async function setUserChatId() {
+      const input = document.getElementById('user-chat-id-input');
+      const chatId = input.value.trim();
+
+      if (!chatId) {
+        alert('Bitte gib eine Chat-ID ein');
+        return;
+      }
+
+      if (!chatId.includes('@')) {
+        alert('Ungültiges Format. Erwartet: 4917012345678@c.us');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/whatsapp/config/user-chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: chatId })
+        });
+
+        if (response.ok) {
+          alert('✅ User-Chat-ID gespeichert!');
+          loadWhatsAppConfig();
+        } else {
+          const error = await response.json();
+          alert('Fehler: ' + (error.detail || 'Unbekannter Fehler'));
+        }
+      } catch (error) {
+        alert('Fehler beim Speichern: ' + error.message);
+      }
+    }
+
+    async function toggleBotEnabled() {
+      const toggle = document.getElementById('bot-enabled-toggle');
+      const enabled = toggle.checked;
+
+      try {
+        await fetch('/api/whatsapp/config/bot-enabled', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled: enabled })
+        });
+        loadWhatsAppConfig();
+      } catch (error) {
+        alert('Fehler: ' + error.message);
+        toggle.checked = !enabled; // Zurücksetzen
+      }
+    }
+
+    async function toggleTestMode() {
+      const toggle = document.getElementById('test-mode-toggle');
+      const enabled = toggle.checked;
+
+      try {
+        await fetch('/api/whatsapp/config/test-mode', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled: enabled })
+        });
+        loadWhatsAppConfig();
+      } catch (error) {
+        alert('Fehler: ' + error.message);
+        toggle.checked = !enabled; // Zurücksetzen
+      }
+    }
+
+    async function showAvailableChats() {
+      try {
+        const response = await fetch('http://localhost:3001/api/whatsapp/chats');
+        const data = await response.json();
+
+        if (!data.chats || data.chats.length === 0) {
+          alert('Keine Chats gefunden');
+          return;
+        }
+
+        let chatList = 'Verfügbare Chats:\n\n';
+        data.chats.forEach((chat, i) => {
+          chatList += `${i+1}. ${chat.name}\n   ID: ${chat.id}\n\n`;
+        });
+
+        alert(chatList);
+      } catch (error) {
+        alert('Fehler beim Laden der Chats: ' + error.message);
+      }
+    }
+
+    async function importAllChats() {
+      const button = document.getElementById('import-button');
+      const statusEl = document.getElementById('import-status');
+      const progressEl = document.getElementById('import-progress');
+
+      // Prüfe Zeitfenster (09:00-22:00)
+      const now = new Date();
+      const hour = now.getHours();
+      if (hour < 9 || hour >= 22) {
+        alert(`Import nur zwischen 09:00-22:00 Uhr erlaubt!\n\nAktuelle Zeit: ${now.toLocaleTimeString('de-DE')}\n\nDies schützt vor WhatsApp-Bans.`);
+        return;
+      }
+
+      if (!confirm(`Alle Chats importieren?\n\n✨ Features:\n- Sortierung nach Aktivität (neueste zuerst)\n- Automatische Deduplizierung\n- Rate-Limiting (3s zwischen Chats, 60s Batch-Pausen)\n- Nur 09:00-22:00 Uhr\n- Import wird fortgesetzt bei Neustart\n\n⚠️ Dies kann mehrere Stunden dauern!`)) {
+        return;
+      }
+
+      try {
+        button.disabled = true;
+        button.textContent = '⏳ Import läuft...';
+        statusEl.innerHTML = '<div class="text-yellow-400">📥 Import gestartet...</div>';
+        progressEl.classList.remove('hidden');
+
+        const response = await fetch('http://localhost:3001/api/whatsapp/import-all-chats', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = await response.json();
+
+        progressEl.classList.add('hidden');
+
+        if (data.success) {
+          statusEl.innerHTML = `
+            <div class="text-green-400 space-y-1">
+              <div>🎉 Import abgeschlossen!</div>
+              <div>📊 ${data.total_chats} Chats verarbeitet</div>
+              <div>✨ ${data.new_messages || 0} neue Nachrichten importiert</div>
+              <div>⏩ ${data.skipped_messages || 0} bereits vorhanden (übersprungen)</div>
+              ${data.errors > 0 ? `<div class="text-yellow-400">⚠️ ${data.errors} Fehler</div>` : ''}
+            </div>
+          `;
+        } else if (data.paused) {
+          statusEl.innerHTML = `
+            <div class="text-yellow-400 space-y-1">
+              <div>⏸️ Import pausiert: ${data.reason}</div>
+              <div>📊 Fortschritt: ${data.progress.chats_processed}/${data.progress.total_chats} Chats</div>
+              <div>✨ ${data.progress.new_messages} neue Nachrichten</div>
+              <div>⏩ ${data.progress.skipped_messages} übersprungen</div>
+              <div class="mt-2 text-xs">💡 Tipp: Import wird beim nächsten Durchlauf fortgesetzt</div>
+            </div>
+          `;
+        } else {
+          statusEl.innerHTML = '<div class="text-red-400">❌ Import fehlgeschlagen</div>';
+        }
+
+      } catch (error) {
+        progressEl.classList.add('hidden');
+        statusEl.innerHTML = `<div class="text-red-400">❌ Fehler: ${error.message}</div>`;
+      } finally {
+        button.disabled = false;
+        button.textContent = '📥 Alle Chats importieren';
+      }
+    }
+
+    function showWhatsAppLogs() {
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+      modal.innerHTML = `
+        <div class="bg-gray-900 border border-gray-700 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+          <div class="flex justify-between items-center p-6 border-b border-gray-700">
+            <h2 class="text-2xl font-bold text-gray-200">📋 WhatsApp Logs</h2>
+            <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-white text-3xl leading-none">×</button>
+          </div>
+          <div class="flex-1 overflow-y-auto p-6">
+            <div class="bg-gray-950 rounded-lg p-4 font-mono text-xs text-green-400 whitespace-pre-wrap" id="log-content">
+              Lade Logs...
+            </div>
+          </div>
+          <div class="p-4 border-t border-gray-700 flex gap-2">
+            <button onclick="loadWhatsAppLogs()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm transition-all">
+              🔄 Aktualisieren
+            </button>
+            <button onclick="this.closest('.fixed').remove()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm transition-all">
+              Schließen
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      loadWhatsAppLogs();
+    }
+
+    async function loadWhatsAppLogs() {
+      const logEl = document.getElementById('log-content');
+      if (!logEl) return;
+
+      try {
+        const response = await fetch('/logs/whatsapp.log');
+        const text = await response.text();
+
+        if (text) {
+          // Letzte 50 Zeilen
+          const lines = text.split('\n').slice(-50);
+          logEl.textContent = lines.join('\n');
+        } else {
+          logEl.textContent = 'Keine Logs verfügbar';
+        }
+      } catch (error) {
+        logEl.textContent = `Fehler beim Laden der Logs: ${error.message}`;
+      }
+    }
+
+    // ===== Chat Selection & Import UI =====
+
+    let availableChats = [];
+    let selectedChatIds = new Set();
+
+    async function showChatSelection() {
+      const modal = document.getElementById('chat-selection-modal');
+      modal.classList.remove('hidden');
+
+      // Lade Chats vom WhatsApp Bridge
+      await loadAvailableChats();
+    }
+
+    function closeChatSelection() {
+      const modal = document.getElementById('chat-selection-modal');
+      modal.classList.add('hidden');
+    }
+
+    async function loadAvailableChats() {
+      const listEl = document.getElementById('chat-selection-list');
+      const statsEl = document.getElementById('chat-list-stats');
+      listEl.innerHTML = '<div class="text-xs text-gray-500 text-center py-4">Lade Chats...</div>';
+      statsEl.textContent = 'Laden...';
+
+      try {
+        console.log('[WhatsApp] Lade Chats von http://localhost:3001/api/whatsapp/chats');
+        const response = await fetch('http://localhost:3001/api/whatsapp/chats');
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('[WhatsApp] Chats geladen:', data.chats?.length || 0);
+
+        if (!data.chats || data.chats.length === 0) {
+          listEl.innerHTML = '<div class="text-xs text-gray-500 text-center py-4">Keine Chats gefunden</div>';
+          statsEl.textContent = '0 Chats';
+          return;
+        }
+
+        availableChats = data.chats;
+        statsEl.textContent = `${data.chats.length} Chats`;
+        console.log('[WhatsApp] Rendere Chat-Liste...');
+        renderChatList();
+        console.log('[WhatsApp] Chat-Liste gerendert');
+      } catch (error) {
+        console.error('[WhatsApp] Fehler beim Laden der Chats:', error);
+        listEl.innerHTML = `<div class="text-xs text-red-400 text-center py-4">Fehler: ${error.message}</div>`;
+        statsEl.textContent = 'Fehler';
+      }
+    }
+
+    function renderChatList() {
+      const listEl = document.getElementById('chat-selection-list');
+      const sortOrder = document.getElementById('chat-sort-order').value;
+
+      // Sortiere Chats
+      let sorted = [...availableChats];
+      if (sortOrder === 'activity') {
+        sorted.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      } else if (sortOrder === 'name') {
+        sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      } else if (sortOrder === 'messages') {
+        sorted.sort((a, b) => (b.unreadCount || 0) - (a.unreadCount || 0));
+      }
+
+      listEl.innerHTML = sorted.map(chat => {
+        const isSelected = selectedChatIds.has(chat.id);
+        const lastActivity = chat.timestamp ? new Date(chat.timestamp * 1000).toLocaleString('de-DE') : 'Unbekannt';
+        const chatType = chat.isGroup ? '👥 Gruppe' : '👤 Kontakt';
+
+        return `
+          <div class="flex items-center gap-2 p-2 bg-gray-800 rounded border ${isSelected ? 'border-green-500' : 'border-gray-700'} hover:bg-gray-750">
+            <input
+              type="checkbox"
+              ${isSelected ? 'checked' : ''}
+              onchange="toggleChatSelection('${chat.id}')"
+              class="w-4 h-4"
+            />
+            <div class="flex-1 text-xs">
+              <div class="font-semibold">${chat.name}</div>
+              <div class="text-gray-500">${chatType} · Letzte Aktivität: ${lastActivity}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      updateSelectedCount();
+    }
+
+    function toggleChatSelection(chatId) {
+      if (selectedChatIds.has(chatId)) {
+        selectedChatIds.delete(chatId);
+      } else {
+        selectedChatIds.add(chatId);
+      }
+      renderChatList();
+    }
+
+    function selectTopChats(count) {
+      selectedChatIds.clear();
+      // Sort by activity, take top N
+      const sorted = [...availableChats].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      sorted.slice(0, count).forEach(chat => selectedChatIds.add(chat.id));
+      renderChatList();
+    }
+
+    function selectRecentChats(days) {
+      selectedChatIds.clear();
+      const cutoff = Date.now() / 1000 - (days * 24 * 60 * 60);
+      availableChats.forEach(chat => {
+        if (chat.timestamp && chat.timestamp > cutoff) {
+          selectedChatIds.add(chat.id);
+        }
+      });
+      renderChatList();
+    }
+
+    function selectAllChats() {
+      availableChats.forEach(chat => selectedChatIds.add(chat.id));
+      renderChatList();
+    }
+
+    function deselectAllChats() {
+      selectedChatIds.clear();
+      renderChatList();
+    }
+
+    function sortChatList() {
+      renderChatList();
+    }
+
+    function updateSelectedCount() {
+      document.getElementById('selected-count').textContent = selectedChatIds.size;
+    }
+
+    async function startSelectedImport() {
+      if (selectedChatIds.size === 0) {
+        alert('Bitte wähle mindestens einen Chat aus!');
+        return;
+      }
+
+      const BULK_THRESHOLD = 20; // Muss mit Backend übereinstimmen
+      const isBulkImport = selectedChatIds.size >= BULK_THRESHOLD;
+
+      // Zeitfenster-Check nur bei Bulk-Import (20+ Chats)
+      if (isBulkImport) {
+        const now = new Date();
+        const hour = now.getHours();
+        if (hour < 9 || hour >= 22) {
+          alert(`Bulk-Import (${BULK_THRESHOLD}+ Chats) nur zwischen 09:00-22:00 Uhr erlaubt!\n\nAktuelle Zeit: ${now.toLocaleTimeString('de-DE')}\n\nDu hast ${selectedChatIds.size} Chats ausgewählt.\n\n💡 Tipp: Wähle weniger als ${BULK_THRESHOLD} Chats für Import ohne Zeitrestriktion.`);
+          return;
+        }
+      }
+
+      // Zeige Details der ausgewählten Chats
+      const selectedChats = availableChats.filter(chat => selectedChatIds.has(chat.id));
+      const chatNames = selectedChats.slice(0, 5).map(c => c.name).join(', ');
+      const moreText = selectedChats.length > 5 ? ` ... und ${selectedChats.length - 5} weitere` : '';
+
+      const timeInfo = isBulkImport
+        ? '⏰ Zeitfenster: 09:00-22:00 Uhr (Bulk-Schutz)\n'
+        : '✅ Keine Zeitrestriktion (< 20 Chats)\n';
+
+      if (!confirm(`${selectedChatIds.size} Chat(s) importieren?\n\nChats: ${chatNames}${moreText}\n\n✨ Features:\n- Smart Deduplication (keine Duplikate)\n- Rate-Limiting (3s zwischen Chats)\n${timeInfo}\n⚠️ Dies kann einige Minuten dauern!`)) {
+        return;
+      }
+
+      const button = document.getElementById('import-button');
+      const statusEl = document.getElementById('import-status');
+      const progressEl = document.getElementById('import-progress');
+
+      closeChatSelection();
+
+      try {
+        button.disabled = true;
+        button.textContent = '⏳ Import läuft...';
+        statusEl.innerHTML = `<div class="text-yellow-400">📥 Importiere ${selectedChatIds.size} ausgewählte Chat(s)...</div>`;
+        progressEl.classList.remove('hidden');
+
+        // Konvertiere Set zu Array
+        const chatIdsArray = Array.from(selectedChatIds);
+
+        console.log('[WhatsApp] Starte selektiven Import für:', chatIdsArray);
+
+        const response = await fetch('http://localhost:3001/api/whatsapp/import-selected-chats', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chatIds: chatIdsArray })
+        });
+
+        const data = await response.json();
+
+        progressEl.classList.add('hidden');
+
+        if (data.success) {
+          statusEl.innerHTML = `
+            <div class="text-green-400 space-y-1">
+              <div>🎉 Import abgeschlossen!</div>
+              <div>📊 ${data.total_chats} Chat(s) importiert</div>
+              <div>✨ ${data.new_messages || 0} neue Nachrichten</div>
+              <div>⏩ ${data.skipped_messages || 0} bereits vorhanden (übersprungen)</div>
+              ${data.errors > 0 ? `<div class="text-yellow-400">⚠️ ${data.errors} Fehler</div>` : ''}
+            </div>
+          `;
+
+          // Deselektiere alle Chats nach erfolgreichem Import
+          selectedChatIds.clear();
+        } else if (data.paused) {
+          statusEl.innerHTML = `
+            <div class="text-yellow-400 space-y-1">
+              <div>⏸️ Import pausiert: ${data.reason}</div>
+              <div>📊 Fortschritt: ${data.progress.chats_processed}/${data.progress.total_chats} Chats</div>
+              <div>✨ ${data.progress.new_messages} neue Nachrichten</div>
+              <div>⏩ ${data.progress.skipped_messages} übersprungen</div>
+              <div class="mt-2 text-xs">💡 Tipp: Import wird beim nächsten Durchlauf fortgesetzt</div>
+            </div>
+          `;
+        } else {
+          statusEl.innerHTML = `<div class="text-red-400">❌ Import fehlgeschlagen: ${data.error || 'Unbekannter Fehler'}</div>`;
+        }
+
+      } catch (error) {
+        progressEl.classList.add('hidden');
+        console.error('[WhatsApp] Import-Fehler:', error);
+        statusEl.innerHTML = `<div class="text-red-400">❌ Fehler: ${error.message}</div>`;
+      } finally {
+        button.disabled = false;
+        button.textContent = '📥 Alle Chats importieren';
+      }
+    }
+
+    // ===== Import Statistics =====
+
+    async function loadImportStats() {
+      const modal = document.getElementById('import-stats-modal');
+      const contentEl = document.getElementById('import-stats-content');
+
+      modal.classList.remove('hidden');
+      contentEl.innerHTML = '<div class="text-gray-500 text-center py-4">Lade Statistiken...</div>';
+
+      try {
+        const response = await fetch('http://localhost:8000/api/whatsapp/import-plan/stats');
+        const data = await response.json();
+
+        if (data.total_chats_tracked === 0) {
+          contentEl.innerHTML = `
+            <div class="text-center py-4 text-gray-500">
+              Noch keine Imports durchgeführt.
+            </div>
+          `;
+          return;
+        }
+
+        let html = `
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <div class="bg-gray-800 p-3 rounded">
+              <div class="text-gray-500 text-xs">Importierte Chats</div>
+              <div class="text-2xl font-bold text-green-400">${data.total_chats_tracked}</div>
+            </div>
+            <div class="bg-gray-800 p-3 rounded">
+              <div class="text-gray-500 text-xs">Total Nachrichten</div>
+              <div class="text-2xl font-bold text-blue-400">${data.total_messages_imported.toLocaleString('de-DE')}</div>
+            </div>
+          </div>
+
+          <h4 class="font-semibold mb-2">📋 Details pro Chat</h4>
+          <div class="space-y-2 max-h-96 overflow-y-auto">
+        `;
+
+        data.chats.forEach(chat => {
+          const lastImport = chat.last_imported_timestamp
+            ? new Date(chat.last_imported_timestamp * 1000).toLocaleString('de-DE')
+            : 'Nie';
+          const firstImport = chat.first_import_run
+            ? new Date(chat.first_import_run).toLocaleString('de-DE')
+            : 'Unbekannt';
+
+          html += `
+            <div class="bg-gray-800 p-3 rounded">
+              <div class="font-semibold mb-1">${chat.chat_id}</div>
+              <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
+                <div>📊 Nachrichten: ${chat.total_messages_imported}</div>
+                <div>🔄 Import-Runs: ${chat.import_runs}</div>
+                <div>📅 Erster Import: ${firstImport}</div>
+                <div>⏰ Letzter Import: ${lastImport}</div>
+              </div>
+            </div>
+          `;
+        });
+
+        html += '</div>';
+        contentEl.innerHTML = html;
+
+      } catch (error) {
+        contentEl.innerHTML = `<div class="text-red-400 text-center py-4">Fehler: ${error.message}</div>`;
+      }
+    }
+
+    function closeImportStats() {
+      const modal = document.getElementById('import-stats-modal');
+      modal.classList.add('hidden');
+    }
   </script>
 </body>
 

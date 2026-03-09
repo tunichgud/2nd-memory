@@ -6,6 +6,7 @@ und Metadaten in Elasticsearch.
 """
 
 import logging
+import sys
 from typing import Any, Dict, List, Optional
 from elasticsearch import Elasticsearch, helpers
 import yaml
@@ -30,12 +31,41 @@ def get_es_client() -> Elasticsearch:
         cfg = _get_config()
         hosts = cfg.get("elasticsearch", {}).get("hosts", ["http://localhost:9200"])
         _client = Elasticsearch(hosts)
-        # Kurzer Connection-Check
+        # Kurzer Connection-Check (nur Logging)
         if not _client.ping():
-            logger.error("Elasticsearch nicht erreichbar unter %s", hosts)
+            logger.warning("Elasticsearch ist aktuell nicht erreichbar unter %s", hosts)
         else:
             logger.info("Elasticsearch Client initialisiert: %s", hosts)
     return _client
+
+
+def verify_elasticsearch():
+    """Prüft beim Systemstart, ob Elasticsearch läuft. Bricht bei Fehler ab."""
+    cfg = _get_config()
+    hosts = cfg.get("elasticsearch", {}).get("hosts", ["http://localhost:9200"])
+    client = Elasticsearch(hosts)
+    
+    try:
+        if not client.ping():
+            _print_es_error(hosts)
+            sys.exit(1)
+    except Exception:
+        _print_es_error(hosts)
+        sys.exit(1)
+
+
+def _print_es_error(hosts: list):
+    print("\n" + "="*80)
+    print(" 🚨 FEHLER: ELASTICSEARCH NICHT ERREICHBAR")
+    print("="*80)
+    print(f"\n memosaur benötigt Elasticsearch zur Suche, aber unter {hosts}")
+    print(" konnte keine Verbindung aufgebaut werden.")
+    print("\n MÖGLICHE LÖSUNGEN:")
+    print(" 1. Starte Elasticsearch mit Docker:")
+    print("    docker compose up -d")
+    print("\n 2. Prüfe, ob Docker Desktop oder der Docker-Dienst läuft.")
+    print(" 3. Kontrolliere die 'hosts' in deiner config.yaml.")
+    print("\n" + "="*80 + "\n")
 
 def get_index_name(collection_name: str) -> str:
     cfg = _get_config()

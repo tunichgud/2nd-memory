@@ -1,11 +1,13 @@
 """
 store.py – ChromaDB Interface für memosaur.
 
-Verwaltet vier Collections:
-  - photos       : Fotos mit GPS, Personen, KI-Beschreibung
-  - reviews      : Google Maps Bewertungen
-  - saved_places : Google Maps Gespeicherte Orte
-  - messages     : WhatsApp / Signal Nachrichten (vorbereitet)
+Verwaltet Collections:
+  - photos         : Fotos mit GPS, Personen, KI-Beschreibung
+  - reviews        : Google Maps Bewertungen
+  - saved_places   : Google Maps Gespeicherte Orte
+  - messages       : WhatsApp / Signal Nachrichten
+  - faces          : Gesichtserkennungs-Embeddings
+  - whatsapp_config: WhatsApp Bot Konfiguration
 """
 
 from __future__ import annotations
@@ -19,7 +21,7 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
-COLLECTIONS = ["photos", "reviews", "saved_places", "messages", "faces"]
+COLLECTIONS = ["photos", "reviews", "saved_places", "messages", "faces", "whatsapp_config"]
 SEARCHABLE_COLLECTIONS = ["photos", "reviews", "saved_places", "messages"]
 
 
