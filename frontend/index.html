@@ -62,6 +62,138 @@
     #ner-overlay {
       backdrop-filter: blur(4px);
     }
+
+    /* Indeterminate Progress Bar */
+    .loading-bar {
+      height: 2px;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      background-color: transparent;
+    }
+
+    .loading-bar::after {
+      content: '';
+      position: absolute;
+      left: -50%;
+      height: 100%;
+      width: 50%;
+      background: linear-gradient(to right, transparent, #3b82f6, #60a5fa, #3b82f6, transparent);
+      animation: indeterminate-loading 1.5s infinite linear;
+    }
+
+    @keyframes indeterminate-loading {
+      from {
+        left: -50%;
+      }
+
+      to {
+        left: 100%;
+      }
+    }
+
+    @keyframes slide-up {
+      from {
+        opacity: 0;
+        transform: translateY(1rem);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Carousel Styles */
+    .carousel-container {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      height: 256px;
+      /* 16rem - fits w-64 h-64 or similar */
+    }
+
+    .carousel-track {
+      display: flex;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      height: 100%;
+    }
+
+    .carousel-slide {
+      min-width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(17, 24, 39, 0.7);
+      backdrop-filter: blur(4px);
+      color: white;
+      border: 1px solid rgba(75, 85, 99, 0.5);
+      border-radius: 50%;
+      width: 2.5rem;
+      height: 2.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.2s;
+    }
+
+    .carousel-btn:hover {
+      background: rgba(31, 41, 55, 0.9);
+      border-color: #3b82f6;
+    }
+
+    .carousel-btn.prev {
+      left: 0.5rem;
+    }
+
+    .carousel-btn.next {
+      right: 0.5rem;
+    }
+
+    .carousel-dots {
+      position: absolute;
+      bottom: 0.75rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 0.5rem;
+      z-index: 10;
+    }
+
+    .carousel-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .carousel-dot.active {
+      background: #3b82f6;
+      transform: scale(1.2);
+    }
+
+    @keyframes zoom-in {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
   </style>
 </head>
 
@@ -120,6 +252,19 @@
     </div>
   </div>
 
+  <!-- Lightbox Overlay (Vollbild) -->
+  <div id="memosaur-lightbox"
+    class="hidden fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-4 backdrop-blur-md transition-opacity duration-300">
+    <div class="relative w-full h-full flex items-center justify-center flex-col animate-[zoom-in_0.2s_ease-out]">
+      <button onclick="closeLightbox()"
+        class="absolute top-4 right-4 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full text-white flex items-center justify-center text-3xl transition-all z-[101]">×</button>
+      <img id="lightbox-img" src=""
+        class="max-h-[85vh] max-w-full object-contain rounded-lg shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+      <div id="lightbox-caption"
+        class="mt-6 text-white text-sm text-center flex flex-wrap justify-center gap-6 font-medium"></div>
+    </div>
+  </div>
+
   <!-- Header -->
   <header class="bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between">
     <div class="flex items-center gap-3">
@@ -130,6 +275,9 @@
     <nav class="flex gap-4 text-sm">
       <button onclick="showTab('chat')" id="tab-chat" class="tab-btn active px-3 py-1 rounded">Chat</button>
       <button onclick="showTab('map')" id="tab-map" class="tab-btn px-3 py-1 rounded">Karte</button>
+      <button onclick="showTab('entities')" id="tab-entities" class="tab-btn px-3 py-1 rounded">Personen</button>
+      <button onclick="showTab('validation')" id="tab-validation" class="tab-btn px-3 py-1 rounded">🏷️
+        Validierung</button>
       <button onclick="showTab('import')" id="tab-import" class="tab-btn px-3 py-1 rounded">Import</button>
       <button onclick="showTab('settings')" id="tab-settings" class="tab-btn px-3 py-1 rounded">Einstellungen</button>
     </nav>
@@ -141,6 +289,15 @@
 
   <!-- Chat-Tab -->
   <div id="view-chat" class="view max-w-4xl mx-auto p-4 flex flex-col gap-4" style="height:calc(100vh - 70px)">
+    <!-- Global Loading Indicator -->
+    <div id="global-loading" class="hidden">
+      <div class="flex items-center justify-between mb-1 px-1">
+        <span class="text-[10px] text-blue-400 font-medium tracking-wider uppercase">Memosaur denkt nach...</span>
+        <span class="text-[10px] text-gray-600 animate-pulse">🦖</span>
+      </div>
+      <div class="loading-bar rounded-full"></div>
+    </div>
+
     <div id="chat-messages" class="flex-1 overflow-y-auto flex flex-col gap-4 pr-2"></div>
 
     <!-- Eingabe -->
@@ -193,6 +350,142 @@
         Bewertungen</span>
       <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
         Gespeicherte Orte</span>
+    </div>
+  </div>
+
+  <!-- Personen-Tab (Entity Resolution) -->
+  <div id="view-entities" class="view hidden max-w-4xl mx-auto p-4 flex flex-col gap-6">
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-semibold flex items-center gap-2">🕵️ Unbekannte Gesichter zuordnen</h2>
+        <button onclick="window.Entities?.loadSuggestedClusters()"
+          class="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 bg-blue-900/30 px-3 py-1.5 rounded-lg border border-blue-800/50 transition-colors">
+          <span>🔄</span> Aktualisieren
+        </button>
+      </div>
+      <p class="text-sm text-gray-400 mb-6">
+        Hier findest du Gesichter, die auf importierten Fotos erkannt wurden, aber noch mit keinem Chat-Kontakt
+        verknüpft sind. Weise ihnen einen Namen und einen Identifier (z.B. Handynummer) zu.
+      </p>
+
+      <!-- Lade-Indikator (Init) -->
+      <div id="entities-loading" class="hidden text-center py-8 text-gray-500 text-sm flex flex-col items-center gap-3">
+        <div class="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        Gefundene Gesichter werden analysiert...
+      </div>
+
+      <!-- Leerer Status -->
+      <div id="entities-empty"
+        class="hidden text-center py-12 bg-gray-800/30 rounded-lg border border-gray-800 border-dashed">
+        <div class="text-3xl mb-3 opacity-50">✨</div>
+        <h3 class="text-gray-300 font-medium mb-1">Alles aufgeräumt!</h3>
+        <p class="text-gray-500 text-sm">Es wurden keine neuen, unzugewiesenen Gesichter in der Datenbank gefunden.</p>
+      </div>
+
+      <!-- Liste der Cluster -->
+      <div id="cluster-list" class="flex flex-col gap-5"></div>
+
+      <!-- Sektion: Einzelne Gesichter -->
+      <div id="single-faces-section" class="hidden mt-8">
+        <h3 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+          <span>👤</span> Einzelne Gesichter (Seltene Personen)
+        </h3>
+        <div id="single-faces-list" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4"></div>
+      </div>
+    </div>
+
+    <!-- Modal / Overlay: Person analysieren & aufteilen -->
+    <div id="split-modal"
+      class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div
+        class="bg-gray-900 border border-gray-800 rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-[slide-up_0.3s_ease-out]">
+        <div class="p-6 border-b border-gray-800 flex justify-between items-center">
+          <div>
+            <h3 class="text-xl font-bold text-gray-100 flex items-center gap-2">
+              <span class="text-blue-500">🔍</span> Person analysieren: <span id="split-entity-name"
+                class="text-blue-400"></span>
+            </h3>
+            <p class="text-sm text-gray-400 mt-1">Wir suchen nach Untergruppen in dieser Person, um sie ggf.
+              aufzuteilen.</p>
+          </div>
+          <button onclick="document.getElementById('split-modal').classList.add('hidden')"
+            class="text-gray-500 hover:text-white text-2xl">×</button>
+        </div>
+
+        <div id="split-content" class="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+          <!-- Wird via JS befüllt -->
+          <div id="split-loading" class="flex flex-col items-center justify-center py-12">
+            <div class="w-10 h-10 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+            <p class="text-sm text-gray-500 mt-4">Analysiere Gesichtsgruppen...</p>
+          </div>
+          <div id="split-results" class="hidden flex flex-col gap-6"></div>
+        </div>
+
+        <div class="p-6 border-t border-gray-800 bg-gray-950/50 flex justify-end">
+          <button onclick="document.getElementById('split-modal').classList.add('hidden')"
+            class="px-6 py-2 rounded-xl border border-gray-700 text-gray-300 hover:bg-gray-800 transition-all">Schließen</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal / Overlay: Fotos verwalten -->
+    <div id="manage-photos-modal"
+      class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div
+        class="bg-gray-900 border border-gray-800 rounded-3xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-[slide-up_0.3s_ease-out]">
+        <div class="p-6 border-b border-gray-800 flex justify-between items-center">
+          <div>
+            <h3 class="text-xl font-bold text-gray-100 flex items-center gap-2">
+              <span class="text-emerald-500">🖼️</span> Bilder verwalten: <span id="manage-photos-entity-name"
+                class="text-emerald-400"></span>
+            </h3>
+            <p class="text-sm text-gray-400 mt-1">Hier kannst du alle zugeordneten Gesichter sehen und falsch
+              zugeordnete Bilder entfernen.</p>
+          </div>
+          <button onclick="document.getElementById('manage-photos-modal').classList.add('hidden')"
+            class="text-gray-500 hover:text-white text-2xl">×</button>
+        </div>
+
+        <div id="manage-photos-content" class="flex-1 overflow-y-auto p-6">
+          <div id="manage-photos-loading" class="flex flex-col items-center justify-center py-12">
+            <div class="w-10 h-10 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+            <p class="text-sm text-gray-500 mt-4">Lade verknüpfte Bilder...</p>
+          </div>
+          <div id="manage-photos-grid"
+            class="hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <!-- Wird via JS befüllt -->
+          </div>
+        </div>
+
+        <div class="p-6 border-t border-gray-800 bg-gray-950/50 flex justify-end">
+          <button onclick="document.getElementById('manage-photos-modal').classList.add('hidden')"
+            class="px-6 py-2 rounded-xl border border-gray-700 text-gray-300 hover:bg-gray-800 transition-all">Schließen</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sektion: Personen verwalten -->
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5 mt-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-semibold flex items-center gap-2">👤 Verknüpfte Personen verwalten</h2>
+        <button onclick="window.Entities?.loadLinkedEntities()"
+          class="text-xs text-gray-400 hover:text-gray-300 flex items-center gap-1 bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-700 transition-colors">
+          <span>🔄</span> Liste aktualisieren
+        </button>
+      </div>
+      <p class="text-sm text-gray-400 mb-6">
+        Hier siehst du alle Personen, die du bereits verknüpft hast. Du kannst ihre Namen korrigieren oder die
+        Verknüpfung wieder aufheben.
+      </p>
+
+      <div id="entities-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Wird via JS befüllt -->
+      </div>
+
+      <div id="entities-list-empty"
+        class="hidden text-center py-8 text-gray-600 text-sm border border-gray-800 border-dashed rounded-lg">
+        Noch keine Personen verknüpft.
+      </div>
     </div>
   </div>
 
@@ -363,6 +656,54 @@
     }
   </style>
 
+  <!-- Validierungs-Tab -->
+  <div id="view-validation" class="view hidden max-w-5xl mx-auto p-4 flex flex-col gap-6">
+    <!-- Header -->
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <h2 class="font-semibold text-xl flex items-center gap-2 mb-3">✅ Personen-Validierung</h2>
+      <p class="text-sm text-gray-400">
+        Überprüfe die zugeordneten Personen und korrigiere falsche Zuordnungen.
+        Gehe zum <strong>Personen-Tab</strong>, um neue Gesichter zu benennen.
+      </p>
+    </div>
+
+    <!-- Personen-Übersicht -->
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold flex items-center gap-2">👥 Alle erkannten Personen</h3>
+        <button onclick="Validation.loadPersonsList()"
+          class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm transition-all shadow-lg">
+          🔄 Liste laden
+        </button>
+      </div>
+      <p class="text-xs text-gray-500 mb-4">
+        Klicke auf eine Person, um alle zugeordneten Gesichter zu sehen. Falsch zugeordnete Gesichter können entfernt werden.
+      </p>
+      <div id="persons-list-container">
+        <div class="text-center py-8 text-gray-500 text-sm">
+          Klicke auf "Liste laden", um die Personen-Übersicht anzuzeigen
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistik-Übersicht -->
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <h3 class="font-semibold mb-4 flex items-center gap-2">📊 Statistiken</h3>
+      <div class="flex gap-2 mb-4">
+        <button onclick="Validation.loadStats()"
+          class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm transition-all">
+          Statistiken laden
+        </button>
+        <button onclick="Validation.repairMigrateGroundTruth()"
+          class="bg-yellow-600 hover:bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm transition-all"
+          title="Repariert fehlende Personen aus alten Validierungen">
+          🔧 Daten reparieren
+        </button>
+      </div>
+      <div id="validation-stats-overview"></div>
+    </div>
+  </div>
+
   <!-- Einstellungen-Tab -->
   <div id="view-settings" class="view hidden max-w-2xl mx-auto p-4 flex flex-col gap-6">
 
@@ -411,6 +752,8 @@
   <!-- Module laden -->
   <script src="/static/chat.js"></script>
   <script src="/static/map.js"></script>
+  <script src="/static/entities.js"></script>
+  <script src="/static/validation.js"></script>
   <script>
     // Aktueller User (Default: ManfredMustermann)
     window._userId = '00000000-0000-0000-0000-000000000001';
@@ -438,6 +781,10 @@
       document.getElementById('tab-' + name).classList.add('active');
       if (name === 'map') loadMap();
       if (name === 'import') loadStatus();
+      if (name === 'entities' && window.Entities) {
+        window.Entities.loadSuggestedClusters();
+        window.Entities.loadLinkedEntities();
+      }
       if (name === 'settings') { loadConsentSettings(); window.Sync?.renderSyncUI('sync-container', window._userId); }
     }
 
@@ -521,6 +868,37 @@
         const el = document.getElementById('user-info');
         if (el) el.innerHTML = `<strong>${d.display_name}</strong> <span class="text-gray-600 text-xs">(${d.id})</span>`;
       } catch (e) { }
+    }
+
+    // -------------------------------------------------------------------------
+    // Lightbox (Vollbild-Ansicht)
+    // -------------------------------------------------------------------------
+    function openLightbox(url, captionHtml = "") {
+      const lb = document.getElementById('memosaur-lightbox');
+      const img = document.getElementById('lightbox-img');
+      const cap = document.getElementById('lightbox-caption');
+      if (!lb || !img || !cap) return;
+
+      img.src = url;
+      cap.innerHTML = captionHtml;
+      lb.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+
+      const escHandler = (e) => {
+        if (e.key === 'Escape') {
+          closeLightbox();
+          document.removeEventListener('keydown', escHandler);
+        }
+      };
+      document.addEventListener('keydown', escHandler);
+    }
+
+    function closeLightbox() {
+      const lb = document.getElementById('memosaur-lightbox');
+      if (lb) {
+        lb.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
     }
   </script>
 

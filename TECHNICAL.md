@@ -4,7 +4,7 @@
 
 1. [Architekturübersicht](#architekturübersicht)
 2. [Verzeichnisstruktur](#verzeichnisstruktur)
-3. [Token-Flow (Privacy-Kernkonzept)](#token-flow)
+3. [Entity-Resolution (Human-in-the-Loop)](#entity-resolution-human-in-the-loop)
 4. [Datenmodell](#datenmodell)
 5. [Backend-Module](#backend-module)
 6. [RAG-Pipelines](#rag-pipelines)
@@ -21,32 +21,32 @@
 ┌──────────────────────────────────────────────────────────────────┐
 │                        Browser (Client)                           │
 │                                                                    │
-│  ┌──────────────┐  ┌─────────────────┐  ┌─────────────────────┐  │
-│  │ Transformers │  │   IndexedDB     │  │  Web Crypto API     │  │
-│  │ .js (WASM)   │  │  Token↔Name     │  │  AES-GCM Encrypt    │  │
-│  │ NER lokal    │  │  Wörterbuch     │  │  für Sync-Blob      │  │
-│  └──────┬───────┘  └──────┬──────────┘  └──────────┬──────────┘  │
-│ maskiert│          lookup │                  encrypt│             │
-└─────────┼─────────────────┼──────────────────────────────────────┘
-          │ POST (nur Tokens)│                         │ POST /sync
-          ▼                  ▼ (Re-Mapping im Browser) ▼
+│  ┌─────────────────┐  ┌─────────────────────┐                    │
+│  │   IndexedDB     │  │  Web Crypto API     │                    │
+│  │  Entity-Mapping │  │  AES-GCM Encrypt    │                    │
+│  │  Wörterbuch     │  │  für Sync-Blob      │                    │
+│  └──────┬──────────┘  └──────────┬──────────┘                    │
+│         │                        │                               │
+└─────────┼────────────────────────┼───────────────────────────────┘
+          │ POST /api/v1/query     │ POST /sync
+          ▼                        ▼ 
 ┌──────────────────────────────────────────────────────────────────┐
 │              FastAPI Backend – /api/v0/ + /api/v1/               │
 │                                                                    │
-│  /v1/query  /v1/ingest  /v1/sync  /v1/consent  /v1/dictionary   │
+│  /v1/query  /v1/ingest  /v1/sync  /v1/consent  /v1/entities    │
 │                                                                    │
 │  ┌──────────────┐   ┌──────────────────┐   ┌──────────────────┐  │
-│  │  ChromaDB    │   │  SQLite          │   │  Ollama          │  │
-│  │  (nur Tokens)│   │  users           │   │  qwen3:8b Chat   │  │
-│  │  user_id-    │   │  consents        │   │  gemma3:12b      │  │
-│  │  scoped      │   │  sync_blobs      │   │  Vision          │  │
+│  │   ChromaDB   │   │  SQLite          │   │  Ollama          │  │
+│  │   / ES       │   │  users           │   │  qwen3:8b Chat   │  │
+│  │              │   │  consents        │   │  gemma3:12b      │  │
+│  │  user-scoped │   │  sync_blobs      │   │  Vision          │  │
 │  └──────────────┘   └──────────────────┘   └──────────────────┘  │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
 Zwei API-Generationen laufen parallel:
-- **v0** (`/api/*`): Original-API mit Klarnamen, bleibt für Rückwärtskompatibilität erhalten
-- **v1** (`/api/v1/*`): Token-aware, user-scoped, DSGVO-konform
+- **v0** (`/api/*`): Original-API mit Klarnamen, bleibt für Rückwärtskompatibilität erhalten.
+- **v1** (`/api/v1/*`): Aktuelle API (user-scoped, DSGVO-konform).
 
 ---
 
@@ -65,9 +65,8 @@ memosaur/
 │   │       ├── users.py               # GET/POST /api/v1/users
 │   │       ├── consent.py             # GET/POST /api/v1/consent/{user_id}
 │   │       ├── sync.py                # GET/POST /api/v1/sync/{user_id}
-│   │       ├── dictionary.py          # GET/DELETE /api/v1/dictionary
 │   │       ├── ingest.py              # POST /api/v1/ingest/* (Consent-Gate)
-│   │       ├── query.py               # POST /api/v1/query (Token-aware)
+│   │       ├── query.py               # POST /api/v1/query (user-scoped)
 │   │       ├── map.py                 # GET /api/v1/locations (user-scoped)
 │   │       └── media.py               # GET /api/v1/media/{user_id}/{file}
 │   ├── db/
@@ -90,16 +89,15 @@ memosaur/
 │       ├── store_v2.py                # ChromaDB Interface v1 (+ user_id-Filter)
 │       ├── query_parser.py            # v0: LLM-basierter Query-Parser
 │       ├── retriever.py               # v0: RAG-Pipeline mit Klarnamen
-│       └── retriever_v2.py            # v1: Token-aware RAG-Pipeline, user-scoped
+│       └── retriever_v2.py            # v1: Agentic RAG-Pipeline, user-scoped
 ├── frontend/
 │   ├── index.html                     # SPA: Chat, Karte, Import, Einstellungen
-│   ├── chat.js                        # Chat-UI, v2 Token-Flow, v0 Fallback
+│   ├── chat.js                        # Chat-UI, v2 Entity-Flow, v0 Fallback
 │   ├── map.js                         # Leaflet.js Kartenansicht
-│   ├── ner.js                         # Transformers.js NER-Pipeline (WASM)
-│   ├── token_store.js                 # IndexedDB Token↔Klarname Wörterbuch
+│   ├── entities.js                    # Entity-Management & Personen-Onboarding
 │   └── sync.js                        # Web Crypto AES-GCM Verschlüsselung
 ├── scripts/
-│   └── migrate_to_v2.py               # Einmalige Migration v1→v2 (tokenisiert DB)
+│   └── ...
 ├── sample/
 │   └── photo_sample.json              # 50 ausgewählte Foto-Dateinamen
 ├── config.yaml                        # Lokale Konfiguration (nicht in Git)
@@ -110,66 +108,27 @@ memosaur/
 
 ---
 
-## Token-Flow
+## Entity-Resolution (Human-in-the-Loop)
 
-Das zentrale Privacy-Konzept von memosaur v2: persönliche Namen und Orte werden **niemals im Klartext** an den Server gesendet.
+Das zentrale Privacy-Konzept von memosaur v2: persönliche Namen und Orte werden lokal verarbeitet und verknüpft.
 
-### Maskierung (Browser → Server)
+### Entity-Mapping
 
-```
-Nutzereingabe:    "Wo war ich im August mit Nora in München?"
-                           │
-              NER (Transformers.js, lokal im Browser)
-                           │
-         Erkannte Entitäten: Nora → PER, München → LOC
-                           │
-         IndexedDB-Lookup / -Eintrag:
-           "Nora"    → PER_1   (neu angelegt)
-           "München" → LOC_11  (bereits vorhanden)
-                           │
-Maskierte Anfrage: "Wo war ich im August mit [PER_1] in [LOC_11]?"
-                           │
-         POST /api/v1/query
-         { masked_query: "...mit [PER_1] in [LOC_11]?",
-           person_tokens: ["[PER_1]"],
-           location_tokens: ["[LOC_11]"] }
-```
+Anstatt Namen im Browser zu maskieren, nutzt memosaur jetzt ein integriertes Entity-Resolution-System:
 
-### Retrieval (Server)
+1. **Gesichtserkennung**: Beim Import von Fotos werden Gesichter erkannt und lokal geclustert (via DBSCAN).
+2. **Onboarding**: Im "Personen"-Tab kann der Nutzer diese Cluster einem Namen (z.B. "Nora") und optional einer Chat-ID zuweisen.
+3. **Internal Mapping**: Das System speichert diese Verknüpfung in der lokalen Browser-DB (IndexedDB) und synchronisiert sie verschlüsselt.
 
-```
-Server empfängt Tokens → ChromaDB-Filter:
-  {"$and": [
-    {"has_per_1": {"$eq": true}},   ← Boolean-Flag in Metadaten
-    {"date_ts": {"$gte": ...}}
-  ]}
+### RAG-Retrieval
 
-LLM-Prompt enthält nur Tokens:
-  "Kontext: Foto vom 29.08. Ort: [LOC_11]. Personen: [PER_1]..."
-  
-LLM-Antwort enthält nur Tokens:
-  "Am 29.08.2025 warst du mit [PER_1] in [LOC_11]..."
-```
+Beim Abfragen der Daten nutzt der Agent Tools, um gezielt in den verschiedenen Datenquellen zu suchen:
 
-### Re-Mapping (Server → Browser)
+- **search_photos**: Sucht nach Clustern oder Personennamen in den Foto-Metadaten.
+- **search_messages**: Sucht in den (lokal indexierten) Chatverläufen.
+- **search_places**: Sucht in Google Maps Daten.
 
-```
-Browser empfängt: "...mit [PER_1] in [LOC_11]..."
-                           │
-         IndexedDB-Lookup:
-           PER_1  → "Nora"
-           LOC_11 → "München"
-                           │
-Anzeige: "...mit Nora in München..."
-```
-
-### Token-ID-Format
-
-| Präfix | Typ | Beispiel |
-|---|---|---|
-| `PER_n` | Person | `[PER_1]` → Nora |
-| `LOC_n` | Ort / Location | `[LOC_11]` → München |
-| `ORG_n` | Organisation | `[ORG_3]` → Deutsche Post |
+Der Privacy-Aspekt wird dadurch gewahrt, dass die gesamte Anwendung (Backend + Datenbank + LLM) **privat und lokal** auf der Hardware des Nutzers läuft. Es gibt keinen Cloud-Server, der die Daten im Klartext sieht.
 
 ---
 
@@ -202,7 +161,7 @@ sync_blobs (id INT PK AUTOINCREMENT, user_id TEXT FK,
 Alle vier Collections (`photos`, `reviews`, `saved_places`, `messages`) enthalten nach der Migration:
 
 - `user_id` – UUID des Nutzers (für Multi-User-Filterung)
-- Alle Texte und String-Metadaten sind **tokenisiert** (Klarnamen durch `[TYPE_n]` ersetzt)
+- Alle Texte und String-Metadaten werden lokal indexiert
 - Boolean-Flags `has_per_1`, `has_loc_2` etc. für strukturierte Filter
 
 #### `photos` – Metadatenfelder
@@ -214,20 +173,19 @@ Alle vier Collections (`photos`, `reviews`, `saved_places`, `messages`) enthalte
 | `filename` | string | Originaldateiname |
 | `date_ts` | int | Unix-Timestamp |
 | `date_iso` | string | ISO-8601 |
-| `lat` / `lon` | float | GPS-Koordinaten (nicht tokenisiert) |
-| `place_name` | string | Tokenisierter Ortsname, z.B. `[LOC_1]` |
-| `persons` | string | Tokenisierte Personen, z.B. `[PER_1],[PER_2]` |
-| `has_per_1` | bool | True wenn PER_1 auf dem Foto |
-| `has_loc_2` | bool | True wenn LOC_2 relevant |
+| `lat` / `lon` | float | GPS-Koordinaten |
+| `place_name` | string | Ortsname (Klartext) |
+| `persons` | string | Zugeordnete Personen (Namen) |
+| `entity_ids` | string | IDs der verknüpften Personen |
 | `cluster` | string | Geografischer Cluster |
 
-Dokument-Text (tokenisiert):
+Dokument-Text (indexiert):
 ```
 Foto: 20250829_192312.jpg
 Datum: 29.08.2025 um 17:23 Uhr
-Ort: [LOC_11]
+Ort: München, Marienplatz
 Koordinaten: 48.14021°N, 11.55518°E
-Personen: [PER_1]
+Personen: Nora
 Bildbeschreibung: Ein kleines Mädchen mit blonden Locken steht auf...
 ```
 
@@ -237,11 +195,10 @@ Bildbeschreibung: Ein kleines Mädchen mit blonden Locken steht auf...
 |---|---|---|
 | `user_id` | string | UUID des Nutzers |
 | `source` | string | `"whatsapp"` oder `"signal"` |
-| `chat_name` | string | Tokenisierter Chat-Name |
+| `chat_name` | string | Name des Chats |
 | `date_ts` / `date_iso` | int/string | Zeitstempel |
-| `persons` | string | Absender-Tokens |
-| `mentioned_persons` | string | Alle erwähnten Personen-Tokens |
-| `has_per_1` | bool | True wenn PER_1 im Chunk erwähnt |
+| `sender` | string | Absender (Name/ID) |
+| `mentioned_persons` | string | Alle erwähnten Personen |
 
 ---
 
@@ -294,20 +251,13 @@ count_documents_for_user(col, user_id)
 
 ### `backend/rag/retriever_v2.py`
 
-Token-aware RAG ohne LLM-NER (NER findet im Browser statt):
+Agentic RAG mit Tool-Einsatz:
 
 ```python
-retrieve_v2(masked_query, user_id, person_tokens, location_tokens, ...)
+retrieve_v2(query, user_id, ...)
 ```
 
-Filter-Aufbau aus Token-IDs:
-```python
-# "[PER_1]" → "has_per_1" → {"has_per_1": {"$eq": True}}
-field = "has_" + token.strip("[]").lower()   # "[PER_1]" → "has_per_1"
-```
-
-System-Prompt weist LLM explizit an, Tokens unverändert beizubehalten:
-> *"Behalte alle Tokens ([PER_n], [LOC_n]) unverändert in deiner Antwort."*
+Die Suche erfolgt quellenübergreifend. Der Agent entscheidet, welche Tools (`search_photos`, `search_messages`, etc.) mit welchen Parametern (Personennamen, Orte, Zeiträume) aufgerufen werden.
 
 ### `backend/api/v1/ingest.py` – Consent-Gate
 
@@ -316,63 +266,53 @@ Foto-Ingestion ist zweistufig:
 ```
 Schritt 1: POST /api/v1/ingest/photos/describe
   → Consent "biometric_photos" prüfen
-  → Ollama Vision → Klartext-Beschreibung an Browser zurücksenden
+  → Ollama Vision → Bildbeschreibung generieren
 
 Schritt 2: POST /api/v1/ingest/photos/submit
-  → Browser hat Beschreibung lokal maskiert
-  → Maskierter Text wird in ChromaDB gespeichert
+  → Metadaten und Beschreibung werden in ChromaDB gespeichert
 ```
 
 Nachrichten-Ingestion prüft Consent `"messages"` vor dem Upload.
 
-### `backend/api/v1/dictionary.py`
+### `backend/api/v1/entities.py`
 
-Stellt das Migrations-Wörterbuch bereit:
+Verwaltet das Entity-Mapping (Personen-Onboarding):
 
 ```
-GET  /api/v1/dictionary  → {entries: [...], count: 267}
-DELETE /api/v1/dictionary → löscht data/migration_dictionary.json
+GET  /api/entities/list  → Liste der verknüpften Personen
+POST /api/entities/link  → Cluster einer Person zuordnen
 ```
-
-Das Frontend importiert es beim ersten Start automatisch in IndexedDB und ruft dann DELETE auf.
 
 ---
 
 ## RAG-Pipelines
 
-### v2-Pipeline (Token-Flow)
+### v2-Pipeline (Agentic RAG)
 
 ```
 Browser                              Server
   │                                    │
-  ├─ NER lokal: "Nora" → [PER_1]      │
-  │                                    │
   ├─ POST /api/v1/query ──────────────►│
-  │  {masked_query, person_tokens}     │
-  │                                    ├─ embed_single(masked_query)
-  │                                    ├─ query_collection_v2(where={
-  │                                    │    user_id, has_per_1, date_ts
-  │                                    │  })
+  │  {query, user_id}                  │
+  │                                    ├─ Agent analysiert Anfrage
+  │                                    ├─ Tool-Calls (z.B. search_photos)
+  │                                    ├─ Retrieval (ES / ChromaDB)
   │                                    ├─ _build_context(sources)
   │                                    ├─ chat(system+context+query)
-  │                                    │  → LLM antwortet mit Tokens
   │                                    │
-  │◄── {masked_answer, sources} ───────┤
+  │◄── {answer, sources} ──────────────┤
   │                                    │
-  ├─ TokenStore.unmaskText(answer)     │
-  ├─ _unmaskMetadata(sources)          │
-  │                                    │
-  └─ Anzeige mit Klarnamen             │
+  └─ Anzeige                           │
 ```
 
-### v0-Pipeline (Legacy, Klarnamen)
+### v0-Pipeline (Legacy)
 
 ```
 POST /api/query
   → parse_query() [LLM-NER + Regelbasiert]
   → embed_single(query)
   → query_collection(where aus ParsedQuery)
-  → chat(context mit Klarnamen)
+  → chat(context)
   → {answer, sources, parsed_query}
 ```
 
@@ -395,7 +335,7 @@ POST /api/query
 | `GET` | `/api/locations` | GPS-Punkte für Karte |
 | `GET` | `/api/media/{filename}` | Bild-Thumbnail |
 
-### v1 (Token-aware, user-scoped)
+### v1 (Current – user-scoped, GDPR compliant)
 
 #### User & Consent
 
@@ -413,23 +353,21 @@ POST /api/query
 |---|---|---|
 | `GET` | `/api/v1/ingest/status?user_id=` | Dokument-Anzahl user-scoped |
 | `POST` | `/api/v1/ingest/photos/describe` | Schritt 1: Vision-Beschreibung holen |
-| `POST` | `/api/v1/ingest/photos/submit` | Schritt 2: Maskiertes Foto speichern |
+| `POST` | `/api/v1/ingest/photos/submit` | Schritt 2: Foto-Metadaten speichern |
 | `POST` | `/api/v1/ingest/reviews?user_id=` | Bewertungen einlesen |
 | `POST` | `/api/v1/ingest/saved?user_id=` | Gespeicherte Orte einlesen |
-| `POST` | `/api/v1/ingest/messages` | WhatsApp/Signal (maskierter Text) |
+| `POST` | `/api/v1/ingest/messages` | WhatsApp/Signal (Klartext-Import) |
 
 #### Abfrage
 
 | Methode | Pfad | Request | Response |
 |---|---|---|---|
-| `POST` | `/api/v1/query` | `{user_id, masked_query, person_tokens, location_tokens, ...}` | `{masked_answer, sources, filter_summary}` |
+| `POST` | `/api/v1/query` | `{user_id, query, ...}` | `{answer, sources, filter_summary}` |
 
 #### Sync & Dictionary
 
 | Methode | Pfad | Beschreibung |
 |---|---|---|
-| `GET` | `/api/v1/dictionary` | Migrations-Wörterbuch abrufen |
-| `DELETE` | `/api/v1/dictionary` | Wörterbuch-Datei nach Import löschen |
 | `POST` | `/api/v1/sync/{user_id}` | Verschlüsselten Blob hochladen |
 | `GET` | `/api/v1/sync/{user_id}` | Neuesten Blob herunterladen |
 | `GET` | `/api/v1/sync/{user_id}/history` | Alle Versionen (für Rollback) |
@@ -441,78 +379,13 @@ POST /api/query
 | `GET` | `/api/v1/locations?user_id=` | GPS-Punkte user-scoped |
 | `GET` | `/api/v1/media/{user_id}/{file}` | Bild-Thumbnail user-scoped |
 
+#### Webhook (v1)
+
+| Methode | Pfad | Beschreibung |
+|---|---|---|
+| `POST` | `/api/v1/webhook` | WhatsApp-Nachricht empfangen & beantworten |
+
 ---
-
-## Frontend-Module
-
-### `frontend/ner.js` – Client-seitige NER
-
-- Modell: `Xenova/bert-base-multilingual-cased-ner-hrl` (~90 MB ONNX)
-- Lädt via Transformers.js CDN, gecacht im Browser-Cache nach erstem Download
-- `aggregation_strategy: 'simple'` fasst zusammengehörige Tokens zusammen
-- Blocking: UI ist bis zum Modellladen gesperrt (Overlay mit Fortschrittsbalken)
-
-```javascript
-const { masked, entities } = await NER.maskText("Nora war in München");
-// masked:   "[ PER_1] war in [LOC_11]"
-// entities: [{word:"Nora", token:"[PER_1]", type:"PER"}, ...]
-```
-
-### `frontend/token_store.js` – IndexedDB Wörterbuch
-
-```javascript
-// Token vergeben / nachschlagen
-await TokenStore.getOrCreateToken("Nora", "PER")   // → "[PER_1]"
-await TokenStore.lookupToken("[PER_1]")             // → "Nora"
-await TokenStore.unmaskText("Hallo [PER_1]!")       // → "Hallo Nora!"
-
-// Server-Import beim ersten Start
-await TokenStore.checkAndImportFromServer()
-// → GET /api/v1/dictionary → importTokens() → DELETE /api/v1/dictionary
-```
-
-**IndexedDB-Schema:**
-```
-DB: "memosaur_tokens"
-  Store: "dictionary"
-    { token_id, cleartext, cleartext_lc, type, first_seen, count }
-  Index: cleartext_lc (für Duplikat-Prüfung)
-  Index: type (für Zähler pro Typ)
-```
-
-### `frontend/sync.js` – Web Crypto Verschlüsselung
-
-```javascript
-// Export: Wörterbuch → verschlüsseln → Server
-await Sync.exportAndSync(userId, password)
-// PBKDF2(password, salt, 250k Iter, SHA-256) → AES-256-GCM Key
-// encrypt(JSON.stringify(tokens)) → {blob: base64, iv: base64}
-// POST /api/v1/sync/{userId}
-
-// Import: Server → entschlüsseln → IndexedDB
-await Sync.importFromSync(userId, password)
-// GET /api/v1/sync/{userId} → decrypt(blob, iv) → importTokens()
-```
-
-Das Passwort wird **nur in lokalen Variablen** gehalten. Keine Persistenz, kein Server-Transfer.
-
-### `frontend/chat.js` – Query-Flow
-
-```javascript
-async function sendQuery() {
-  if (window._nerReady) {
-    // v2: NER → maskieren → POST /api/v1/query → unmaskieren
-    const { masked, entities } = await NER.maskText(query);
-    const data = await fetch('/api/v1/query', { body: {masked_query: masked, ...} });
-    const unmasked = await TokenStore.unmaskText(data.masked_answer);
-    appendAssistantMessage(unmasked, ...);
-  } else {
-    // v0 Fallback
-    const data = await fetch('/api/query', { body: {query} });
-    appendAssistantMessage(data.answer, ...);
-  }
-}
-```
 
 ---
 
@@ -577,4 +450,3 @@ server:
 |---|---|---|
 | Tailwind CSS | CDN | Styling |
 | Leaflet.js | 1.9.4 | Interaktive Karte |
-| `@xenova/transformers` | 2.17.2 | NER-Modell via WASM im Browser |

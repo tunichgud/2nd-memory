@@ -176,9 +176,13 @@ def query_es(
     must_filters = [{"term": {"user_id": user_id}}]
     
     if person_names:
-        # Alle genannten Personen müssen vorkommen (AND Logik für Multi-Personen-Suche)
-        for name in person_names:
-            must_filters.append({"term": {"persons": name}})
+        # person_names ist jetzt eine flache Liste aller aufgelösten IDs (Clusters, Aliase, Namen)
+        # Wenn wir mehrere Personen suchen, kommen diese als Gruppen vom Retriever?
+        # Nein, retriever_v2 verschmilzt aktuell alle zu einer Liste.
+        # WICHTIG: Sollten wir OR oder AND nutzen? 
+        # POC-Ansatz: Wenn person_names eine flache Liste ist, suchen wir Dokumente,
+        # die MINDESTENS EINEN dieser Identifier enthalten.
+        must_filters.append({"terms": {"persons": person_names}})
 
     if location_names:
         from backend.rag.geo_utils import get_bounding_box
@@ -220,7 +224,7 @@ def query_es(
     }
 
     import json
-    logger.info("ES Search Query [%s]: %s", collection_name, json.dumps(search_query, indent=2, ensure_ascii=False))
+    logger.debug("ES Search Query [%s]: %s", collection_name, json.dumps(search_query, indent=2, ensure_ascii=False))
 
     res = client.search(index=index_name, body=search_query, size=n_results)
     

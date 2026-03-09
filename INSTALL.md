@@ -29,9 +29,9 @@
 | Speicherplatz | 5 GB | 20 GB |
 | Browser | Chrome 112+ / Firefox 115+ | aktuell |
 
-> **Browser-Anforderung:** memosaur v2 verwendet WebAssembly (NER-Modell), IndexedDB
-> (Token-Wörterbuch) und die Web Crypto API (Sync-Verschlüsselung). Diese Features
-> sind in allen modernen Browsern verfügbar, aber nicht in sehr alten Versionen.
+> **Browser-Anforderung:** memosaur v2 verwendet moderne Web-Technologien wie IndexedDB
+> und die Web Crypto API (Sync-Verschlüsselung). Diese Features sind in allen modernen
+> Browsern verfügbar, aber nicht in sehr alten Versionen.
 
 ---
 
@@ -101,11 +101,10 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-> **Beim ersten Start** werden zwei Modelle automatisch heruntergeladen:
+> **Beim ersten Start** wird ein Modell automatisch heruntergeladen:
 > - Python-Backend: `paraphrase-multilingual-MiniLM-L12-v2` (~470 MB, von HuggingFace)
-> - Browser: NER-Modell `bert-base-multilingual-cased-ner-hrl` (~90 MB, vom CDN)
 >
-> Beide werden lokal gecacht und nur einmalig geladen.
+> Das Modell wird lokal gecacht und nur einmalig geladen.
 
 ---
 
@@ -209,28 +208,17 @@ Browser öffnen: **[http://localhost:8000](http://localhost:8000)**
 
 Beim ersten Besuch läuft folgende Sequenz automatisch ab:
 
-### 1. Token-Wörterbuch laden (< 1 Sekunde)
-Das NER-Wörterbuch wird vom Server abgerufen und in der Browser-IndexedDB gespeichert. Dieser Schritt ist nur beim allerersten Besuch nötig.
+### 1. Initialisierung
+Die App lädt notwendige Komponenten aus der lokalen Datenbank.
 
-### 2. NER-Modell laden (~90 MB, einmalig)
-Ein KI-Modell für die lokale Erkennung von Namen und Orten wird heruntergeladen. Ein Fortschrittsbalken zeigt den Stand. Nach dem Download wird es im Browser-Cache gespeichert – beim nächsten Besuch startet es sofort.
-
-```
-Lade Token-Wörterbuch…
-Wörterbuch geladen (267 Tokens)
-NER-Modell: 45% (model_quantized.onnx)
-NER-Modell: 100%
-→ App startet
-```
-
-### 3. DSGVO-Einwilligungsdialog
+### 2. DSGVO-Einwilligungsdialog
 Beim allerersten Start erscheint ein Dialog für die Einwilligungen nach Art. 9 DSGVO:
 
 | Feature | Was wird verarbeitet |
 |---|---|
-| **Fotos & KI-Bilderkennung** | Bilder werden an Ollama (lokal) gesendet; die Beschreibungen werden im Browser vor der Speicherung anonymisiert |
-| **GPS-Standortdaten** | GPS-Koordinaten gehen an OpenStreetMap/Nominatim für Reverse Geocoding (nur Koordinaten, keine Namen) |
-| **Nachrichten** | Chat-Texte werden vor dem Upload im Browser maskiert – nur Tokens erreichen den Server |
+| **Fotos & KI-Bilderkennung** | Bilder werden an Ollama (lokal) gesendet für die Analyse (GPS, Personen, Beschreibungen). |
+| **GPS-Standortdaten** | GPS-Koordinaten gehen an OpenStreetMap/Nominatim für Reverse Geocoding. |
+| **Nachrichten** | Chat-Texte werden lokal indexiert, um sie für dich durchsuchbar zu machen. |
 
 Ohne Einwilligung sind die jeweiligen Features deaktiviert. Die Einstellung kann jederzeit im **Einstellungen-Tab** geändert werden.
 
@@ -252,11 +240,10 @@ Klick auf **"Alles einlesen"** startet den Import in drei Phasen:
 
 > **Foto-Ingestion via v2-API (mit Consent):**
 > Jedes Foto durchläuft:
-> 1. Server ruft Ollama Vision auf → sendet Klartext-Beschreibung an Browser
-> 2. Browser maskiert Beschreibung (NER: Namen → Tokens)
-> 3. Browser schickt maskierten Text zurück → Server speichert in ChromaDB
->
-> Kein Klarname wird dauerhaft auf dem Server gespeichert.
+> 1. Server ruft Ollama Vision auf → generiert Bildbeschreibung.
+> 2. Geocoding-Service ermittelt den Ortsnamen aus den Koordinaten.
+> 3. Gesichtserkennungs-Modul erkennt Personen-Cluster.
+> 4. Alle Daten werden in der lokalen Vektordatenbank (ChromaDB/Elasticsearch) gespeichert.
 
 Nach dem Import zeigt der **Datenbank-Status**:
 ```
@@ -282,8 +269,7 @@ Messenger-Daten benötigen die Einwilligung **"Nachrichten"** im Consent-Dialog.
 
 1. WhatsApp → Einstellungen → Chats → Chat exportieren → **Ohne Medien**
 2. Die `.txt`-Datei im **Import-Tab** unter "WhatsApp Export" hochladen
-3. Der Browser maskiert den Text vor dem Upload automatisch
-4. Nachrichten werden in 10er-Chunks indexiert, erwähnte Personen erkannt
+3. Nachrichten werden in 10er-Chunks indexiert, erwähnte Personen erkannt
 
 ### Signal
 
@@ -292,78 +278,22 @@ Messenger-Daten benötigen die Einwilligung **"Nachrichten"** im Consent-Dialog.
 
 ---
 
-## Migration von v1 auf v2
+## WhatsApp Live-Brücke (Experimental)
 
-Falls du memosaur bereits in der v1 (ohne Token-Flow) genutzt hast und die bestehende ChromaDB migrieren möchtest:
+Memosaur kann live auf WhatsApp-Nachrichten reagieren:
 
-### Was die Migration tut
+1. Node.js (v18+) auf dem Server installieren.
+2. Abhängigkeiten installieren: `npm install`
+3. Backend starten: `./start.sh`
+4. Brücke starten: `npm run whatsapp`
+5. QR-Code im Terminal mit WhatsApp scannen (WhatsApp → Verknüpfte Geräte).
+6. Memosaur antwortet nun live auf eingehende Nachrichten!
 
-1. SQLite-Datenbank anlegen + Default-User `ManfredMustermann`
-2. Alle ChromaDB-Dokumente mit `user_id` versehen
-3. Klarnamen (Personen, Orte) durch Tokens ersetzen
-4. Embeddings neu berechnen (tokenisierter Text)
-5. Token-Wörterbuch als `data/migration_dictionary.json` exportieren
-
-### Migration ausführen
-
-```bash
-source .venv/bin/activate
-python scripts/migrate_to_v2.py
-```
-
-Ausgabe am Ende:
-```
-Migration abgeschlossen!
-  267 Dokumente migriert
-  267 Tokens erzeugt (5 PER, 16 LOC, 246 ORG)
-  Wörterbuch: data/migration_dictionary.json
-```
-
-### Nach der Migration
-
-1. Server starten: `./start.sh`
-2. Browser öffnen: http://localhost:8000
-3. Das Wörterbuch wird beim ersten Seitenaufruf **automatisch** in den Browser importiert
-4. Die Datei `data/migration_dictionary.json` wird danach automatisch vom Server gelöscht
-
-> **Wichtig:** Solange `migration_dictionary.json` existiert, enthält sie Klarnamen
-> im Klartext auf dem Server. Sie wird nach dem ersten Browser-Import automatisch
-> gelöscht. Bis dahin sollte der Server nicht öffentlich erreichbar sein.
+---
 
 ---
 
 ## Fehlerbehebung
-
-### NER-Modell lädt nicht / bleibt bei 0%
-
-**Ursache:** Browser blockiert den CDN-Zugriff auf `cdn.jsdelivr.net`
-
-**Lösung:** Browser-Konsole öffnen (F12) und auf Fehler prüfen:
-- `CORS error` → Firewall oder Browser-Erweiterung blockiert CDN
-- `Failed to fetch` → Keine Internetverbindung beim ersten Start
-
-Das Modell muss nur einmal heruntergeladen werden. Nach dem ersten Laden ist es im Browser-Cache.
-
-### Tokens werden nicht demaskiert (`[LOC_1]` bleibt sichtbar)
-
-**Ursache:** Token-Wörterbuch ist nicht in der Browser-IndexedDB
-
-**Diagnose** (Browser-Konsole):
-```javascript
-await TokenStore.getAllTokens().then(t => console.log(t.length + ' Tokens'))
-// Sollte: "267 Tokens" (oder mehr nach neuen Importen)
-// Falls 0: Wörterbuch fehlt
-```
-
-**Lösung:**
-```javascript
-// Manuell neu importieren (setzt auch den localStorage-Flag zurück)
-localStorage.removeItem('memosaur_dict_imported');
-location.reload();
-// → App lädt Wörterbuch automatisch beim Neustart
-```
-
-### GPU-Timeout beim Bildimport
 
 **Symptom:** `model runner has unexpectedly stopped` im Server-Log
 
@@ -400,17 +330,6 @@ ollama pull gemma3:12b
 # Oder alternatives Modell in config.yaml eintragen
 ```
 
-### ChromaDB-Fehler nach Migration
-
-**Symptom:** `ValueError: Expected metadata value to be...`
-
-Neue Boolean-Flags (`has_per_1` etc.) wurden nicht für alle Dokumente gesetzt.
-
-```bash
-# Migration erneut ausführen (ist idempotent)
-python scripts/migrate_to_v2.py
-```
-
 ### Takeout-Pfade nicht gefunden
 
 ```bash
@@ -444,19 +363,8 @@ find takeout/ -maxdepth 4 -type d
 Nützliche Befehle in der Browser-Konsole (F12):
 
 ```javascript
-// Token-Wörterbuch prüfen
-await TokenStore.getAllTokens().then(t => t.slice(0,5))
-
-// Demaskierung testen
-await TokenStore.unmaskText("Hallo [PER_1], warst du in [LOC_1]?")
-
-// NER-Status
-NER.getNERState()   // → 'ready' | 'loading' | 'error'
-
-// NER testen
-await NER.recognizeEntities("Nora war in Ahrensburg beim Bäcker")
-
-// Consent-Status
+// Consent-Status prüfen
 fetch('/api/v1/consent/00000000-0000-0000-0000-000000000001')
   .then(r => r.json()).then(console.log)
 ```
+

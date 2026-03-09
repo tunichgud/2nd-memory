@@ -35,6 +35,9 @@ async function sendQuery() {
   const stopBtn = document.getElementById('stop-btn');
   if (stopBtn) stopBtn.classList.remove('hidden');
 
+  const globalLoading = document.getElementById('global-loading');
+  if (globalLoading) globalLoading.classList.remove('hidden');
+
   currentAbortController = new AbortController();
 
   try {
@@ -48,6 +51,7 @@ async function sendQuery() {
   } finally {
     currentAbortController = null;
     if (stopBtn) stopBtn.classList.add('hidden');
+    if (globalLoading) globalLoading.classList.add('hidden');
   }
 }
 
@@ -98,7 +102,6 @@ async function _sendQueryStream(query, abortSignal) {
 
     buffer += decoder.decode(value, { stream: true });
 
-    // Server-Sent Events sind durch \n\n separiert
     let boundary = buffer.indexOf("\n\n");
     while (boundary !== -1) {
       const chunkStr = buffer.slice(0, boundary).trim();
@@ -110,14 +113,13 @@ async function _sendQueryStream(query, abortSignal) {
       try {
         const chunk = JSON.parse(chunkStr);
         if (chunk.type === "plan") {
-          // Plan als Zwischenschritt im UI aktualisieren
           updateStreamingPlan(responseUi, chunk.content);
         } else if (chunk.type === "sources") {
-          // Quellen updaten (initial oder nach Tool-Call)
           fullSources = chunk.content;
+          // Store sources in window for inline access
+          window._lastSources = fullSources;
           await updateStreamingSources(responseUi, fullSources);
         } else if (chunk.type === "text") {
-          // Text an den Ausgabe-Block dranhängen
           fullAnswer += chunk.content;
           updateStreamingText(responseUi, fullAnswer);
         } else if (chunk.type === "error") {
@@ -185,11 +187,22 @@ function createStreamingAssistantMessageCard() {
   const div = document.createElement('div');
   div.className = 'flex flex-col gap-3 max-w-[92%]';
 
+  // Header/Toggle für den Plan
+  const planHeader = document.createElement('button');
+  planHeader.className = 'text-[10px] text-gray-500 hover:text-gray-300 flex items-center gap-1 transition-colors w-fit';
+  planHeader.innerHTML = '<span>▶</span> Agenten-Plan anzeigen';
+  div.appendChild(planHeader);
+
   // "Denk"-Block für den Agent-Plan
   const planBubble = document.createElement('div');
-  planBubble.className = 'bg-gray-800 rounded-2xl p-3 text-xs text-gray-400 italic font-mono flex items-center gap-2';
+  planBubble.className = 'bg-gray-900 border border-gray-800 rounded-xl p-3 text-[11px] text-gray-400 italic font-mono flex items-center gap-2 hidden';
   planBubble.innerHTML = '<span class="typing-dot w-1.5 h-1.5 bg-gray-500 rounded-full inline-block mt-1"></span><div class="plan-text flex-1"></div>';
   div.appendChild(planBubble);
+
+  planHeader.onclick = () => {
+    const isHidden = planBubble.classList.toggle('hidden');
+    planHeader.innerHTML = isHidden ? '<span>▶</span> Agenten-Plan anzeigen' : '<span>▼</span> Agenten-Plan ausblenden';
+  };
 
   // Text-Block
   const textBubble = document.createElement('div');
@@ -209,16 +222,11 @@ function createStreamingAssistantMessageCard() {
 
 function updateStreamingPlan(ui, planText) {
   if (planText === 'Formuliere Antwort...') {
-    // Wenn er antwortet, füge einen abschließenden Text hinzu
-    const finalSpan = document.createElement('div');
-    finalSpan.className = 'mt-2 text-gray-300 font-bold';
-    finalSpan.innerHTML = "Agent hat Recherche abgeschlossen.";
-    ui.planBubble.appendChild(finalSpan);
     // Animation entfernen
     const dot = ui.planBubble.querySelector('.typing-dot');
     if (dot) dot.remove();
   } else {
-    // Neuen Gedanken-Schritt anhängen statt überschreiben
+    // Neuen Gedanken-Schritt anhängen
     const textContainer = ui.planBubble.querySelector('.plan-text');
     const newStep = document.createElement('div');
     newStep.className = 'mb-1 last:mb-0 text-gray-300';
@@ -261,12 +269,12 @@ async function updateStreamingSources(ui, sources) {
 
   const toggle = document.createElement('button');
   toggle.className = 'text-xs text-gray-500 hover:text-gray-300 ml-auto';
-  toggle.textContent = 'Details ausblenden';
+  toggle.textContent = 'Details anzeigen';
   header.appendChild(toggle);
   ui.srcWrapper.appendChild(header);
 
   const srcList = document.createElement('div');
-  srcList.className = 'flex flex-col gap-1 mt-1';
+  srcList.className = 'flex flex-col gap-1 mt-1 hidden';
   Object.values(byCollection).forEach(items => {
     items.forEach(src => srcList.appendChild(renderSource(src)));
   });
@@ -349,7 +357,7 @@ function _renderPhotoSource(src, meta, info, pct) {
     const imgWrap = document.createElement('div');
     imgWrap.className = 'flex-shrink-0 w-24 h-24 bg-gray-800 cursor-pointer relative group';
     imgWrap.title = 'Klicken für Vollbild';
-    imgWrap.onclick = () => _openLightbox(fullUrl, meta);
+    imgWrap.onclick = () => window.openLightbox(fullUrl, `<span>📅 ${formatDate(meta.date_iso)}</span> <span>📍 ${escHtml(meta.place_name || '')}</span> <span>👤 ${escHtml(meta.persons || '')}</span>`);
 
     const img = document.createElement('img');
     img.src = thumbUrl;
@@ -500,43 +508,7 @@ function _renderMessageSource(src, meta, info, pct) {
 }
 
 // ---- Lightbox für Vollbild-Ansicht ----
-function _openLightbox(fullUrl, meta) {
-  // Bestehendes Lightbox entfernen
-  document.getElementById('memosaur-lightbox')?.remove();
-
-  const overlay = document.createElement('div');
-  overlay.id = 'memosaur-lightbox';
-  overlay.className = 'fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4';
-  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
-
-  const inner = document.createElement('div');
-  inner.className = 'relative max-w-4xl max-h-full flex flex-col gap-2';
-
-  const img = document.createElement('img');
-  img.src = fullUrl;
-  img.className = 'max-h-[80vh] max-w-full object-contain rounded-lg shadow-2xl';
-
-  const caption = document.createElement('div');
-  caption.className = 'text-white text-sm text-center flex flex-wrap justify-center gap-4';
-  if (meta.date_iso) caption.innerHTML += `<span>📅 ${formatDate(meta.date_iso)}</span>`;
-  if (meta.place_name) caption.innerHTML += `<span>📍 ${escHtml(meta.place_name)}</span>`;
-  if (meta.persons) caption.innerHTML += `<span>👤 ${escHtml(meta.persons)}</span>`;
-
-  const close = document.createElement('button');
-  close.className = 'absolute -top-3 -right-3 w-8 h-8 bg-gray-700 hover:bg-gray-600 rounded-full text-white flex items-center justify-center text-lg leading-none';
-  close.textContent = '×';
-  close.onclick = () => overlay.remove();
-
-  inner.appendChild(img);
-  inner.appendChild(caption);
-  inner.appendChild(close);
-  overlay.appendChild(inner);
-  document.body.appendChild(overlay);
-
-  // ESC schließt Lightbox
-  const escHandler = (e) => { if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', escHandler); } };
-  document.addEventListener('keydown', escHandler);
-}
+// Lightbox is now global in index.html
 
 function appendTypingIndicator() {
   const id = 'typing-' + Date.now();
@@ -666,11 +638,82 @@ function escHtml(str) {
 }
 
 function formatAnswer(text) {
-  // Markdown-ähnliche Formatierung (fett, kursiv, Zeilenumbrüche)
-  return escHtml(text)
+  // Markdown-ähnliche Formatierung
+  let html = escHtml(text)
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     .replace(/\n/g, '<br>');
+
+  // Inline-Referenzen [[n]]
+  html = html.replace(/\[\[(\d+)\]\]/g, (match, n) => {
+    const idx = parseInt(n) - 1;
+    return `<button onclick="_openSourceOverlay(${idx})" class="inline-flex items-center justify-center w-5 h-5 ml-1 text-[10px] font-bold text-white bg-blue-600 rounded-full hover:bg-blue-500 transition-colors" title="Quelle anzeigen">${n}</button>`;
+  });
+
+  return html;
+}
+
+function _openSourceOverlay(index) {
+  const sources = window._lastSources || [];
+  const src = sources[index];
+  if (!src) return;
+
+  const info = SOURCE_LABELS[src.collection] || { label: src.collection, icon: '📄' };
+  const meta = src.metadata || {};
+
+  // Lightbox-Logik wiederverwenden
+  if (src.collection === 'photos') {
+    const filename = meta.filename || '';
+    const fullUrl = filename ? `/api/media/${encodeURIComponent(filename)}?size=full` : '';
+    window.openLightbox(fullUrl, `<span>📅 ${formatDate(meta.date_iso)}</span> <span>📍 ${escHtml(meta.place_name || '')}</span> <span>👤 ${escHtml(meta.persons || '')}</span>`);
+  } else {
+    // Text-Overlay für Nachrichten/Reviews
+    document.getElementById('memosaur-overlay')?.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'memosaur-overlay';
+    overlay.className = 'fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4';
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+
+    const inner = document.createElement('div');
+    inner.className = 'bg-gray-900 border border-gray-700 rounded-2xl max-w-2xl w-full p-6 flex flex-col gap-4 shadow-2xl relative';
+
+    const header = document.createElement('div');
+    header.className = 'flex justify-between items-center border-b border-gray-800 pb-3';
+    header.innerHTML = `<h3 class="font-bold text-lg flex items-center gap-2">${info.icon} ${info.label}</h3>`;
+
+    const close = document.createElement('button');
+    close.className = 'w-8 h-8 bg-gray-800 hover:bg-gray-700 rounded-full text-white flex items-center justify-center text-xl leading-none';
+    close.textContent = '×';
+    close.onclick = () => overlay.remove();
+    header.appendChild(close);
+
+    const body = document.createElement('div');
+    body.className = 'overflow-y-auto max-h-[60vh] text-sm leading-relaxed text-gray-300 font-mono whitespace-pre-wrap py-2';
+
+    // Inhalt schön rendern je nach Typ
+    if (src.collection === 'messages') {
+      body.innerHTML = src.document; // Die gerenderte Bubble wäre schöner, aber Text reicht für Overlay
+    } else if (src.collection === 'reviews') {
+      const rezMatch = src.document.match(/Rezension:\s*(.+)/s);
+      body.textContent = rezMatch ? rezMatch[1].trim() : src.document;
+    } else {
+      body.textContent = src.document;
+    }
+
+    const footer = document.createElement('div');
+    footer.className = 'text-[10px] text-gray-500 flex gap-4';
+    if (meta.date_iso) footer.innerHTML += `<span>📅 ${formatDate(meta.date_iso)}</span>`;
+    if (meta.place_name || meta.address) footer.innerHTML += `<span>📍 ${escHtml(meta.place_name || meta.address)}</span>`;
+
+    inner.appendChild(header);
+    inner.appendChild(body);
+    inner.appendChild(footer);
+    overlay.appendChild(inner);
+    document.body.appendChild(overlay);
+
+    const escHandler = (e) => { if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', escHandler); } };
+    document.addEventListener('keydown', escHandler);
+  }
 }
 
 function formatDate(iso) {

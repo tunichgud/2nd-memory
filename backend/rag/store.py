@@ -19,7 +19,8 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
-COLLECTIONS = ["photos", "reviews", "saved_places", "messages"]
+COLLECTIONS = ["photos", "reviews", "saved_places", "messages", "faces"]
+SEARCHABLE_COLLECTIONS = ["photos", "reviews", "saved_places", "messages"]
 
 
 def _get_data_dir() -> Path:

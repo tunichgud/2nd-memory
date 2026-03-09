@@ -61,6 +61,26 @@ rag:
   # Mindest-Ähnlichkeit (0.0–1.0) für Treffer
   min_score: 0.3
 
+# --- Gesichtserkennung ------------------------------------------------------
+face_recognition:
+  # DBSCAN Clustering Parameter für Gesichtserkennung
+  # Niedrigerer eps = strengeres Clustering = kleinere, präzisere Gruppen
+  # Empfohlene Werte:
+  #   0.25-0.30: Sehr streng (wenige Fehler, aber mehr Einzelgesichter)
+  #   0.30-0.35: Ausgewogen (Standard)
+  #   0.35-0.40: Lockerer (größere Cluster, mehr Fehler möglich)
+  dbscan_eps: 0.30              # Epsilon (max. Cosine-Distanz zwischen Gesichtern)
+  dbscan_min_samples: 2         # Mindestanzahl Gesichter für einen Cluster
+
+  # MediaPipe Detection Parameter
+  min_detection_confidence: 0.7  # Mindest-Confidence für Gesichtserkennung (0.0-1.0)
+
+  # Quality Filtering
+  min_face_size: 80            # Minimale Gesichtsgröße in Pixeln (Breite/Höhe)
+  min_blur_score: 100          # Minimaler Laplacian Variance Score (Schärfe)
+  min_brightness: 20           # Minimale Helligkeit (0-255)
+  max_brightness: 235          # Maximale Helligkeit (0-255)
+
 # --- Server -----------------------------------------------------------------
 server:
   host: "0.0.0.0"

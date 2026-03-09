@@ -12,8 +12,8 @@ import logging
 from datetime import datetime, timezone
 
 from backend.rag.embedder import embed_single
-from backend.rag.store_v2 import query_collection_v2, COLLECTIONS
-from backend.rag.store import COLLECTIONS
+from backend.rag.store_v2 import query_collection_v2
+from backend.rag.store import COLLECTIONS, SEARCHABLE_COLLECTIONS
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,6 @@ Du hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu eri
 HEUTIGES DATUM: {current_date} (Nutze dies als Referenz für Begriffe wie "letztes Jahr", "letzten Monat" etc.)
 
 WICHTIG: Nutze für Personen und Orte immer die echten Namen aus der Anfrage oder den Quellen. 
-Das System verwendet keine Tokens mehr.
 
 ReAct (Reasoning and Acting) Ansatz:
 - Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:
@@ -42,9 +41,10 @@ ReAct (Reasoning and Acting) Ansatz:
 Weitere Regeln:
 1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere keine Fakten.
 2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).
-3. Antworte auf Deutsch. Falls nach "Gefühlen" oder "Stimmung" gefragt wird, nutze `search_messages`.
-4. Bei Ortsfragen: nutze das Cluster/Ort-Feld ("München-Ost") und GPS-Koordinaten zur Verortung.
-5. Falls keine passenden Daten gefunden wurden, erkläre logisch, was du versucht hast zu suchen und warum es keine Treffer gab."""
+3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.
+4. Antworte auf Deutsch. Falls nach "Gefühlen" oder "Stimmung" gefragt wird, nutze `search_messages`.
+5. Bei Ortsfragen: nutze das Cluster/Ort-Feld ("München-Ost") und GPS-Koordinaten zur Verortung.
+6. Falls keine passenden Daten gefunden wurden, erkläre logisch, was du versucht hast zu suchen und warum es keine Treffer gab."""
 
 
 def _build_token_filter(
@@ -87,11 +87,21 @@ def retrieve_v2(
     min_score: float = _RELEVANT_MIN_SCORE,
     date_from: str | None = None,
     date_to: str | None = None,
+    **kwargs # Catch-all für veraltete Parameter wie masked_query/person_tokens
 ) -> list[dict]:
     """User-scoped semantisches Retrieval mit Python Post-Filtern für Personen und Orte."""
-    query_embedding = embed_single(query)
-    person_names    = [n.strip() for n in (person_names or []) if n.strip()]
-    location_names  = [n.strip() for n in (location_names or []) if n.strip()]
+    # Support für veraltete Parameter-Namen (Bugfix)
+    effective_query = kwargs.get("masked_query", query)
+    effective_persons = person_names or kwargs.get("person_tokens") or []
+    effective_locations = location_names or kwargs.get("location_tokens") or []
+
+    query_embedding = embed_single(effective_query)
+    effective_persons = [n.strip() for n in effective_persons if n.strip()]
+    effective_locations = [n.strip() for n in effective_locations if n.strip()]
+
+    # Personen-Namen auflösen (z.B. "Ringo" -> ["Ringo", "cluster_5", "0123..."])
+    resolved_person_identifiers = _resolve_person_names(effective_persons)
+    logger.info("v2 resolved identifiers: %s -> %s", effective_persons, resolved_person_identifiers)
 
     # Relevante Collections bestimmen
     has_person = bool(person_names)
@@ -103,11 +113,11 @@ def retrieve_v2(
     elif has_location and not has_person:
         relevant = {"photos", "reviews", "saved_places"}
     else:
-        relevant = set(COLLECTIONS)
+        relevant = set(SEARCHABLE_COLLECTIONS)
 
     logger.info(
         "v2 retrieve | query='%s' | persons=%s | locations=%s | relevant=%s",
-        query[:60], person_names, location_names, sorted(relevant),
+        effective_query[:60], effective_persons, effective_locations, sorted(relevant),
     )
 
     # --- NEU: Elasticsearch Integration ---
@@ -121,8 +131,8 @@ def retrieve_v2(
                 query_vector=query_embedding,
                 user_id=user_id,
                 n_results=n_per_collection,
-                person_names=person_names,
-                location_names=location_names,
+                person_names=resolved_person_identifiers, # Nutze aufgelöste IDs
+                location_names=effective_locations,
                 date_from=date_from,
                 date_to=date_to
             )
@@ -143,7 +153,7 @@ def retrieve_v2(
     # --- ALT: ChromaDB + Python Post-Filtering (Fallback) ---
     all_results: list[dict] = []
 
-    for col_name in COLLECTIONS:
+    for col_name in SEARCHABLE_COLLECTIONS:
         is_relevant = col_name in relevant
         threshold = min_score if is_relevant else _FALLBACK_MIN_SCORE
 
@@ -152,7 +162,7 @@ def retrieve_v2(
         logger.info("  [%s] relevant=%s | where=%s", col_name, is_relevant, where)
 
         fetch_n = n_per_collection
-        if (location_names or person_names):
+        if (effective_locations or effective_persons):
             # Da ChromaDB substring checks ($contains) nicht unterstützt,
             # holen wir einen vergrößerten semantischen Pool und filtern via Python
             fetch_n = 50
@@ -182,17 +192,16 @@ def retrieve_v2(
             })
 
         # --- Post-Filter für Personen ---
-        if person_names and col_name in ("photos", "messages"):
-            pers_lower = [n.lower() for n in person_names]
+        if effective_persons and col_name in ("photos", "messages"):
+            pers_lower = [n.lower() for n in resolved_person_identifiers] # Nutze aufgelöste IDs
             filtered_by_person = []
             for h in col_hits:
                 meta = h["metadata"]
-                # In Photos/Messages können Personen in 'persons', 'mentioned_persons' oder 'people' stehen
-                # Fallback: Suche auch direkt im Dokumententext
                 search_text = (
                     str(meta.get("persons", "")) + " " + 
                     str(meta.get("mentioned_persons", "")) + " " + 
                     str(meta.get("people", "")) + " " +
+                    str(meta.get("cluster_id", "")) + " " + # WICHTIG: cluster_id aus vision
                     h["document"]
                 ).lower()
                 
@@ -200,17 +209,17 @@ def retrieve_v2(
                     filtered_by_person.append(h)
                     
             if filtered_by_person:
-                logger.info("  [%s] person-Post-Filter: %d → %d Treffer (Namen=%s)",
-                            col_name, len(col_hits), len(filtered_by_person), person_names)
+                logger.info("  [%s] person-Post-Filter: %d → %d Treffer (Identifier=%s)",
+                            col_name, len(col_hits), len(filtered_by_person), resolved_person_identifiers)
                 col_hits = filtered_by_person
             else:
-                logger.info("  [%s] person-Post-Filter ohne Treffer (Namen=%s) – verwerfe alle!",
-                            col_name, person_names)
+                logger.info("  [%s] person-Post-Filter ohne Treffer (Identifier=%s) – verwerfe alle!",
+                            col_name, resolved_person_identifiers)
                 col_hits = []
 
         # --- Post-Filter für Orte ---
-        if location_names and col_name in ("photos", "reviews", "saved_places"):
-            loc_lower = [n.lower() for n in location_names]
+        if effective_locations and col_name in ("photos", "reviews", "saved_places"):
+            loc_lower = [n.lower() for n in effective_locations]
             filtered_by_loc = []
             for h in col_hits:
                 meta = h["metadata"]
@@ -250,8 +259,44 @@ def retrieve_v2(
             all_results.extend([h for h in col_hits if h["score"] >= threshold])
 
     all_results.sort(key=lambda r: (r["is_relevant"], r["score"]), reverse=True)
-    logger.info("v2 retrieve GESAMT: %d Ergebnisse für '%s'", len(all_results), query[:40])
+    logger.info("v2 retrieve GESAMT: %d Ergebnisse für '%s'", len(all_results), effective_query[:40])
     return all_results
+
+
+def _resolve_person_names(names: list[str]) -> list[str]:
+    """Löst Klarnamen via ES Entity-Index in alle bekannten Identifier auf."""
+    if not names: return []
+    try:
+        from backend.rag.es_store import get_es_client, get_index_name
+        es = get_es_client()
+        idx = get_index_name("entities")
+        
+        resolved = set()
+        for name in names:
+            resolved.add(name) # Den Namen selbst immer behalten
+            # Suche in ES
+            try:
+                res = es.get(index=idx, id=name)
+                entity = res["_source"]
+                # Aliase hinzufügen
+                for a in entity.get("chat_aliases", []): resolved.add(a)
+                # Cluster-IDs hinzufügen
+                for c in entity.get("vision_clusters", []): resolved.add(c)
+            except Exception:
+                # Falls exakter Name nicht gefunden, versuche Match
+                try:
+                    search = es.search(index=idx, query={"match": {"entity_id": name}})
+                    for hit in search["hits"]["hits"]:
+                        ent = hit["_source"]
+                        resolved.add(ent["entity_id"])
+                        for a in ent.get("chat_aliases", []): resolved.add(a)
+                        for c in ent.get("vision_clusters", []): resolved.add(c)
+                except Exception:
+                    pass
+        return list(resolved)
+    except Exception as exc:
+        logger.warning("Personen-Auflösung via ES fehlgeschlagen: %s", exc)
+        return names
 
 
 
@@ -337,10 +382,9 @@ def answer_v2(
         date_to = parsed.date_to
 
     sources = retrieve_v2(
-        masked_query=masked_query,
+        query=masked_query,
         user_id=user_id,
-        person_tokens=person_tokens,
-        location_tokens=location_tokens,
+        person_names=person_tokens,
         location_names=location_names,
         collections=collections,
         n_per_collection=n_per_collection,
@@ -374,11 +418,10 @@ def answer_v2(
         pers_toks = [p for p in (personen or []) if p.startswith("[PER_")]
 
         res = retrieve_v2(
-            masked_query=suchtext,
+            query=suchtext,
             user_id=user_id,
-            person_tokens=pers_toks,
-            location_tokens=loc_toks,
-            location_names=loc_names,
+            person_names=pers_toks,
+            location_names=loc_names, # Merged loc_toks into names if needed?
             collections=["photos"],
             n_per_collection=n_per_collection,
             min_score=min_score,
@@ -410,11 +453,9 @@ def answer_v2(
         logger.info(f"==> Tool Call: search_messages(suchtext='{suchtext[:30]}...', personen={personen}, von={von_datum}, bis={bis_datum})")
         pers_toks = [p for p in (personen or []) if p.startswith("[PER_")]
         res = retrieve_v2(
-            masked_query=suchtext,
+            query=suchtext,
             user_id=user_id,
-            person_tokens=pers_toks,
-            location_tokens=None,
-            location_names=None,
+            person_names=pers_toks,
             collections=["messages"],
             n_per_collection=n_per_collection,
             min_score=min_score,

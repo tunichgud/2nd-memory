@@ -22,6 +22,7 @@ async def serve_media_v1(
     user_id: str,
     filename: str,
     size: str = Query(default="thumb", pattern="^(thumb|full)$"),
+    bbox: str | None = Query(None, pattern="^[0-9,]+$"),
     db: aiosqlite.Connection = Depends(get_db),
 ):
     if "/" in filename or "\\" in filename or ".." in filename:
@@ -33,7 +34,7 @@ async def serve_media_v1(
 
     cache = _thumb_cache_v1 if size == "thumb" else _full_cache_v1
     max_px = 300 if size == "thumb" else 1200
-    cache_key = f"{user_id}/{filename}"
+    cache_key = f"{user_id}/{filename}_{bbox}" if bbox else f"{user_id}/{filename}"
 
     if cache_key in cache:
         return Response(content=cache[cache_key], media_type="image/jpeg",
@@ -44,7 +45,7 @@ async def serve_media_v1(
         raise HTTPException(status_code=404, detail=f"Bild nicht gefunden: {filename}")
 
     try:
-        thumb = _make_thumbnail(raw, max_px)
+        thumb = _make_thumbnail(raw, max_px, bbox=bbox)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Thumbnail-Fehler: {exc}")
 

@@ -1,6 +1,6 @@
 # memosaur 🦕
 
-**Privacy-First Persönliches Gedächtnis-System** – vereint Fotos, Nachrichten und Geodaten zu einer durchsuchbaren Wissensbasis, die du per natürlicher Sprache abfragen kannst. Alle persönlichen Namen und Orte werden vor dem Server maskiert und erst im Browser wieder lesbar gemacht.
+**Privacy-First Persönliches Gedächtnis-System** – vereint Fotos, Nachrichten und Geodaten zu einer durchsuchbaren Wissensbasis, die du per natürlicher Sprache abfragen kannst. Alle persönlichen Daten werden lokal verarbeitet und verbleiben in deiner eigenen Infrastruktur.
 
 ---
 
@@ -8,14 +8,14 @@
 
 memosaur ist eine lokal laufende KI-Anwendung, die deine persönlichen Daten aus verschiedenen Quellen zusammenführt und durch intelligente Abfragen zugänglich macht.
 
-**Das Besondere:** Personennamen und Ortsnamen verlassen deinen Browser nur als anonyme Tokens (`[PER_1]`, `[LOC_2]`). Die eigentliche Zuordnung liegt ausschließlich in deiner lokalen Browser-Datenbank (IndexedDB). Der Server sieht und speichert niemals Klarnamen.
+**Das Besondere:** Alle Daten bleiben lokal. Personennamen und Orte werden durch intelligente Entity-Resolution erkannt und verknüpft, verlassen aber niemals deinen Browser im Klartext für externe Dienste. Die eigentliche Zuordnung liegt in deiner lokalen Browser-Datenbank (IndexedDB) und einer verschlüsselten Sync-Funktion.
 
 **Typische Abfragen:**
 
-- *„Wo war ich im August mit Nora?"*
-- *„Welche Restaurants habe ich in München besucht?"*
-- *„Was hat Sarah über Nora geschrieben?"*
-- *„Wo habe ich die Dorade gegessen?"*
+- „Wo war ich im August mit Nora?"
+- „Welche Restaurants habe ich in München besucht?"
+- „Was hat Sarah über Nora geschrieben?"
+- „Wo habe ich die Dorade gegessen?"
 
 ---
 
@@ -33,22 +33,21 @@ memosaur ist eine lokal laufende KI-Anwendung, die deine persönlichen Daten aus
 
 ## Funktionen
 
-### Privacy-First Token-Flow (v2)
-- **Client-seitige NER**: Ein KI-Modell (~90 MB) läuft direkt im Browser via WebAssembly. Es erkennt Personen, Orte und Organisationen lokal – ohne Serveranfrage.
-- **Automatische Maskierung**: Vor jeder Anfrage an den Server werden Klarnamen durch Tokens ersetzt (`Nora` → `[PER_1]`, `München` → `[LOC_11]`).
-- **Lokales Wörterbuch**: Das Token↔Klarname-Mapping wird ausschließlich in der Browser-eigenen IndexedDB gespeichert.
-- **Re-Mapping im Browser**: Antworten des Servers enthalten nur Tokens. Das Frontend ersetzt sie vor der Anzeige automatisch durch Klarnamen.
+### Privacy-First Entity-Flow
+- **Client-seitige Analyse**: Moderne KI-Modelle unterstützen die Erkennung von Personen und Orten direkt im Zusammenspiel mit deinen Daten.
+- **Lokale Zuordnung**: Das Mapping zwischen Gesichtern, Chat-Namen und Orten wird ausschließlich in der Browser-eigenen IndexedDB und einer lokalen SQLite-Datenbank gespeichert.
+- **Transparenz**: Jede Information wird mit ihrer Originalquelle verknüpft, sodass du immer nachvollziehen kannst, woher ein Gedächtnis-Splitter stammt.
 
 ### Intelligente Suche
-- **Strukturierte Filter**: NER-Ergebnisse aus der Anfrage werden direkt als ChromaDB-Filter genutzt – `[PER_1]` filtert exakt die Einträge mit diesem Token.
+- **Strukturierte Filter**: Ergebnisse werden direkt nach Personen, Orten oder Zeiträumen gefiltert.
 - **Quellenübergreifend**: Eine Frage wird gleichzeitig gegen Fotos, Nachrichten, Bewertungen und gespeicherte Orte gesucht.
-- **Adaptive Slot-Vergabe**: Relevante Collections bekommen mehr Ergebnis-Slots als irrelevante.
+- **Adaptive Agenten**: Ein KI-Agent plant die Suche (z.B. erst Ort finden, dann Nachrichten aus dem Zeitraum laden).
 
 ### DSGVO-Einwilligungen (Art. 9)
 - Beim ersten Start erscheint ein Consent-Dialog.
-- **Fotos & KI**: Opt-in erforderlich (Bilder werden an Ollama-Vision gesendet, Beschreibungen im Browser maskiert).
+- **Fotos & KI**: Opt-in erforderlich (Bilder werden lokal analysiert, Beschreibungen im Browser verarbeitet).
 - **GPS-Daten**: Separates Opt-in (Koordinaten gehen an Nominatim/OpenStreetMap für Reverse Geocoding).
-- **Nachrichten**: Separates Opt-in (Text wird vor dem Upload im Browser maskiert).
+- **Nachrichten**: Separates Opt-in (Texte werden lokal indexiert).
 - Ohne Einwilligung sind die jeweiligen Features deaktiviert.
 
 ### Quellen-Transparenz
@@ -58,11 +57,11 @@ memosaur ist eine lokal laufende KI-Anwendung, die deine persönlichen Daten aus
   - **Nachrichten**: Chat-Blasen-Ansicht mit Zeitstempeln, scrollbar
   - **Gespeicherte Orte**: Adresse, Google Maps Link
 
-### Multi-Device Sync (v2)
-- Das Token-Wörterbuch kann verschlüsselt auf dem Server gespeichert werden.
+### Multi-Device Sync
+- Deine Daten können verschlüsselt auf dem Server gesichert werden.
 - Verschlüsselung: `PBKDF2 → AES-256-GCM` direkt im Browser (Web Crypto API).
 - Das Passwort verlässt niemals den Browser.
-- Auf einem zweiten Gerät: Blob herunterladen, entschlüsseln, Wörterbuch ist sofort verfügbar.
+- Auf einem zweiten Gerät: Blob herunterladen, entschlüsseln, alles ist sofort verfügbar.
 
 ### Kartenansicht
 - Alle indexierten GPS-Punkte auf einer interaktiven Karte (Leaflet.js / OpenStreetMap)
@@ -71,7 +70,7 @@ memosaur ist eine lokal laufende KI-Anwendung, die deine persönlichen Daten aus
 
 ### Multi-User vorbereitet
 - SQLite-Datenbank mit User-Tabelle, Consent-Audit-Trail und Sync-Blob-Versionierung
-- Alle ChromaDB-Dokumente sind mit `user_id` versehen
+- Alle Dokumente sind mit `user_id` versehen
 - Aktuell: ein Default-User `ManfredMustermann`, weitere können per API angelegt werden
 
 ---
@@ -83,20 +82,14 @@ memosaur ist eine lokal laufende KI-Anwendung, die deine persönlichen Daten aus
            │                                   │
   Anfrage: "Wo war ich mit Nora?"              │
            │                                   │
-    NER lokal (WASM)                           │
-    Nora → [PER_1]                             │
+           ├──────────────────────────────────►│
+           │        POST /api/v1/query         │
            │                                   │
-    ──── POST /api/v1/query ──────────────────►│
-         {masked_query: "mit [PER_1]",         │
-          person_tokens: ["[PER_1]"]}          │
-                                               │
-                              embed + retrieve │
-                              LLM antwortet    │
-                              mit Tokens       │
-                                               │
-    ◄──── {masked_answer: "...mit [PER_1]..."} │
+           │                          Agent plant Suche
+           │                          (Retriever/Tools)
            │                                   │
-    IndexedDB: [PER_1] → "Nora"               │
+           │◄──────────────────────────────────┤
+           │           Antwort & Quellen       │
            │                                   │
     Anzeige: "...mit Nora..."                  │
 ```
@@ -136,7 +129,7 @@ Detaillierte Anleitung: [INSTALL.md](INSTALL.md)
 
 ### WhatsApp
 - Android/iOS: Einstellungen → Chats → Chat exportieren → **Ohne Medien**
-- Die `.txt`-Datei im **Import**-Tab hochladen (Text wird vor dem Upload im Browser maskiert)
+- Die `.txt`-Datei im **Import**-Tab hochladen (Texte werden lokal indexiert)
 
 ### Signal
 - Signal Desktop: Einstellungen → Chats → Chats exportieren
@@ -149,15 +142,15 @@ Detaillierte Anleitung: [INSTALL.md](INSTALL.md)
 | Schicht | Technologie |
 |---|---|
 | Backend | Python, FastAPI, uvicorn |
-| Vektordatenbank | ChromaDB (lokal, persistent) |
+| Vektordatenbank | ChromaDB / Elasticsearch (lokal, persistent) |
 | Embeddings | sentence-transformers (lokal, multilingual) |
 | LLM | Ollama (`qwen3:8b` Chat, `gemma3:12b` Vision) |
 | Relationale DB | SQLite via aiosqlite (User, Consent, Sync) |
-| NER im Browser | Transformers.js WASM (`bert-base-multilingual`) |
-| Token-Speicher | IndexedDB (Browser-lokal) |
+| Karten | Leaflet.js / OpenStreetMap |
+| Entity-Speicher | IndexedDB (Browser-lokal) |
 | Verschlüsselung | Web Crypto API (AES-256-GCM, PBKDF2) |
 | Geodaten | Nominatim/OpenStreetMap (Reverse Geocoding) |
-| Frontend | HTML, Tailwind CSS CDN, Leaflet.js |
+| Frontend | HTML, Tailwind CSS CDN |
 
 Ausführliche technische Dokumentation: [TECHNICAL.md](TECHNICAL.md)
 

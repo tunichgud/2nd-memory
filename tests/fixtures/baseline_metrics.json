@@ -1,0 +1,20 @@
+{
+  "detection_rate": 0.9,
+  "avg_faces_per_image": 2.0,
+  "avg_confidence": 0.85,
+  "embedding_dimensions": 512,
+  "avg_embedding_norm": 1.0,
+  "embedding_std": 0.01,
+  "same_face_similarity": 0.9,
+  "diff_face_similarity": 0.4,
+  "similarity_margin": 0.5,
+  "clustering_purity": 0.85,
+  "false_positive_rate": 0.05,
+  "n_clusters": 3,
+  "n_noise_points": 1,
+  "avg_detection_time_ms": 50.0,
+  "avg_embedding_time_ms": 15.0,
+  "timestamp": "2026-03-09T15:43:29.358589",
+  "git_commit": null,
+  "notes": "Test baseline"
+}

@@ -1,0 +1,9 @@
+# Keine echten Gesichter/Fotos committen
+faces/**/*.jpg
+faces/**/*.jpeg
+faces/**/*.png
+faces/**/*.webp
+
+# Ground Truth Daten sind OK (nur IDs, keine Bilder)
+!ground_truth.json
+!baseline_metrics.json

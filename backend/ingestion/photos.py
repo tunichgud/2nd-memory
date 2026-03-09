@@ -403,6 +403,13 @@ def ingest_photos(
         metadatas.append(chroma_meta)
         stats["success"] += 1
 
+        # 🚀 Echtzeit-Gesichtserkennung
+        try:
+            from backend.ingestion.faces import process_and_store_faces
+            process_and_store_faces(f"photo_{filename}", image_bytes, chroma_meta)
+        except Exception as exc:
+            logger.warning("Gesichtserkennung fehlgeschlagen für %s: %s", filename, exc)
+
         # Regelmäßiger Checkpoint-Upsert (Batching)
         if len(ids) >= 10:
             _flush_to_stores(ids, documents, embeddings, metadatas, reset and idx <= 10)

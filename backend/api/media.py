@@ -57,8 +57,10 @@ def _find_image_bytes(filename: str) -> bytes | None:
     return None
 
 
-def _make_thumbnail(image_bytes: bytes, max_px: int) -> bytes:
-    """Erstellt ein JPEG-Thumbnail mit max. max_px auf der längsten Seite."""
+def _make_thumbnail(image_bytes: bytes, max_px: int, bbox: str | None = None) -> bytes:
+    """Erstellt ein JPEG-Thumbnail mit max. max_px auf der längsten Seite.
+    Unterstützt optionales Cropping via bbox='ymin,xmin,ymax,xmax'.
+    """
     from PIL import Image, ImageOps
     import io as _io
 
@@ -67,6 +69,25 @@ def _make_thumbnail(image_bytes: bytes, max_px: int) -> bytes:
         img = ImageOps.exif_transpose(img)
     except Exception:
         pass
+
+    # Optionales Cropping (für Gesichter)
+    if bbox:
+        try:
+            ymin, xmin, ymax, xmax = map(int, bbox.split(","))
+            w, h = img.size
+            
+            # Padding hinzufügen (ca. 20%)
+            pad_h = (ymax - ymin) * 0.2
+            pad_w = (xmax - xmin) * 0.2
+            
+            ymin = max(0, int(ymin - pad_h))
+            xmin = max(0, int(xmin - pad_w))
+            ymax = min(h, int(ymax + pad_h))
+            xmax = min(w, int(xmax + pad_w))
+            
+            img = img.crop((xmin, ymin, xmax, ymax))
+        except Exception as e:
+            logger.warning("Bbox-Cropping fehlgeschlagen: %s", e)
 
     w, h = img.size
     if max(w, h) > max_px:
@@ -87,6 +108,7 @@ def _make_thumbnail(image_bytes: bytes, max_px: int) -> bytes:
 async def serve_media(
     filename: str,
     size: str = Query(default="thumb", pattern="^(thumb|full)$"),
+    bbox: str | None = Query(None, pattern="^[0-9,]+$"),
 ) -> Response:
     """Liefert ein Bild als JPEG aus.
 
@@ -99,10 +121,11 @@ async def serve_media(
 
     cache = _thumb_cache if size == "thumb" else _full_cache
     max_px = 300 if size == "thumb" else 1200
+    cache_key = f"{filename}_{bbox}" if bbox else filename
 
     # Cache-Hit
-    if filename in cache:
-        return Response(content=cache[filename], media_type="image/jpeg",
+    if cache_key in cache:
+        return Response(content=cache[cache_key], media_type="image/jpeg",
                         headers={"Cache-Control": "public, max-age=86400"})
 
     # Bild laden
@@ -112,7 +135,7 @@ async def serve_media(
 
     # Thumbnail erstellen
     try:
-        thumb = _make_thumbnail(raw, max_px)
+        thumb = _make_thumbnail(raw, max_px, bbox=bbox)
     except Exception as exc:
         logger.error("Thumbnail-Fehler für %s: %s", filename, exc)
         raise HTTPException(status_code=500, detail="Thumbnail-Fehler")
@@ -121,7 +144,7 @@ async def serve_media(
     if len(cache) >= MAX_CACHE_ENTRIES:
         oldest = next(iter(cache))
         del cache[oldest]
-    cache[filename] = thumb
+    cache[cache_key] = thumb
 
     return Response(
         content=thumb,
