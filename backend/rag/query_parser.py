@@ -80,10 +80,16 @@ Analysiere die Anfrage und extrahiere strukturierte Informationen als JSON.
 Antworte NUR mit gültigem JSON, ohne Erklärungen oder Markdown-Blöcke.
 
 ⚠️ WICHTIG: Chat-History Context nutzen!
-- Wenn die aktuelle Frage sich auf vorherige Antworten bezieht, nutze diesen Kontext
-- Beispiel: "Wo war ich im August?" → Antwort: "München"
-           "Wie fühlte sich Sarah dabei?" → Inferiere: München + August!
-- Extrahiere implizite Informationen aus dem Gesprächsverlauf
+- Du bekommst vorherige User-Fragen als Kontext
+- Nutze diesen Kontext um implizite Referenzen zu inferieren
+- Beispiel: Vorherige Frage: "Wo war ich im August?"
+           Aktuelle Frage: "Wie fühlte sich Sarah dabei?"
+           → Inferiere: location="München", date_from="2025-08-01", date_to="2025-08-31"
+
+⚠️ OUTPUT FORMAT: Antworte AUSSCHLIESSLICH mit JSON!
+- Gebe KEINE Erklärungen oder Text aus
+- Nur gültiges JSON im exakten Schema
+- Wenn unsicher: Nutze null statt zu raten
 
 Verfügbare Collections:
 - "photos": Fotos mit GPS, Datum, Personen (persons-Feld: kommasepariert)
@@ -234,13 +240,24 @@ def _extract_llm(pq: ParsedQuery, chat_history: list[dict] | None = None) -> Non
         {"role": "system", "content": _get_parse_system_prompt()},
     ]
 
-    # Add recent chat history for context (last 3 messages = 1.5 exchanges)
+    # Add SUMMARIZED chat history for context (only user queries, not full answers!)
+    # This prevents the LLM from getting confused and generating text instead of JSON
     if chat_history:
-        recent_history = chat_history[-6:]  # Last 3 Q&A pairs
-        for msg in recent_history:
+        # Extract only user queries from last 3 exchanges
+        user_queries = [
+            msg["content"]
+            for msg in chat_history[-6:]
+            if msg.get("role") == "user"
+        ]
+
+        if user_queries:
+            # Add as condensed context
+            context_summary = "Bisherige Fragen in dieser Session:\n" + "\n".join(
+                f"- {q}" for q in user_queries[-3:]  # Last 3 user queries only
+            )
             messages.append({
-                "role": msg["role"],
-                "content": msg["content"]
+                "role": "user",
+                "content": context_summary
             })
 
     # Add current query
