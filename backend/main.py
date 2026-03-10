@@ -16,10 +16,16 @@ from pathlib import Path
 
 import uvicorn
 import yaml
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+
+# ⚠️  WICHTIG: .env laden BEVOR andere Module importiert werden!
+# Sonst sind ENV-Variablen in oauth.py, connector.py etc. nicht verfügbar
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(dotenv_path=BASE_DIR / ".env")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -28,7 +34,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
 # ---------------------------------------------------------------------------
@@ -90,11 +95,20 @@ app.include_router(map_router)
 app.include_router(media_router)
 
 # ---------------------------------------------------------------------------
+# Auth-Router
+# ---------------------------------------------------------------------------
+
+from backend.auth.oauth import router as oauth_router
+from backend.auth.local import router as local_router
+
+app.include_router(oauth_router)
+app.include_router(local_router)
+
+# ---------------------------------------------------------------------------
 # v1-Router (token-aware, user-scoped)
 # ---------------------------------------------------------------------------
 
 from backend.api.v1.users      import router as v1_users_router
-from backend.api.v1.consent    import router as v1_consent_router
 from backend.api.v1.sync       import router as v1_sync_router
 from backend.api.v1.ingest     import router as v1_ingest_router
 from backend.api.v1.query      import router as v1_query_router
@@ -107,7 +121,6 @@ from backend.api.v1.validation import router as v1_validation_router
 from backend.api.v1.whatsapp   import router as v1_whatsapp_router
 
 app.include_router(v1_users_router)
-app.include_router(v1_consent_router)
 app.include_router(v1_sync_router)
 app.include_router(v1_dictionary_router)
 app.include_router(v1_entities_router)
@@ -130,6 +143,11 @@ if FRONTEND_DIR.exists():
     @app.get("/")
     async def serve_frontend() -> FileResponse:
         return FileResponse(str(FRONTEND_DIR / "index.html"))
+
+    @app.get("/login.html")
+    async def serve_login() -> FileResponse:
+        """Serve login page for OAuth authentication."""
+        return FileResponse(str(FRONTEND_DIR / "login.html"))
 
 # Logs-Verzeichnis für WhatsApp-Logs
 LOGS_DIR = BASE_DIR / "logs"

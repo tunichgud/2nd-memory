@@ -48,9 +48,11 @@ Business Goal / Feature Idea
          ┌────────────────┴────────────────┐
          │                                  │
     ┌────┴──────┐                   ┌──────┴────┐
-    │REFACTORER │                   │  SCRIBE   │
+    │    QS     │                   │  SCRIBE   │
     │(Thinking) │                   │ (Standard)│
-    └───────────┘                   └───────────┘
+    │Quality    │                   └───────────┘
+    │Assurance  │
+    └───────────┘
 ```
 
 ### Agent-Domains
@@ -67,9 +69,9 @@ Business Goal / Feature Idea
   - `@chat-rag-dev`: Chat UI, RAG Pipeline, LLM
   - `@general-dev`: Infrastructure, Config, Media, Maps
 
-**Quality:** Tester (1)
+**Quality:** Tester (1) + QS (Quality Assurance) (1)
 
-**Maintenance:** Refactorer (1) + Scribe (1)
+**Maintenance:** Scribe (1)
 
 ---
 
@@ -114,10 +116,14 @@ Business Goal / Feature Idea
 @tester Schreibe und führe Tests für die Änderungen in [Files] aus.
 ```
 
-**Refactorer** (on-demand):
+**QS (Quality Assurance)** (User meldet Bug, nach Tester, oder on-demand):
 ```
-@refactorer Analysiere [module/file] auf Refactoring-Potenzial.
+@qs [User beschreibt Bug] → QS übernimmt Koordination und Tracking
+@qs Überprüfe die Logs auf Fehler und koordiniere Bug-Fixes.
+@qs Verifiziere dass [Bug/Feature] vollständig getestet und fehlerfrei ist.
 ```
+
+**Wichtig**: Wenn der User einen Bug meldet, immer `@qs` nutzen - QS koordiniert dann den Fix!
 
 **Scribe** (nach Feature-Completion):
 ```
@@ -150,10 +156,11 @@ Antigravity erlaubt mehrere Agenten gleichzeitig. Sinnvolle Kombinationen:
 | **BD + Architect** | PRD schreiben während Technical Design entsteht |
 | **UX + Frontend Developer** | Wireframes → Implementation ohne Wartezeit |
 | Tester + Scribe | Tests schreiben während Docs entstehen |
+| Tester + QS | Tests schreiben während Logs analysiert werden |
 | Architect (Feature A) + Developer (Feature B) | Planung läuft vor, Implementation folgt |
 | WhatsApp-Dev + Face-Recognition-Dev | Unabhängige Domains, keine File-Konflikte |
 | Chat-RAG-Dev + General-Dev | Backend vs. Frontend/Infrastructure |
-| Refactorer + Scribe | Code verbessern + dokumentieren gleichzeitig |
+| QS + Scribe | Logs prüfen + dokumentieren gleichzeitig |
 
 **Nicht parallel:**
 - BD + Developer (ohne Architect dazwischen — PRD muss erst in Technical Plan übersetzt werden)
@@ -175,7 +182,7 @@ Antigravity erlaubt mehrere Agenten gleichzeitig. Sinnvolle Kombinationen:
 | Chat-RAG-Dev | Sonnet Standard | RAG-Pipeline, bekannte Patterns |
 | General-Dev | Sonnet Standard | Infrastructure, repetitive Tasks |
 | Tester | Sonnet Standard | Regelbasiert, kein Deep Thinking nötig |
-| Refactorer | Sonnet Thinking | Braucht Analyse über mehrere Dateien |
+| **QS (Quality Assurance)** | **Sonnet Thinking** | Log-Analyse, Root-Cause-Diagnose, Bug-Koordination |
 | Scribe | Sonnet Standard | Dokumentation ist repetitiv |
 
 ---
@@ -194,7 +201,7 @@ Antigravity erlaubt mehrere Agenten gleichzeitig. Sinnvolle Kombinationen:
 ├── chat-rag-dev.md             ← Chat & RAG Developer
 ├── general-dev.md              ← General Infrastructure Developer
 ├── tester.md                   ← Test-Agent
-├── refactorer.md               ← Refactoring-Agent
+├── qs.md                       ← Quality Assurance Agent (Log-Analyse, Bug-Koordination)
 ├── scribe.md                   ← Dokumentations-Agent
 ├── prompt-engineer.md          ← Prompt Engineering Specialist
 └── coder.md                    ← Legacy (ersetzt durch 4 Feature-Devs)
@@ -204,14 +211,15 @@ Antigravity erlaubt mehrere Agenten gleichzeitig. Sinnvolle Kombinationen:
 
 ## Tipps
 
+- **Bug gefunden? Immer zu QS!** — `@qs [Bug-Beschreibung]` koordiniert die komplette Behebung
 - **Strategische Features? Start mit BD** — Business Value klären, bevor du baust
 - **UI-Changes? Start mit UX** — Wireframes verhindern 3 Redesign-Runden
 - **Starte immer mit Architect** — auch für kleine Features. 2 Minuten Planung spart 20 Minuten Debugging.
 - **Wähle den richtigen Developer** — WhatsApp-Feature? Nutze `@whatsapp-dev`, nicht `@general-dev`
 - **Parallelisiere wenn möglich** — z.B. `@bd + @ux` oder `@whatsapp-dev + @face-recognition-dev` gleichzeitig
 - **Lass Tester blockieren** — wenn Tests rot sind, merged nichts.
+- **QS nach jedem größeren Feature** — Log-Analyse verhindert, dass Bugs in Production gehen.
 - **Scribe am Ende** — nicht während Entwicklung, sonst veraltet Doku sofort.
-- **Refactorer separat** — nie gleichzeitig mit neuen Features, sonst verlierst du den Überblick.
 
 ## Vorteile des Feature-basierten Setups
 

@@ -1,3 +1,12 @@
-2026/03/10-15:36:49.493 27 Reusing MANIFEST /app/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
-2026/03/10-15:36:49.493 27 Recovering log #581
-2026/03/10-15:36:49.506 27 Reusing old log /app/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/000581.log 
+2026/03/10-21:32:07.903 cf2a5 Reusing MANIFEST /home/bacher/prj/mabrains/memosaur/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/03/10-21:32:07.903 cf2a5 Recovering log #614
+2026/03/10-21:32:07.913 cf2a5 Reusing old log /home/bacher/prj/mabrains/memosaur/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/000614.log 
+2026/03/10-21:32:07.913 cf2a5 Delete type=2 #610
+2026/03/10-21:32:07.913 cf2a5 Delete type=2 #607
+2026/03/10-21:32:07.913 cf2a5 Delete type=2 #609
+2026/03/10-21:32:07.914 cf2a5 Delete type=2 #605
+2026/03/10-21:32:07.914 cf2a5 Delete type=2 #606
+2026/03/10-21:32:07.914 cf2a5 Delete type=2 #612
+2026/03/10-21:32:07.914 cf2a5 Delete type=2 #615
+2026/03/10-21:32:07.914 cf2a5 Delete type=2 #608
+2026/03/10-21:32:07.914 cf2a5 Delete type=2 #611

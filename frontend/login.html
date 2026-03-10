@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login – memosaur 🦕</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-card {
+      animation: slideIn 0.4s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-card bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
+    <!-- Logo & Header -->
+    <div class="text-center mb-8">
+      <div class="text-6xl mb-4">🦕</div>
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">memosaur</h1>
+      <p class="text-gray-600">Dein Privacy-First Personal Memory System</p>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-message" class="hidden mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+      <p class="text-red-700 text-sm"></p>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="flex mb-6 border-b border-gray-200">
+      <button
+        id="tab-local"
+        class="flex-1 py-3 px-4 text-center font-medium border-b-2 border-purple-600 text-purple-600"
+        onclick="showTab('local')">
+        Username/Password
+      </button>
+      <button
+        id="tab-google"
+        class="flex-1 py-3 px-4 text-center font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700"
+        onclick="showTab('google')">
+        Google OAuth
+      </button>
+    </div>
+
+    <!-- Local Login Tab -->
+    <div id="local-tab" class="tab-content">
+      <form id="login-form" class="space-y-4" onsubmit="handleLocalLogin(event)">
+        <div>
+          <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            required
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+            placeholder="username">
+        </div>
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Passwort</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            required
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+            placeholder="••••••••">
+        </div>
+        <button
+          type="submit"
+          class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+          Anmelden
+        </button>
+      </form>
+
+      <!-- Register Link -->
+      <div class="mt-6 text-center">
+        <p class="text-sm text-gray-600">
+          Noch kein Account?
+          <button onclick="showRegister()" class="text-purple-600 hover:text-purple-700 font-medium">
+            Jetzt registrieren
+          </button>
+        </p>
+      </div>
+
+      <!-- Registration Form (Hidden initially) -->
+      <form id="register-form" class="hidden space-y-4 mt-6" onsubmit="handleRegister(event)">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Neuen Account erstellen</h3>
+        <div>
+          <label for="reg-username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+          <input
+            type="text"
+            id="reg-username"
+            name="username"
+            required
+            minlength="3"
+            pattern="[a-zA-Z0-9_-]+"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600"
+            placeholder="username">
+          <p class="text-xs text-gray-500 mt-1">Min. 3 Zeichen, nur Buchstaben, Zahlen, _ und -</p>
+        </div>
+        <div>
+          <label for="reg-display-name" class="block text-sm font-medium text-gray-700 mb-2">Display Name</label>
+          <input
+            type="text"
+            id="reg-display-name"
+            name="display_name"
+            required
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600"
+            placeholder="Dein Name">
+        </div>
+        <div>
+          <label for="reg-password" class="block text-sm font-medium text-gray-700 mb-2">Passwort</label>
+          <input
+            type="password"
+            id="reg-password"
+            name="password"
+            required
+            minlength="8"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600"
+            placeholder="••••••••">
+          <p class="text-xs text-gray-500 mt-1">Min. 8 Zeichen, 1 Großbuchstabe, 1 Kleinbuchstabe, 1 Zahl</p>
+        </div>
+        <button
+          type="submit"
+          class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+          Registrieren
+        </button>
+        <button
+          type="button"
+          onclick="hideRegister()"
+          class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-6 rounded-lg transition-colors">
+          Abbrechen
+        </button>
+      </form>
+    </div>
+
+    <!-- Google OAuth Tab -->
+    <div id="google-tab" class="tab-content hidden">
+      <div class="space-y-4">
+        <div id="g_id_onload"
+          data-client_id="YOUR_GOOGLE_CLIENT_ID"
+          data-callback="handleGoogleLogin"
+          data-auto_prompt="false">
+        </div>
+
+        <div class="g_id_signin"
+          data-type="standard"
+          data-shape="rectangular"
+          data-theme="outline"
+          data-text="signin_with"
+          data-size="large"
+          data-logo_alignment="left"
+          data-width="100%">
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Info -->
+    <div class="mt-8 text-center text-sm text-gray-500">
+      <p>🔒 Deine Daten bleiben lokal</p>
+      <p class="mt-1">Zero-Cloud-Guarantee • Privacy-First</p>
+    </div>
+  </div>
+
+  <script>
+    // Tab-Wechsel
+    function showTab(tabName) {
+      // Alle Tabs ausblenden
+      document.getElementById('local-tab').classList.add('hidden');
+      document.getElementById('google-tab').classList.add('hidden');
+
+      // Tab-Buttons zurücksetzen
+      document.getElementById('tab-local').classList.remove('border-purple-600', 'text-purple-600');
+      document.getElementById('tab-local').classList.add('border-transparent', 'text-gray-500');
+      document.getElementById('tab-google').classList.remove('border-purple-600', 'text-purple-600');
+      document.getElementById('tab-google').classList.add('border-transparent', 'text-gray-500');
+
+      // Gewählten Tab anzeigen
+      document.getElementById(tabName + '-tab').classList.remove('hidden');
+      document.getElementById('tab-' + tabName).classList.add('border-purple-600', 'text-purple-600');
+      document.getElementById('tab-' + tabName).classList.remove('border-transparent', 'text-gray-500');
+    }
+
+    function showRegister() {
+      document.getElementById('login-form').classList.add('hidden');
+      document.getElementById('register-form').classList.remove('hidden');
+    }
+
+    function hideRegister() {
+      document.getElementById('register-form').classList.add('hidden');
+      document.getElementById('login-form').classList.remove('hidden');
+    }
+
+    // Local Login
+    async function handleLocalLogin(event) {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+
+      try {
+        const res = await fetch('/api/auth/login/local', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: formData.get('username'),
+            password: formData.get('password')
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError(data.detail || 'Login fehlgeschlagen');
+          return;
+        }
+
+        console.log('[Login] Erfolgreich:', data.user);
+        window.location.href = '/';
+
+      } catch (err) {
+        console.error('[Login] Fehler:', err);
+        showError('Verbindungsfehler zum Server');
+      }
+    }
+
+    // Registration
+    async function handleRegister(event) {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: formData.get('username'),
+            password: formData.get('password'),
+            display_name: formData.get('display_name')
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError(data.detail || 'Registrierung fehlgeschlagen');
+          return;
+        }
+
+        console.log('[Register] Erfolgreich:', data.user);
+        window.location.href = '/';
+
+      } catch (err) {
+        console.error('[Register] Fehler:', err);
+        showError('Verbindungsfehler zum Server');
+      }
+    }
+
+    // Globale Callback-Funktion für Google Sign-In
+    async function handleGoogleLogin(response) {
+      console.log('[Login] Google JWT received');
+
+      try {
+        // Sende JWT an Backend
+        const res = await fetch('/api/auth/google/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ credential: response.credential })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError(data.detail || 'Login fehlgeschlagen');
+          return;
+        }
+
+        console.log('[Login] Erfolgreich:', data.user);
+
+        // Redirect zu Hauptseite
+        window.location.href = '/';
+
+      } catch (err) {
+        console.error('[Login] Fehler:', err);
+        showError('Verbindungsfehler zum Server');
+      }
+    }
+
+    function showError(message) {
+      const errorEl = document.getElementById('error-message');
+      errorEl.querySelector('p').textContent = message;
+      errorEl.classList.remove('hidden');
+
+      // Auto-Hide nach 5 Sekunden
+      setTimeout(() => {
+        errorEl.classList.add('hidden');
+      }, 5000);
+    }
+
+    // Check ob bereits eingeloggt
+    async function checkAuthStatus() {
+      try {
+        const res = await fetch('/api/auth/status');
+        const data = await res.json();
+
+        if (data.authenticated) {
+          console.log('[Login] Bereits eingeloggt, redirecte...');
+          window.location.href = '/';
+        }
+      } catch (err) {
+        console.error('[Login] Status-Check fehlgeschlagen:', err);
+      }
+    }
+
+    // Beim Laden: Prüfe Auth-Status
+    window.onload = () => {
+      checkAuthStatus();
+
+      // Google Client ID aus Backend laden (falls konfiguriert)
+      fetch('/api/auth/config')
+        .then(r => r.json())
+        .then(config => {
+          if (config.google_client_id) {
+            const onloadEl = document.getElementById('g_id_onload');
+            onloadEl.setAttribute('data-client_id', config.google_client_id);
+          } else {
+            console.warn('[Login] Google OAuth nicht konfiguriert');
+            showError('Google OAuth ist nicht konfiguriert (fehlendes GOOGLE_CLIENT_ID)');
+          }
+        })
+        .catch(err => {
+          console.error('[Login] Config laden fehlgeschlagen:', err);
+        });
+    };
+  </script>
+</body>
+
+</html>

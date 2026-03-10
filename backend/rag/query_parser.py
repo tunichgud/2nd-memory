@@ -49,8 +49,31 @@ _MONTH_MAP: dict[str, int] = {
 }
 
 def _get_parse_system_prompt() -> str:
-    current_year = datetime.now().year
+    from backend.llm.prompt_utils import get_current_date_compact, get_year_context
+    from datetime import datetime, timedelta
+
+    year_ctx = get_year_context()
+    current_year = year_ctx["current_year"]
+    last_year = year_ctx["last_year"]
+    current_date_iso = year_ctx["iso_date"]
+
+    # Berechne wichtige relative Daten
+    now = datetime.now()
+    yesterday = (now - timedelta(days=1)).strftime('%Y-%m-%d')
+    day_before_yesterday = (now - timedelta(days=2)).strftime('%Y-%m-%d')
+    tomorrow = (now + timedelta(days=1)).strftime('%Y-%m-%d')
+
+    # Diese Woche (Montag bis Sonntag)
+    week_start = (now - timedelta(days=now.weekday())).strftime('%Y-%m-%d')
+    week_end = (now + timedelta(days=6 - now.weekday())).strftime('%Y-%m-%d')
+
+    # Letzte Woche
+    last_week_start = (now - timedelta(days=now.weekday() + 7)).strftime('%Y-%m-%d')
+    last_week_end = (now - timedelta(days=now.weekday() + 1)).strftime('%Y-%m-%d')
+
     return f"""Du bist ein Query-Parser für ein persönliches Gedächtnis-System.
+
+{get_current_date_compact()}
 
 Analysiere die Anfrage und extrahiere strukturierte Informationen als JSON.
 Antworte NUR mit gültigem JSON, ohne Erklärungen oder Markdown-Blöcke.
@@ -67,17 +90,36 @@ JSON-Schema:
   "locations": [],         // Genannte Ortsnamen oder Regionen
   "month": null,           // Monatsnummer 1-12 oder null
   "year": null,            // Jahreszahl oder null
-  "date_from": null,       // ISO-Datum YYYY-MM-DD oder null
-  "date_to": null,         // ISO-Datum YYYY-MM-DD oder null
+  "date_from": null,       // ISO-Datum YYYY-MM-DD oder null (inklusive)
+  "date_to": null,         // ISO-Datum YYYY-MM-DD oder null (inklusive)
   "topics": [],            // Themen: "restaurant", "location", "activity", "person"
   "relevant_collections": [] // Subset von ["photos","reviews","saved_places","messages"]
 }}
 
-Regeln:
+⚠️  WICHTIG: Regeln für Datumsberechnung (STRIKT EINHALTEN!):
+
+Relative Zeitangaben (von HEUTE = {current_date_iso} aus):
+- "heute" → date_from="{current_date_iso}", date_to="{current_date_iso}"
+- "heute Abend" → date_from="{current_date_iso}", date_to="{current_date_iso}"
+- "heute Morgen" → date_from="{current_date_iso}", date_to="{current_date_iso}"
+- "gestern" → date_from="{yesterday}", date_to="{yesterday}"
+- "vorgestern" → date_from="{day_before_yesterday}", date_to="{day_before_yesterday}"
+- "morgen" → date_from="{tomorrow}", date_to="{tomorrow}"
+- "diese Woche" → date_from="{week_start}", date_to="{week_end}"
+- "letzte Woche" → date_from="{last_week_start}", date_to="{last_week_end}"
+
+Absolute Zeitangaben:
+- "letztes Jahr" = {last_year} (NICHT {current_year}!)
+- "dieses Jahr" = {current_year}
+- "August letzten Jahres" = August {last_year} → date_from="{last_year}-08-01", date_to="{last_year}-08-31"
+- "im August" (ohne Jahr) = August {current_year}
+- Bei Monatsnennung ohne Jahr: nimm das aktuelle Jahr ({current_year})
+
+Weitere Regeln:
 - persons: Nur echte Personennamen extrahieren, keine Pronomen
 - relevant_collections: photos+messages wenn Personen gefragt; reviews+saved_places wenn Orte/Restaurants gefragt
-- Bei Monatsnennung ohne Jahr: nimm das aktuellste Jahr mit Daten ({current_year})
-- date_from/date_to: Berechne den exakten Zeitraum aus Monat/Jahr"""
+- date_from/date_to: Berechne den exakten Zeitraum aus Monat/Jahr
+- Bei "heute Abend", "heute Morgen" etc: Nutze IMMER das HEUTIGE Datum ({current_date_iso})!"""
 
 
 @dataclass

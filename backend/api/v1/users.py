@@ -41,12 +41,6 @@ async def create_user(req: CreateUserRequest, db: aiosqlite.Connection = Depends
         "INSERT INTO users (id, display_name, created_at) VALUES (?, ?, ?)",
         (user_id, req.display_name, now),
     )
-    # Default-Consents anlegen
-    for scope in ("biometric_photos", "gps", "messages"):
-        await db.execute(
-            "INSERT INTO consents (user_id, scope, granted, granted_at) VALUES (?, ?, 0, ?)",
-            (user_id, scope, now),
-        )
     await db.commit()
     logger.info("Neuer User erstellt: %s (%s)", req.display_name, user_id)
     return User(id=user_id, display_name=req.display_name, created_at=now)

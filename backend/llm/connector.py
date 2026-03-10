@@ -165,11 +165,13 @@ def chat(messages: list[dict], model: str | None = None, tools: list | None = No
 
 
 async def chat_stream(messages: list[dict], model: str | None = None, tools: list | None = None):
-    """Asynchroner Generator für Chat-Streams. 
+    """Asynchroner Generator für Chat-Streams.
     Wertet Tool-Calls manuell aus, um dem Frontend "Plan"-Ereignisse zu senden.
-    
+
     Yields:
-        {'type': 'plan', 'content': '...'} für Tool-Nutzung
+        {'type': 'thought', 'content': '...'} für ReAct Thought
+        {'type': 'tool_call', 'content': {...}} für Tool-Aufruf
+        {'type': 'tool_result', 'content': {...}} für Tool-Ergebnis
         {'type': 'text', 'content': '...'} für finale Text-Chunks
     """
     import asyncio
@@ -235,21 +237,54 @@ async def chat_stream(messages: list[dict], model: str | None = None, tools: lis
                 break
                 
         if fc and fc.name in tool_map:
-            # Informiere Frontend: Agent denkt nach (nutze Geminis echten Gedanken, falls vorhanden)
-            friendly_plan = plan_text if plan_text else f"Nutze Werkzeug '{fc.name}'..."
-            yield {"type": "plan", "content": friendly_plan}
-            
+            # Schritt 1: Thought (ReAct Reasoning)
+            if plan_text:
+                yield {"type": "thought", "content": plan_text}
+
+            # Schritt 2: Tool Call (Action)
+            friendly_args = {k: v for k, v in fc.args.items()}
+            yield {
+                "type": "tool_call",
+                "content": {
+                    "tool": fc.name,
+                    "args": friendly_args,
+                    "status": "running"
+                }
+            }
+
             # Tool ausführen
             tool_func = tool_map[fc.name]
             args = {k: v for k, v in fc.args.items()}
             logger.info(f"Manual Tool Call: {fc.name}({args})")
-            
+
             # Da Tools blocking sein könnten, mit asyncio abfangen
             try:
                 tool_res = tool_func(**args)
+                tool_error = None
             except Exception as e:
                 logger.error(f"Tool error: {e}")
                 tool_res = f"Fehler bei Tool-Ausführung: {e}"
+                tool_error = str(e)
+
+            # Schritt 3: Tool Result (Observation)
+            # Parse JSON wenn Tool structured output liefert
+            import json as json_lib
+            try:
+                parsed = json_lib.loads(tool_res) if isinstance(tool_res, str) else tool_res
+                new_sources_count = len(parsed.get("new_sources", [])) if isinstance(parsed, dict) else 0
+                summary = f"{new_sources_count} neue Quellen" if new_sources_count > 0 else "Keine neuen Quellen"
+            except:
+                summary = f"{len(tool_res[:100])}+ Zeichen" if isinstance(tool_res, str) else "Ergebnis erhalten"
+
+            yield {
+                "type": "tool_result",
+                "content": {
+                    "tool": fc.name,
+                    "summary": summary,
+                    "status": "error" if tool_error else "success",
+                    "error": tool_error
+                }
+            }
 
             # Das Resultat als Antwort von uns (dem "System") ins Model füttern
             current_prompt = genai.protos.Content(
@@ -265,17 +300,17 @@ async def chat_stream(messages: list[dict], model: str | None = None, tools: lis
             )
         else:
             # Keine Tools mehr -> Text Finale
-            yield {"type": "plan", "content": "Formuliere Antwort..."}
+            yield {"type": "thought", "content": "Formuliere finale Antwort..."}
             # Trick: Wir senden den current_prompt (sollte leer sein, oder die letzte func response)
             # noch einmal als Stream, um den Text chunk-weise zu Frontend zu feuern.
             # Da wir oben schon send_message ohne stream gemacht haben...
             # Eigentlich haben wir hier schon den Text.
             # Für echtes Streaming müssten wir send_message(stream=True) nutzen,
-            # was aber mit function calls bei Gemini kompliziert ist. 
+            # was aber mit function calls bei Gemini kompliziert ist.
             # -> Wir streamen den fertigen Text künstlich oder geben ihn am Stück.
             text = _strip_thinking(response.text.strip())
-            
-            # Wir stückeln ihn für eine "Tipp-Animation" (oder reichen ihn am Stück durch, 
+
+            # Wir stückeln ihn für eine "Tipp-Animation" (oder reichen ihn am Stück durch,
             # Frontend macht sowieso markdown rendering)
             yield {"type": "text", "content": text}
             break

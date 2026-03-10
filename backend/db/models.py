@@ -14,20 +14,6 @@ class User(BaseModel):
     is_active: bool = True
 
 
-class Consent(BaseModel):
-    user_id: str
-    scope: str           # 'biometric_photos' | 'gps' | 'messages'
-    granted: bool
-    granted_at: int | None = None
-    ip_hint: str | None = None
-
-
-class ConsentUpdate(BaseModel):
-    biometric_photos: bool = False
-    gps: bool = False
-    messages: bool = False
-
-
 class SyncBlob(BaseModel):
     id: int | None = None
     user_id: str

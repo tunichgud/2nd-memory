@@ -28,6 +28,8 @@ class V1QueryRequest(BaseModel):
     user_id: str
     query: str = Field(..., min_length=1, max_length=2000)
     chat_history: list[ChatMessageDict] = Field(default_factory=list)
+    person_names: list[str] | None = None
+    location_names: list[str] | None = None
     collections: list[str] | None = None
     n_results: int = Field(default=6, ge=1, le=50)
     min_score: float = Field(default=0.2, ge=0.0, le=1.0)
@@ -146,6 +148,8 @@ async def query_stream_v1(
                 query=req.query,
                 chat_history=[{"role": msg.role, "content": msg.content} for msg in req.chat_history],
                 user_id=req.user_id,
+                person_names=req.person_names,
+                location_names=req.location_names,
                 collections=req.collections,
                 n_per_collection=req.n_results,
                 min_score=req.min_score,

@@ -194,63 +194,54 @@
         transform: scale(1);
       }
     }
+
+    /* Thinking Timeline Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-fadeIn {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+
+    .thinking-timeline {
+      transition: all 0.3s ease-out;
+    }
+
+    .timeline-step {
+      transition: all 0.2s ease-out;
+    }
+
+    .timeline-step:hover {
+      transform: translateX(2px);
+    }
+
+    /* Pulsing animation for active tool calls */
+    @keyframes pulse-border {
+      0%, 100% {
+        border-color: rgb(234, 179, 8);
+        opacity: 1;
+      }
+      50% {
+        border-color: rgb(250, 204, 21);
+        opacity: 0.7;
+      }
+    }
+
+    .border-yellow-500.animate-pulse {
+      animation: pulse-border 2s ease-in-out infinite;
+    }
   </style>
 </head>
 
 <body class="bg-gray-950 text-gray-100 min-h-screen font-sans">
-
-  <!-- Consent-Modal -->
-  <div id="consent-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 z-40 flex items-center justify-center p-4">
-    <div class="bg-gray-900 border border-gray-700 rounded-2xl max-w-md w-full p-6 flex flex-col gap-4">
-      <h2 class="font-bold text-lg">Datenverarbeitung – Ihre Einwilligung</h2>
-      <p class="text-sm text-gray-400">
-        Für folgende Features verarbeiten wir Ihre Daten lokal oder auf dem Server.
-        Sie können einzelne Bereiche aktivieren oder deaktivieren.
-      </p>
-      <div class="flex flex-col gap-3">
-        <label class="flex items-start gap-3 cursor-pointer">
-          <input type="checkbox" id="consent-photos" class="mt-1 w-4 h-4 accent-blue-500">
-          <div>
-            <div class="font-medium text-sm">Fotos &amp; KI-Bilderkennung</div>
-            <div class="text-xs text-gray-500">
-              Bilder werden für die Analyse (GPS, Personen, Beschreibungen) verarbeitet.
-            </div>
-          </div>
-        </label>
-        <label class="flex items-start gap-3 cursor-pointer">
-          <input type="checkbox" id="consent-gps" class="mt-1 w-4 h-4 accent-blue-500">
-          <div>
-            <div class="font-medium text-sm">GPS-Standortdaten</div>
-            <div class="text-xs text-gray-500">
-              Koordinaten werden zur Ortsbestimmung genutzt.
-            </div>
-          </div>
-        </label>
-        <label class="flex items-start gap-3 cursor-pointer">
-          <input type="checkbox" id="consent-messages" class="mt-1 w-4 h-4 accent-blue-500">
-          <div>
-            <div class="font-medium text-sm">Nachrichten (WhatsApp, Signal)</div>
-            <div class="text-xs text-gray-500">
-              Ihre Chats werden indexiert, um sie für Sie durchsuchbar zu machen.
-            </div>
-          </div>
-        </label>
-      </div>
-      <p class="text-xs text-gray-500">
-        Ohne Einwilligung sind die jeweiligen Features deaktiviert.
-        Diese Einstellung kann jederzeit im Einstellungen-Tab geändert werden.
-      </p>
-      <div class="flex gap-3">
-        <button onclick="saveConsent(false)" class="flex-1 bg-gray-700 hover:bg-gray-600 rounded-lg px-4 py-2 text-sm">
-          Ablehnen
-        </button>
-        <button onclick="saveConsent(true)"
-          class="flex-1 bg-blue-600 hover:bg-blue-500 rounded-lg px-4 py-2 text-sm font-medium">
-          Einwilligen &amp; Starten
-        </button>
-      </div>
-    </div>
-  </div>
 
   <!-- Lightbox Overlay (Vollbild) -->
   <div id="memosaur-lightbox"
@@ -735,20 +726,13 @@
       </div>
     </div>
 
-    <!-- Consent -->
-    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
-      <h2 class="font-semibold mb-3">🔒 Datenschutz &amp; Einwilligungen</h2>
-      <div id="consent-settings" class="flex flex-col gap-3 text-sm text-gray-400">Lädt…</div>
-      <button onclick="openConsentModal()" class="mt-4 ingest-btn bg-gray-700 hover:bg-gray-600 text-sm">
-        Einwilligungen ändern
-      </button>
-    </div>
-
-
-    <!-- User-Info -->
+    <!-- User-Info & Logout -->
     <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
       <h2 class="font-semibold mb-3">ℹ️ Benutzer-Information</h2>
-      <div id="user-info" class="text-sm text-gray-400">Lädt…</div>
+      <div id="user-info" class="text-sm text-gray-400 mb-4">Lädt…</div>
+      <button onclick="logout()" class="bg-red-700 hover:bg-red-600 text-sm px-4 py-2 rounded-lg transition-all">
+        🚪 Abmelden
+      </button>
     </div>
 
     <!-- WhatsApp Integration -->
@@ -960,17 +944,43 @@
   <script src="/static/entities.js"></script>
   <script src="/static/validation.js"></script>
   <script>
-    // Aktueller User (Default: ManfredMustermann)
-    window._userId = '00000000-0000-0000-0000-000000000001';
+    // Aktueller User (wird nach Auth-Check gesetzt)
+    window._userId = null;
+
+    // Auth-Check: Prüft ob User eingeloggt ist
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/auth/status');
+        const data = await res.json();
+
+        if (!data.authenticated) {
+          // Nicht eingeloggt → Redirect zu Login
+          console.log('[Auth] Nicht eingeloggt, redirecte zu /login.html');
+          window.location.href = '/login.html';
+          return false;
+        }
+
+        // User-ID setzen
+        window._userId = data.user.id;
+        console.log('[Auth] Eingeloggt als:', data.user.display_name);
+        return true;
+
+      } catch (err) {
+        console.error('[Auth] Status-Check fehlgeschlagen:', err);
+        // Bei Fehler: Redirect zu Login (sicherer Fallback)
+        window.location.href = '/login.html';
+        return false;
+      }
+    }
 
     // App-Initialisierung
     async function initApp() {
+      // WICHTIG: Erst Auth-Check, dann Rest laden
+      const authenticated = await checkAuth();
+      if (!authenticated) return;  // Redirect läuft bereits
+
       loadStatus();
-      loadConsentSettings();
       loadUserInfo();
-      // Consent beim ersten Besuch prüfen
-      const seen = localStorage.getItem('memosaur_consent_seen');
-      if (!seen) openConsentModal();
     }
 
     // Start
@@ -991,7 +1001,6 @@
         window.Entities.loadLinkedEntities();
       }
       if (name === 'settings') {
-        loadConsentSettings();
         window.Sync?.renderSyncUI('sync-container', window._userId);
         checkWhatsAppStatus();
       }
@@ -1020,56 +1029,8 @@
     }
 
     // -------------------------------------------------------------------------
-    // Consent-Modal
+    // User Info
     // -------------------------------------------------------------------------
-    function openConsentModal() {
-      // Aktuellen Status laden
-      fetch(`/api/v1/consent/${window._userId}`)
-        .then(r => r.json())
-        .then(d => {
-          document.getElementById('consent-photos').checked = d.biometric_photos;
-          document.getElementById('consent-gps').checked = d.gps;
-          document.getElementById('consent-messages').checked = d.messages;
-        }).catch(() => { });
-      document.getElementById('consent-modal').classList.remove('hidden');
-    }
-
-    async function saveConsent(acceptAll) {
-      const photos = acceptAll ? true : document.getElementById('consent-photos').checked;
-      const gps = acceptAll ? true : document.getElementById('consent-gps').checked;
-      const messages = acceptAll ? true : document.getElementById('consent-messages').checked;
-      if (acceptAll) {
-        document.getElementById('consent-photos').checked = true;
-        document.getElementById('consent-gps').checked = true;
-        document.getElementById('consent-messages').checked = true;
-      }
-      try {
-        await fetch(`/api/v1/consent/${window._userId}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ biometric_photos: photos, gps, messages }),
-        });
-        localStorage.setItem('memosaur_consent_seen', '1');
-      } catch (e) { console.error('Consent-Fehler:', e); }
-      document.getElementById('consent-modal').classList.add('hidden');
-      loadConsentSettings();
-    }
-
-    async function loadConsentSettings() {
-      try {
-        const r = await fetch(`/api/v1/consent/${window._userId}`);
-        const d = await r.json();
-        const el = document.getElementById('consent-settings');
-        if (!el) return;
-        const icon = (v) => v ? '✅' : '❌';
-        el.innerHTML = `
-      <div>${icon(d.biometric_photos)} Fotos &amp; KI-Bilderkennung</div>
-      <div>${icon(d.gps)} GPS-Standortdaten</div>
-      <div>${icon(d.messages)} Nachrichten</div>
-    `;
-      } catch (e) { }
-    }
-
     async function loadUserInfo() {
       try {
         const r = await fetch(`/api/v1/users/${window._userId}`);
@@ -1138,6 +1099,27 @@
         setTimeout(() => {
           element.classList.add('hidden');
         }, 3000);
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // Logout
+    // -------------------------------------------------------------------------
+    async function logout() {
+      if (!confirm('Möchtest du dich wirklich abmelden?')) return;
+
+      try {
+        const res = await fetch('/api/auth/logout', { method: 'POST' });
+        if (res.ok) {
+          console.log('[Auth] Logout erfolgreich');
+          window.location.href = '/login.html';
+        } else {
+          console.error('[Auth] Logout fehlgeschlagen');
+          alert('Logout fehlgeschlagen');
+        }
+      } catch (err) {
+        console.error('[Auth] Logout-Fehler:', err);
+        alert('Verbindungsfehler');
       }
     }
 

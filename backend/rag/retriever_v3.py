@@ -411,16 +411,11 @@ def _fallback_retrieval(
 
 def _get_system_prompt_v3() -> str:
     """Optimierter System Prompt für Chain-of-Thought RAG."""
-    now = datetime.now()
-    current_date = now.strftime('%d.%m.%Y')
-    current_weekday = now.strftime('%A')
-    weekday_map = {
-        'Monday': 'Montag', 'Tuesday': 'Dienstag', 'Wednesday': 'Mittwoch',
-        'Thursday': 'Donnerstag', 'Friday': 'Freitag', 'Saturday': 'Samstag', 'Sunday': 'Sonntag'
-    }
-    weekday_de = weekday_map.get(current_weekday, current_weekday)
+    from backend.llm.prompt_utils import get_current_date_header, get_year_context
 
-    return f"""⚠️ WICHTIG - AKTUELLES DATUM: {current_date} ({weekday_de})
+    year_ctx = get_year_context()
+
+    return f"""{get_current_date_header()}
 
 Du bist Memosaur, ein analytischer Agent für persönliche Erinnerungen.
 
@@ -444,7 +439,7 @@ Wenn die Anfrage komplex ist, arbeite in Schritten:
 2. Verwende INLINE-REFERENZEN: [[1]], [[2]] für Quellen-Nummern
 3. Bei fehlenden Daten: Sage klar "Ich habe keine Informationen über..."
 4. Antworte auf Deutsch
-5. Bei Zeitangaben: Rechne vom aktuellen Datum ({current_date})
+5. Bei Zeitangaben: Rechne vom aktuellen Datum ({year_ctx['current_date']})
 
 ## Verfügbare Tools (optional, wenn Gemini Provider)
 - `search_photos(suchtext, personen, orte, von_datum, bis_datum)`: Sucht in Fotos

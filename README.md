@@ -2,6 +2,8 @@
 
 **Privacy-First Persönliches Gedächtnis-System** – vereint Fotos, Nachrichten und Geodaten zu einer durchsuchbaren Wissensbasis, die du per natürlicher Sprache abfragen kannst. Alle persönlichen Daten werden lokal verarbeitet und verbleiben in deiner eigenen Infrastruktur.
 
+> **🚀 Neu hier?** Starte mit der [SETUP.md](SETUP.md) für eine vollständige Installations- und Konfigurationsanleitung inkl. Google OAuth.
+
 ---
 
 ## Was ist memosaur?
@@ -116,7 +118,7 @@ cp config.yaml.example config.yaml
 open http://localhost:8000
 ```
 
-Detaillierte Anleitung: [INSTALL.md](INSTALL.md)
+**📖 Detaillierte Anleitung**: [SETUP.md](SETUP.md) (Installation, OAuth-Konfiguration, Troubleshooting)
 
 ---
 

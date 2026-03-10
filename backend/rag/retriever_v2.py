@@ -21,27 +21,25 @@ _RELEVANT_MIN_SCORE  = 0.20
 _FALLBACK_MIN_SCORE  = 0.42
 
 def _get_system_prompt() -> str:
-    now = datetime.now()
-    current_date = now.strftime('%d.%m.%Y')
-    current_weekday = now.strftime('%A')  # Monday, Tuesday, etc.
-    weekday_map = {
-        'Monday': 'Montag', 'Tuesday': 'Dienstag', 'Wednesday': 'Mittwoch',
-        'Thursday': 'Donnerstag', 'Friday': 'Freitag', 'Saturday': 'Samstag', 'Sunday': 'Sonntag'
-    }
-    weekday_de = weekday_map.get(current_weekday, current_weekday)
+    from backend.llm.prompt_utils import get_current_date_header
 
-    return f"""⚠️ WICHTIG - AKTUELLES DATUM: {current_date} ({weekday_de})
-
-Zeitliche Berechnungen IMMER von diesem Datum aus:
-- "letztes Wochenende" = Samstag {(now - timedelta(days=now.weekday()+2)).strftime('%d.%m.%Y')} + Sonntag {(now - timedelta(days=now.weekday()+1)).strftime('%d.%m.%Y')}
-- "diese Woche" = {(now - timedelta(days=now.weekday())).strftime('%d.%m.%Y')} bis {(now + timedelta(days=6-now.weekday())).strftime('%d.%m.%Y')}
-- "gestern" = {(now - timedelta(days=1)).strftime('%d.%m.%Y')}
-- "vorgestern" = {(now - timedelta(days=2)).strftime('%d.%m.%Y')}
+    return f"""{get_current_date_header()}
 
 Du bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.
 Du hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.
 
-WICHTIG: Nutze für Personen und Orte immer die echten Namen aus der Anfrage oder den Quellen. 
+🎯 WICHTIGSTE REGEL für "Wo war ich?"-Fragen:
+1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)
+2. Extrahiere aus den Foto-Metadaten das "cluster"-Feld (z.B. "München-Schwabing") oder "address"-Feld
+3. Nenne den EXAKTEN ORT als erste Information in deiner Antwort
+4. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)
+
+BEISPIEL:
+User: "Wo war ich im August 2022 mit Nora?"
+→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.
+→ Tool: search_photos(personen=["Nora"], von_datum="2022-08-01", bis_datum="2022-08-31")
+→ Observation: [Foto vom 15.08.2022, cluster="München-Schwabing", GPS: 48.16°N 11.58°E]
+→ Antwort: "Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]]."
 
 ReAct (Reasoning and Acting) Ansatz:
 - Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:
@@ -50,7 +48,7 @@ ReAct (Reasoning and Acting) Ansatz:
     -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=["Nora"], orte=["München"]).
     -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.
 
-- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum. Sende diese Gedanken ALS TEXT, BEVOR du den Tool-Aufruf auslöst.
+- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.
 
 Weitere Regeln:
 1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere keine Fakten.
@@ -58,7 +56,12 @@ Weitere Regeln:
 3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.
 4. Antworte auf Deutsch. Falls nach "Gefühlen" oder "Stimmung" gefragt wird, nutze `search_messages`.
 5. Bei Ortsfragen: nutze das Cluster/Ort-Feld ("München-Ost") und GPS-Koordinaten zur Verortung.
-6. Falls keine passenden Daten gefunden wurden, erkläre logisch, was du versucht hast zu suchen und warum es keine Treffer gab."""
+6. Falls keine passenden Daten gefunden wurden, erkläre logisch, was du versucht hast zu suchen und warum es keine Treffer gab.
+
+ANTWORTSTIL:
+- Präzise und kurz (3-4 Sätze für einfache Fragen)
+- Exakte Ortsangaben ZUERST (z.B. "Du warst in München", nicht "Es gibt Fotos aus einer Stadt")
+- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)"""
 
 
 def _build_token_filter(
@@ -419,8 +422,8 @@ def answer_v2(
         date_to=date_to,
     )
 
-    # Nutze Kompression wenn viele Quellen
-    use_compression = len(sources) > 15
+    # Nutze Kompression wenn viele Quellen (ab 10 statt 15 für bessere Qualität)
+    use_compression = len(sources) > 10
     context = _format_sources_for_llm(sources, use_compression=use_compression)
 
     # Definition der spezialisierten Agenten-Tools
@@ -461,8 +464,8 @@ def answer_v2(
             if s["id"] not in existing_ids:
                 sources.append(s)
                 existing_ids.add(s["id"])
-        # Nutze Kompression wenn viele Quellen
-        use_compression = len(res) > 15
+        # Nutze Kompression wenn viele Quellen (ab 10 statt 15)
+        use_compression = len(res) > 10
         return _format_sources_for_llm(res, use_compression=use_compression)
 
     def search_messages(
@@ -497,8 +500,8 @@ def answer_v2(
             if s["id"] not in existing_ids:
                 sources.append(s)
                 existing_ids.add(s["id"])
-        # Nutze Kompression wenn viele Quellen
-        use_compression = len(res) > 15
+        # Nutze Kompression wenn viele Quellen (ab 10 statt 15)
+        use_compression = len(res) > 10
         return _format_sources_for_llm(res, use_compression=use_compression)
 
     # Zusammenfassung für User/Prompt
@@ -557,6 +560,8 @@ async def answer_v2_stream(
     query: str,
     user_id: str,
     chat_history: list[dict] | None = None,
+    person_names: list[str] | None = None,
+    location_names: list[str] | None = None,
     collections: list[str] | None = None,
     n_per_collection: int = 6,
     min_score: float = 0.2,
@@ -569,8 +574,41 @@ async def answer_v2_stream(
     from backend.llm.connector import chat_stream, get_cfg
     import json
 
+    # NEU: Query-Analyzer für komplexe Anfragen
+    try:
+        from backend.rag.query_analyzer import analyze_query
+        analyzed = analyze_query(query)
+
+        # Sende Query-Analysis als Event
+        yield json.dumps({
+            "type": "query_analysis",
+            "content": {
+                "query_type": analyzed.query_type,
+                "complexity": analyzed.complexity,
+                "sub_queries": analyzed.sub_queries,
+                "temporal_fuzzy": analyzed.temporal_fuzzy,
+                "entities": analyzed.entities,
+                "reasoning": analyzed.reasoning
+            }
+        }) + "\n\n"
+
+        # Übernehme erkannte Entities
+        if analyzed.entities and not person_names:
+            person_names = [e for e in analyzed.entities if e[0].isupper()]
+        if analyzed.entities and not location_names:
+            location_names = analyzed.entities
+
+        logger.info("Query-Analyzer: type=%s, complexity=%s, entities=%s",
+                   analyzed.query_type, analyzed.complexity, analyzed.entities)
+    except Exception as exc:
+        logger.warning("Query-Analyzer fehlgeschlagen (nutze Fallback): %s", exc)
+
     # Fallback: Parse die Anfrage via LLM, um Klarnamen-Orte zu extrahieren,
     # die das Frontend-NER möglicherweise nicht erkannt hat (z.B. "München" statt "[LOC_1]").
+    # Initialisiere location_names und person_names falls nicht übergeben
+    location_names = location_names or []
+    person_names = person_names or []
+
     try:
         from backend.rag.query_parser import parse_query
         parsed = parse_query(query)
@@ -578,12 +616,12 @@ async def answer_v2_stream(
             plain_locs = [l for l in parsed.locations if not l.startswith("[LOC_")]
             if plain_locs:
                 logger.info("Stream-Fallback: LLM-Parser fand Klarnamen-Orte: %s", plain_locs)
-                location_names = list(location_names or []) + plain_locs
+                location_names = list(location_names) + plain_locs
         if parsed.persons:
             plain_pers = [p for p in parsed.persons if not p.startswith("[PER_")]
             if plain_pers:
                 logger.info("Stream-Fallback: LLM-Parser fand Klarnamen-Personen: %s", plain_pers)
-                person_names = list(person_names or []) + plain_pers
+                person_names = list(person_names) + plain_pers
         if parsed.date_from and not date_from:
             date_from = parsed.date_from
         if parsed.date_to and not date_to:
@@ -668,8 +706,8 @@ async def answer_v2_stream(
                 new_sources.append(s)
                 existing_ids.add(s["id"])
         
-        # Nutze Kompression für Tool-Results
-        use_compression = len(res) > 15
+        # Nutze Kompression für Tool-Results (ab 10 statt 15)
+        use_compression = len(res) > 10
         return json.dumps({"new_sources": new_sources, "formatted_context": _format_sources_for_llm(res, use_compression=use_compression)})
 
     def search_messages(
@@ -709,8 +747,8 @@ async def answer_v2_stream(
                 new_sources.append(s)
                 existing_ids.add(s["id"])
                 
-        # Nutze Kompression für Tool-Results
-        use_compression = len(res) > 15
+        # Nutze Kompression für Tool-Results (ab 10 statt 15)
+        use_compression = len(res) > 10
         return json.dumps({"new_sources": new_sources, "formatted_context": _format_sources_for_llm(res, use_compression=use_compression)})
 
     def search_places(
@@ -740,12 +778,12 @@ async def answer_v2_stream(
                 new_sources.append(s)
                 existing_ids.add(s["id"])
                 
-        # Nutze Kompression für Tool-Results
-        use_compression = len(res) > 15
+        # Nutze Kompression für Tool-Results (ab 10 statt 15)
+        use_compression = len(res) > 10
         return json.dumps({"new_sources": new_sources, "formatted_context": _format_sources_for_llm(res, use_compression=use_compression)})
 
-    # Nutze Kompression wenn viele Quellen
-    use_compression = len(sources) > 15
+    # Nutze Kompression wenn viele Quellen (ab 10 statt 15 für bessere Qualität)
+    use_compression = len(sources) > 10
     context = _format_sources_for_llm(sources, use_compression=use_compression)
 
     filter_parts = []

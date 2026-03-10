@@ -1,23 +1,12 @@
 -- memosaur – initiales Datenbankschema
 -- Migration 001
 
--- Nutzer-Tabelle (Basis für Multi-User-Betrieb)
+-- Nutzer-Tabelle (Single-User-System mit OAuth)
 CREATE TABLE IF NOT EXISTS users (
     id           TEXT PRIMARY KEY,          -- UUID v4
     display_name TEXT NOT NULL,
     created_at   INTEGER NOT NULL,          -- Unix timestamp
     is_active    INTEGER NOT NULL DEFAULT 1
-);
-
--- DSGVO-Einwilligungen (Art. 9 DSGVO)
--- scope: 'biometric_photos' | 'gps' | 'messages'
-CREATE TABLE IF NOT EXISTS consents (
-    user_id    TEXT    NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    scope      TEXT    NOT NULL,
-    granted    INTEGER NOT NULL DEFAULT 0,  -- 1 = erteilt, 0 = verweigert
-    granted_at INTEGER,                     -- Unix timestamp der letzten Änderung
-    ip_hint    TEXT,                        -- anonymisiert: nur letztes Oktet
-    PRIMARY KEY (user_id, scope)
 );
 
 -- Verschlüsselte Sync-Blobs (Token↔Klarname Wörterbuch)

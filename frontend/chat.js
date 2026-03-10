@@ -112,8 +112,23 @@ async function _sendQueryStream(query, abortSignal) {
 
       try {
         const chunk = JSON.parse(chunkStr);
-        if (chunk.type === "plan") {
-          updateStreamingPlan(responseUi, chunk.content);
+
+        // NEW EVENT TYPES
+        if (chunk.type === "query_analysis") {
+          addQueryAnalysisStep(responseUi, chunk.content);
+        } else if (chunk.type === "thought") {
+          addThoughtStep(responseUi, chunk.content);
+        } else if (chunk.type === "tool_call") {
+          // Speichere stepId für späteren Result-Update
+          responseUi.lastToolStepId = addToolCallStep(responseUi, chunk.content);
+        } else if (chunk.type === "tool_result") {
+          if (responseUi.lastToolStepId) {
+            updateToolResultStep(responseUi, responseUi.lastToolStepId, chunk.content);
+          }
+        }
+        // LEGACY EVENT TYPES (Fallback)
+        else if (chunk.type === "plan") {
+          addThoughtStep(responseUi, chunk.content);
         } else if (chunk.type === "sources") {
           fullSources = chunk.content;
           // Store sources in window for inline access
@@ -182,26 +197,26 @@ function appendUserMessage(text) {
   scrollBottom();
 }
 
-// ----- Helper für das Streaming-UI -----
+// ----- Helper für das Streaming-UI mit enhanced Thinking Timeline -----
 function createStreamingAssistantMessageCard() {
   const div = document.createElement('div');
   div.className = 'flex flex-col gap-3 max-w-[92%]';
 
-  // Header/Toggle für den Plan
+  // Header/Toggle für die Thinking Timeline
   const planHeader = document.createElement('button');
   planHeader.className = 'text-[10px] text-gray-500 hover:text-gray-300 flex items-center gap-1 transition-colors w-fit';
-  planHeader.innerHTML = '<span>▶</span> Agenten-Plan anzeigen';
+  planHeader.innerHTML = '<span>▼</span> 🤖 Denkprozess';
   div.appendChild(planHeader);
 
-  // "Denk"-Block für den Agent-Plan
-  const planBubble = document.createElement('div');
-  planBubble.className = 'bg-gray-900 border border-gray-800 rounded-xl p-3 text-[11px] text-gray-400 italic font-mono flex items-center gap-2 hidden';
-  planBubble.innerHTML = '<span class="typing-dot w-1.5 h-1.5 bg-gray-500 rounded-full inline-block mt-1"></span><div class="plan-text flex-1"></div>';
-  div.appendChild(planBubble);
+  // Thinking Timeline Container
+  const thinkingTimeline = document.createElement('div');
+  thinkingTimeline.className = 'thinking-timeline bg-gradient-to-br from-gray-900 to-gray-800 border border-blue-900/30 rounded-xl p-4 text-[11px] font-mono';
+  thinkingTimeline.innerHTML = '<div class="timeline-steps flex flex-col gap-2"></div>';
+  div.appendChild(thinkingTimeline);
 
   planHeader.onclick = () => {
-    const isHidden = planBubble.classList.toggle('hidden');
-    planHeader.innerHTML = isHidden ? '<span>▶</span> Agenten-Plan anzeigen' : '<span>▼</span> Agenten-Plan ausblenden';
+    const isHidden = thinkingTimeline.classList.toggle('hidden');
+    planHeader.innerHTML = isHidden ? '<span>▶</span> 🤖 Denkprozess' : '<span>▼</span> 🤖 Denkprozess';
   };
 
   // Text-Block
@@ -217,22 +232,142 @@ function createStreamingAssistantMessageCard() {
   chatMessages().appendChild(div);
   scrollBottom();
 
-  return { root: div, planBubble, textBubble, srcWrapper };
+  // State tracking für Timeline
+  return {
+    root: div,
+    thinkingTimeline,
+    textBubble,
+    srcWrapper,
+    timelineSteps: thinkingTimeline.querySelector('.timeline-steps'),
+    stepCounter: 0
+  };
 }
 
-function updateStreamingPlan(ui, planText) {
-  if (planText === 'Formuliere Antwort...') {
-    // Animation entfernen
-    const dot = ui.planBubble.querySelector('.typing-dot');
-    if (dot) dot.remove();
-  } else {
-    // Neuen Gedanken-Schritt anhängen
-    const textContainer = ui.planBubble.querySelector('.plan-text');
-    const newStep = document.createElement('div');
-    newStep.className = 'mb-1 last:mb-0 text-gray-300';
-    newStep.textContent = "• " + planText;
-    textContainer.appendChild(newStep);
+// ========== NEW TIMELINE EVENT HANDLERS ==========
+
+function addQueryAnalysisStep(ui, analysis) {
+  const step = document.createElement('div');
+  step.className = 'timeline-step opacity-0 animate-fadeIn';
+
+  const complexityColors = {
+    simple: 'text-green-400',
+    medium: 'text-yellow-400',
+    complex: 'text-orange-400'
+  };
+
+  const typeLabels = {
+    fact_retrieval: 'Fakten-Suche',
+    temporal_inference: 'Zeitliche Ableitung',
+    multi_entity_reasoning: 'Multi-Entitäten-Analyse',
+    recommendation: 'Empfehlung'
+  };
+
+  step.innerHTML = `
+    <div class="flex items-start gap-2 p-2 bg-gray-800/50 rounded-lg border-l-2 border-blue-500">
+      <div class="text-blue-400 mt-0.5">🧠</div>
+      <div class="flex-1">
+        <div class="text-gray-300 font-semibold mb-1">Query-Analyse</div>
+        <div class="text-gray-400 space-y-1 text-[10px]">
+          <div>Typ: <span class="text-blue-300">${typeLabels[analysis.query_type] || analysis.query_type}</span></div>
+          <div>Komplexität: <span class="${complexityColors[analysis.complexity]}">${analysis.complexity}</span></div>
+          ${analysis.entities && analysis.entities.length > 0 ? `<div>Entitäten: <span class="text-purple-300">${analysis.entities.join(', ')}</span></div>` : ''}
+          ${analysis.sub_queries && analysis.sub_queries.length > 0 ? `<div class="mt-2 text-gray-500">Geplante Schritte: ${analysis.sub_queries.length}</div>` : ''}
+        </div>
+      </div>
+      <div class="text-green-400 text-lg">✓</div>
+    </div>
+  `;
+
+  ui.timelineSteps.appendChild(step);
+  setTimeout(() => step.classList.remove('opacity-0'), 10);
+  scrollBottom();
+}
+
+function addThoughtStep(ui, thoughtText) {
+  const step = document.createElement('div');
+  step.className = 'timeline-step opacity-0 animate-fadeIn';
+
+  step.innerHTML = `
+    <div class="flex items-start gap-2 p-2 bg-gray-800/30 rounded-lg border-l-2 border-cyan-500">
+      <div class="text-cyan-400 mt-0.5">💭</div>
+      <div class="flex-1 text-gray-300 italic">${escHtml(thoughtText)}</div>
+    </div>
+  `;
+
+  ui.timelineSteps.appendChild(step);
+  setTimeout(() => step.classList.remove('opacity-0'), 10);
+  scrollBottom();
+}
+
+function addToolCallStep(ui, toolData) {
+  ui.stepCounter++;
+  const stepId = `tool-${ui.stepCounter}`;
+
+  const step = document.createElement('div');
+  step.className = 'timeline-step opacity-0 animate-fadeIn';
+  step.id = stepId;
+
+  const toolIcons = {
+    search_photos: '📷',
+    search_messages: '💬',
+    search_places: '📍'
+  };
+
+  const argsFormatted = Object.entries(toolData.args || {})
+    .map(([k, v]) => `${k}=${JSON.stringify(v)}`)
+    .join(', ');
+
+  step.innerHTML = `
+    <div class="flex items-start gap-2 p-2 bg-gray-800/50 rounded-lg border-l-2 border-yellow-500">
+      <div class="text-yellow-400 mt-0.5">${toolIcons[toolData.tool] || '🔧'}</div>
+      <div class="flex-1">
+        <div class="text-gray-300 font-semibold mb-1">Tool: ${toolData.tool}</div>
+        <div class="text-gray-500 text-[10px] font-mono">${argsFormatted || '(keine Args)'}</div>
+      </div>
+      <div class="tool-status">
+        <div class="animate-spin text-yellow-400">⚙️</div>
+      </div>
+    </div>
+  `;
+
+  ui.timelineSteps.appendChild(step);
+  setTimeout(() => step.classList.remove('opacity-0'), 10);
+  scrollBottom();
+
+  return stepId;
+}
+
+function updateToolResultStep(ui, stepId, resultData) {
+  const step = document.getElementById(stepId);
+  if (!step) return;
+
+  const statusIcon = resultData.status === 'success'
+    ? '<div class="text-green-400 text-lg">✓</div>'
+    : '<div class="text-red-400 text-lg">✗</div>';
+
+  const statusColor = resultData.status === 'success' ? 'border-green-500' : 'border-red-500';
+
+  const toolStatus = step.querySelector('.tool-status');
+  if (toolStatus) {
+    toolStatus.innerHTML = statusIcon;
   }
+
+  // Ändere Border-Color
+  const container = step.querySelector('.border-l-2');
+  if (container) {
+    container.classList.remove('border-yellow-500');
+    container.classList.add(statusColor);
+  }
+
+  // Füge Ergebnis hinzu
+  const content = step.querySelector('.flex-1');
+  if (content && resultData.summary) {
+    const resultDiv = document.createElement('div');
+    resultDiv.className = 'mt-2 text-gray-400 text-[10px]';
+    resultDiv.textContent = `→ ${resultData.summary}`;
+    content.appendChild(resultDiv);
+  }
+
   scrollBottom();
 }
 

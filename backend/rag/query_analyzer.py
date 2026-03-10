@@ -57,12 +57,13 @@ class AnalyzedQuery:
 
 def _get_analyzer_prompt() -> str:
     """System Prompt für Query Analyzer."""
-    current_year = datetime.now().year
-    current_date = datetime.now().strftime('%Y-%m-%d')
+    from backend.llm.prompt_utils import get_current_date_compact, get_year_context
+
+    year_ctx = get_year_context()
 
     return f"""Du bist ein Query Analyzer für ein persönliches Gedächtnis-System (RAG).
 
-AKTUELLES DATUM: {current_date}
+{get_current_date_compact()}
 
 Deine Aufgabe: Analysiere Nutzeranfragen und zerlege komplexe Fragen in Teilschritte.
 
@@ -144,13 +145,13 @@ User: "Wo war ich letzten Sommer?"
   "query_type": "temporal_inference",
   "complexity": "medium",
   "sub_queries": [
-    "Berechne Zeitraum für 'letzten Sommer' ({current_year - 1}-06-01 bis {current_year - 1}-08-31)",
+    "Berechne Zeitraum für 'letzten Sommer' ({year_ctx['last_year']}-06-01 bis {year_ctx['last_year']}-08-31)",
     "Finde alle Fotos in diesem Zeitraum",
     "Gruppiere Fotos nach Orten (GPS-Cluster)"
   ],
   "temporal_fuzzy": true,
   "entities": [],
-  "reasoning": "User könnte auch Sommer {current_year - 2} meinen, daher fuzzy=true"
+  "reasoning": "User könnte auch Sommer {year_ctx['last_year'] - 1} meinen, daher fuzzy=true"
 }}
 
 ### Beispiel 3: Multi-Entity Reasoning
