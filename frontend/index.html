@@ -707,6 +707,34 @@
   <!-- Einstellungen-Tab -->
   <div id="view-settings" class="view hidden max-w-2xl mx-auto p-4 flex flex-col gap-6">
 
+    <!-- Profile -->
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <h2 class="font-semibold mb-3">👤 Profil</h2>
+      <div class="flex flex-col gap-3">
+        <div>
+          <label for="display-name-input" class="block text-sm text-gray-400 mb-2">Anzeigename</label>
+          <div class="flex gap-2">
+            <input
+              type="text"
+              id="display-name-input"
+              placeholder="Dein Name"
+              maxlength="100"
+              class="flex-1 bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              aria-label="Anzeigename bearbeiten"
+            />
+            <button
+              onclick="updateDisplayName()"
+              class="bg-blue-600 hover:bg-blue-500 text-sm px-4 py-2 rounded transition-all whitespace-nowrap"
+              aria-label="Namen speichern"
+            >
+              💾 Speichern
+            </button>
+          </div>
+          <div id="display-name-feedback" class="text-xs mt-2 hidden"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Consent -->
     <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
       <h2 class="font-semibold mb-3">🔒 Datenschutz &amp; Einwilligungen</h2>
@@ -719,7 +747,7 @@
 
     <!-- User-Info -->
     <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
-      <h2 class="font-semibold mb-3">👤 Aktiver Nutzer</h2>
+      <h2 class="font-semibold mb-3">ℹ️ Benutzer-Information</h2>
       <div id="user-info" class="text-sm text-gray-400">Lädt…</div>
     </div>
 
@@ -1048,7 +1076,69 @@
         const d = await r.json();
         const el = document.getElementById('user-info');
         if (el) el.innerHTML = `<strong>${d.display_name}</strong> <span class="text-gray-600 text-xs">(${d.id})</span>`;
+
+        // Populate display name input in Settings tab
+        const input = document.getElementById('display-name-input');
+        if (input) input.value = d.display_name;
       } catch (e) { }
+    }
+
+    async function updateDisplayName() {
+      const input = document.getElementById('display-name-input');
+      const feedback = document.getElementById('display-name-feedback');
+      const newName = input.value.trim();
+
+      // Validation
+      if (!newName || newName.length === 0) {
+        showFeedback(feedback, '❌ Name darf nicht leer sein', 'error');
+        return;
+      }
+
+      if (newName.length > 100) {
+        showFeedback(feedback, '❌ Name darf maximal 100 Zeichen lang sein', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/v1/users/${window._userId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ display_name: newName })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          showFeedback(feedback, `❌ Fehler: ${error.detail}`, 'error');
+          return;
+        }
+
+        const updatedUser = await response.json();
+        console.log('Profil aktualisiert:', updatedUser);
+
+        // Update UI
+        const userInfoEl = document.getElementById('user-info');
+        if (userInfoEl) {
+          userInfoEl.innerHTML = `<strong>${updatedUser.display_name}</strong> <span class="text-gray-600 text-xs">(${updatedUser.id})</span>`;
+        }
+
+        showFeedback(feedback, '✅ Name erfolgreich geändert!', 'success');
+      } catch (err) {
+        console.error('Fehler beim Aktualisieren:', err);
+        showFeedback(feedback, '❌ Netzwerkfehler', 'error');
+      }
+    }
+
+    function showFeedback(element, message, type) {
+      element.textContent = message;
+      element.classList.remove('hidden', 'text-red-400', 'text-green-400');
+      element.classList.add(type === 'error' ? 'text-red-400' : 'text-green-400');
+
+      // Auto-hide success messages after 3 seconds
+      if (type === 'success') {
+        setTimeout(() => {
+          element.classList.add('hidden');
+        }, 3000);
+      }
     }
 
     // -------------------------------------------------------------------------

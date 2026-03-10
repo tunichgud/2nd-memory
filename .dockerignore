@@ -1,0 +1,90 @@
+# ==============================================================================
+# .dockerignore – Dateien die NICHT ins Docker Image kopiert werden sollen
+# ==============================================================================
+
+# -------------------------------------------------------
+# Persönliche Daten (NIEMALS ins Image!)
+# -------------------------------------------------------
+takeout/
+data/
+.wwebjs_auth/
+.wwebjs_cache/
+*.db
+*.db-journal
+*.db-wal
+
+# Secrets
+.env
+.env.*
+config.yaml
+!config.yaml.example
+
+# -------------------------------------------------------
+# Development & Build Artifacts
+# -------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+.venv/
+venv/
+env/
+dist/
+build/
+*.whl
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+# package-lock.json wird NICHT ignoriert - benötigt für npm ci
+
+# -------------------------------------------------------
+# IDE & OS
+# -------------------------------------------------------
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# -------------------------------------------------------
+# Logs
+# -------------------------------------------------------
+*.log
+logs/
+
+# -------------------------------------------------------
+# Git
+# -------------------------------------------------------
+.git/
+.gitignore
+.gitattributes
+
+# -------------------------------------------------------
+# Docker
+# -------------------------------------------------------
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# -------------------------------------------------------
+# Documentation (nicht benötigt im Runtime Image)
+# -------------------------------------------------------
+docs/
+tests/
+*.md
+!README.md
+.antigravity/
+
+# -------------------------------------------------------
+# Backups
+# -------------------------------------------------------
+backups/
+*.bak
+*.backup
+*.tar.gz
+*.zip

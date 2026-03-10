@@ -10,6 +10,7 @@ Start: python -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
 from __future__ import annotations
 
 import logging
+import os
 import sys
 from pathlib import Path
 
@@ -40,9 +41,22 @@ app = FastAPI(
     version="2.0.0",
 )
 
+# CORS Configuration (Security Fix)
+# ENV: CORS_ORIGINS=http://localhost:3000,https://memosaur.example.com
+ALLOWED_ORIGINS = os.getenv(
+    "CORS_ORIGINS",
+    "http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000"
+).split(",")
+
+# ⚠️  SECURITY: Wildcard (*) nur für Single-User Local Development!
+# Für Production/Multi-User: Setze CORS_ORIGINS in .env
+if "*" in ALLOWED_ORIGINS:
+    logger.warning("⚠️  CORS: Wildcard (*) aktiv - NUR für lokales Development!")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=True,  # Für JWT Cookies (Phase 2)
     allow_methods=["*"],
     allow_headers=["*"],
 )

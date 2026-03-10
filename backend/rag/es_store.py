@@ -40,18 +40,20 @@ def get_es_client() -> Elasticsearch:
 
 
 def verify_elasticsearch():
-    """Prüft beim Systemstart, ob Elasticsearch läuft. Bricht bei Fehler ab."""
+    """Prüft beim Systemstart, ob Elasticsearch läuft. Nur Warning, kein Exit."""
     cfg = _get_config()
     hosts = cfg.get("elasticsearch", {}).get("hosts", ["http://localhost:9200"])
     client = Elasticsearch(hosts)
-    
+
     try:
         if not client.ping():
-            _print_es_error(hosts)
-            sys.exit(1)
-    except Exception:
-        _print_es_error(hosts)
-        sys.exit(1)
+            logger.warning("⚠️  Elasticsearch nicht erreichbar unter %s - läuft im Fallback-Modus (ChromaDB only)", hosts)
+            return
+    except Exception as e:
+        logger.warning("⚠️  Elasticsearch nicht verfügbar: %s - läuft im Fallback-Modus (ChromaDB only)", e)
+        return
+
+    logger.info("✅ Elasticsearch erreichbar: %s", hosts)
 
 
 def _print_es_error(hosts: list):

@@ -9,7 +9,7 @@ Unterschiede zu retriever.py (v1):
 """
 from __future__ import annotations
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from backend.rag.embedder import embed_single
 from backend.rag.store_v2 import query_collection_v2
@@ -21,11 +21,25 @@ _RELEVANT_MIN_SCORE  = 0.20
 _FALLBACK_MIN_SCORE  = 0.42
 
 def _get_system_prompt() -> str:
-    current_date = datetime.now().strftime('%d.%m.%Y')
-    return f"""Du bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.
-Du hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.
+    now = datetime.now()
+    current_date = now.strftime('%d.%m.%Y')
+    current_weekday = now.strftime('%A')  # Monday, Tuesday, etc.
+    weekday_map = {
+        'Monday': 'Montag', 'Tuesday': 'Dienstag', 'Wednesday': 'Mittwoch',
+        'Thursday': 'Donnerstag', 'Friday': 'Freitag', 'Saturday': 'Samstag', 'Sunday': 'Sonntag'
+    }
+    weekday_de = weekday_map.get(current_weekday, current_weekday)
 
-HEUTIGES DATUM: {current_date} (Nutze dies als Referenz für Begriffe wie "letztes Jahr", "letzten Monat" etc.)
+    return f"""⚠️ WICHTIG - AKTUELLES DATUM: {current_date} ({weekday_de})
+
+Zeitliche Berechnungen IMMER von diesem Datum aus:
+- "letztes Wochenende" = Samstag {(now - timedelta(days=now.weekday()+2)).strftime('%d.%m.%Y')} + Sonntag {(now - timedelta(days=now.weekday()+1)).strftime('%d.%m.%Y')}
+- "diese Woche" = {(now - timedelta(days=now.weekday())).strftime('%d.%m.%Y')} bis {(now + timedelta(days=6-now.weekday())).strftime('%d.%m.%Y')}
+- "gestern" = {(now - timedelta(days=1)).strftime('%d.%m.%Y')}
+- "vorgestern" = {(now - timedelta(days=2)).strftime('%d.%m.%Y')}
+
+Du bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.
+Du hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.
 
 WICHTIG: Nutze für Personen und Orte immer die echten Namen aus der Anfrage oder den Quellen. 
 
@@ -302,8 +316,20 @@ def _resolve_person_names(names: list[str]) -> list[str]:
 
 import json
 
-def _format_sources_for_llm(sources: list[dict]) -> str:
-    """Bereitet die Retrieval-Ergebnisse als str auf."""
+def _format_sources_for_llm(sources: list[dict], use_compression: bool = False) -> str:
+    """Bereitet die Retrieval-Ergebnisse als str auf.
+
+    Args:
+        sources: Liste von Source-Dicts
+        use_compression: Wenn True, nutze intelligente Context-Kompression (empfohlen für >15 Quellen)
+    """
+    if use_compression:
+        # Nutze intelligente Context-Kompression (seit v2.1)
+        from backend.rag.context_manager import compress_sources, ContextBudget
+        budget = ContextBudget(max_tokens=8000)  # Sicheres Limit für Chain-of-Thought
+        return compress_sources(sources, budget=budget, top_n_full=5)
+
+    # Legacy-Formatierung (für Kompatibilität)
     SOURCE_LABELS = {
         "photos":       ("📷", "FOTO"),
         "reviews":      ("⭐", "BEWERTUNG"),
@@ -393,7 +419,9 @@ def answer_v2(
         date_to=date_to,
     )
 
-    context = _format_sources_for_llm(sources)
+    # Nutze Kompression wenn viele Quellen
+    use_compression = len(sources) > 15
+    context = _format_sources_for_llm(sources, use_compression=use_compression)
 
     # Definition der spezialisierten Agenten-Tools
     def search_photos(
@@ -433,7 +461,9 @@ def answer_v2(
             if s["id"] not in existing_ids:
                 sources.append(s)
                 existing_ids.add(s["id"])
-        return _format_sources_for_llm(res)
+        # Nutze Kompression wenn viele Quellen
+        use_compression = len(res) > 15
+        return _format_sources_for_llm(res, use_compression=use_compression)
 
     def search_messages(
         suchtext: str = "",
@@ -467,7 +497,9 @@ def answer_v2(
             if s["id"] not in existing_ids:
                 sources.append(s)
                 existing_ids.add(s["id"])
-        return _format_sources_for_llm(res)
+        # Nutze Kompression wenn viele Quellen
+        use_compression = len(res) > 15
+        return _format_sources_for_llm(res, use_compression=use_compression)
 
     # Zusammenfassung für User/Prompt
     filter_parts = []
@@ -636,7 +668,9 @@ async def answer_v2_stream(
                 new_sources.append(s)
                 existing_ids.add(s["id"])
         
-        return json.dumps({"new_sources": new_sources, "formatted_context": _format_sources_for_llm(res)})
+        # Nutze Kompression für Tool-Results
+        use_compression = len(res) > 15
+        return json.dumps({"new_sources": new_sources, "formatted_context": _format_sources_for_llm(res, use_compression=use_compression)})
 
     def search_messages(
         suchtext: str = "",
@@ -675,7 +709,9 @@ async def answer_v2_stream(
                 new_sources.append(s)
                 existing_ids.add(s["id"])
                 
-        return json.dumps({"new_sources": new_sources, "formatted_context": _format_sources_for_llm(res)})
+        # Nutze Kompression für Tool-Results
+        use_compression = len(res) > 15
+        return json.dumps({"new_sources": new_sources, "formatted_context": _format_sources_for_llm(res, use_compression=use_compression)})
 
     def search_places(
         suchtext: str = "",
@@ -704,9 +740,13 @@ async def answer_v2_stream(
                 new_sources.append(s)
                 existing_ids.add(s["id"])
                 
-        return json.dumps({"new_sources": new_sources, "formatted_context": _format_sources_for_llm(res)})
+        # Nutze Kompression für Tool-Results
+        use_compression = len(res) > 15
+        return json.dumps({"new_sources": new_sources, "formatted_context": _format_sources_for_llm(res, use_compression=use_compression)})
 
-    context = _format_sources_for_llm(sources)
+    # Nutze Kompression wenn viele Quellen
+    use_compression = len(sources) > 15
+    context = _format_sources_for_llm(sources, use_compression=use_compression)
 
     filter_parts = []
     if date_from or date_to:

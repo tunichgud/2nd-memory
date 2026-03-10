@@ -4,12 +4,15 @@ const axios = require('axios');
 const express = require('express');
 const cors = require('cors');
 
+// Backend URL (Docker-aware: nutzt backend:8000 im Container, localhost:8000 lokal)
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
+
 // Startet den Client mit lokaler Session-Speicherung
-// Nutzt den systemweiten Chrome-Browser falls vorhanden
+// Nutzt den systemweiten Chrome-Browser falls vorhanden (oder Chromium in Docker)
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
-        executablePath: '/usr/bin/google-chrome',
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome',
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     }
 });
@@ -29,7 +32,7 @@ let BOT_CONFIG = {
 // Lädt Bot-Config aus dem Backend (ChromaDB)
 async function loadBotConfig() {
     try {
-        const response = await axios.get('http://localhost:8000/api/whatsapp/config');
+        const response = await axios.get(`${BACKEND_URL}/api/whatsapp/config`);
         BOT_CONFIG = response.data;
         console.log('[WhatsApp] Bot-Config geladen:', BOT_CONFIG);
 
@@ -63,7 +66,7 @@ client.on('ready', async () => {
 
         try {
             // Speichere in Backend/ChromaDB
-            await axios.post('http://localhost:8000/api/whatsapp/config/user-chat', {
+            await axios.post(`${BACKEND_URL}/api/whatsapp/config/user-chat`, {
                 chat_id: autoUserChatId
             });
             console.log(`[WhatsApp] ✅ User-Chat-ID automatisch gespeichert!`);
@@ -94,7 +97,7 @@ async function saveMessageToBackend(msg, chatName = null) {
             type: msg.type
         };
 
-        await axios.post('http://localhost:8000/api/whatsapp/message', messageData);
+        await axios.post(`${BACKEND_URL}/api/whatsapp/message`, messageData);
         console.log(`[WhatsApp] 💾 Nachricht gespeichert: ${msg.from}`);
     } catch (err) {
         console.error(`[WhatsApp] Fehler beim Speichern der Nachricht:`, err.message);
@@ -167,7 +170,7 @@ client.on('message_create', async msg => {
         // Im TEST_MODE behandeln wir eigene Nachrichten als "incoming"
         const isIncoming = BOT_CONFIG.test_mode ? true : !msg.fromMe;
 
-        const response = await axios.post('http://localhost:8000/api/v1/webhook', {
+        const response = await axios.post(`${BACKEND_URL}/api/v1/webhook`, {
             sender: sender,
             text: msg.body,
             is_incoming: isIncoming
@@ -216,7 +219,7 @@ app.get('/api/whatsapp/chats', async (req, res) => {
 
             try {
                 const statusResponse = await axios.get(
-                    `http://localhost:8000/api/whatsapp/import-plan/chat/${encodeURIComponent(chatId)}/last-import`
+                    `${BACKEND_URL}/api/whatsapp/import-plan/chat/${encodeURIComponent(chatId)}/last-import`
                 );
 
                 if (statusResponse.data && !statusResponse.data.never_imported) {
@@ -338,7 +341,7 @@ function isWithinSafeTimeWindow() {
 // Holt letzten Import-Timestamp für einen Chat vom Backend
 async function getLastImportTimestamp(chatId) {
     try {
-        const response = await axios.get(`http://localhost:8000/api/whatsapp/import-plan/chat/${encodeURIComponent(chatId)}/last-import`);
+        const response = await axios.get(`${BACKEND_URL}/api/whatsapp/import-plan/chat/${encodeURIComponent(chatId)}/last-import`);
         return response.data.last_imported_timestamp || 0;
     } catch (err) {
         // Chat wurde noch nie importiert
@@ -349,7 +352,7 @@ async function getLastImportTimestamp(chatId) {
 // Aktualisiert letzten Import-Timestamp für einen Chat im Backend
 async function updateLastImportTimestamp(chatId, timestamp, messageId) {
     try {
-        await axios.post(`http://localhost:8000/api/whatsapp/import-plan/chat/${encodeURIComponent(chatId)}/update-timestamp`, {
+        await axios.post(`${BACKEND_URL}/api/whatsapp/import-plan/chat/${encodeURIComponent(chatId)}/update-timestamp`, {
             timestamp: timestamp,
             message_id: messageId
         });
@@ -704,10 +707,10 @@ app.get('/api/whatsapp/history', (req, res) => {
 // GET /api/whatsapp/config - Bot-Konfiguration
 app.get('/api/whatsapp/config', (req, res) => {
     res.json({
-        bot_enabled: BOT_ENABLED,
-        test_mode: TEST_MODE,
-        my_chat_id: MY_CHAT_ID,
-        my_chat_configured: MY_CHAT_ID !== null
+        bot_enabled: BOT_CONFIG.bot_enabled,
+        test_mode: BOT_CONFIG.test_mode,
+        my_chat_id: BOT_CONFIG.user_chat_id,
+        my_chat_configured: BOT_CONFIG.user_chat_id !== null
     });
 });
 
@@ -719,27 +722,27 @@ app.post('/api/whatsapp/config/my-chat', (req, res) => {
         return res.status(400).json({ error: 'chatId required' });
     }
 
-    MY_CHAT_ID = chatId;
-    console.log(`[WhatsApp] ✅ MY_CHAT_ID manuell gesetzt: ${chatId}`);
+    BOT_CONFIG.user_chat_id = chatId;
+    console.log(`[WhatsApp] ✅ user_chat_id manuell gesetzt: ${chatId}`);
 
     res.json({
-        bot_enabled: BOT_ENABLED,
-        test_mode: TEST_MODE,
-        my_chat_id: MY_CHAT_ID,
+        bot_enabled: BOT_CONFIG.bot_enabled,
+        test_mode: BOT_CONFIG.test_mode,
+        my_chat_id: BOT_CONFIG.user_chat_id,
         my_chat_configured: true
     });
 });
 
 // DELETE /api/whatsapp/config/my-chat - Entferne Chat-ID (Reset)
 app.delete('/api/whatsapp/config/my-chat', (req, res) => {
-    const old = MY_CHAT_ID;
-    MY_CHAT_ID = null;
-    console.log(`[WhatsApp] ❌ MY_CHAT_ID zurückgesetzt (war: ${old})`);
+    const old = BOT_CONFIG.user_chat_id;
+    BOT_CONFIG.user_chat_id = null;
+    console.log(`[WhatsApp] ❌ user_chat_id zurückgesetzt (war: ${old})`);
 
     res.json({
-        bot_enabled: BOT_ENABLED,
-        test_mode: TEST_MODE,
-        my_chat_id: MY_CHAT_ID,
+        bot_enabled: BOT_CONFIG.bot_enabled,
+        test_mode: BOT_CONFIG.test_mode,
+        my_chat_id: BOT_CONFIG.user_chat_id,
         my_chat_configured: false
     });
 });

@@ -1,0 +1,54 @@
+# ==============================================================================
+# requirements-docker.txt – Optimiert für Docker (ohne CUDA, ohne ML-Dependencies)
+# ==============================================================================
+#
+# Unterschied zu requirements.txt:
+# - Keine sentence-transformers (läuft in ChromaDB Container)
+# - Kein ChromaDB Client mit ML-Extras
+# - Keine Testing-Dependencies (nur Runtime)
+# - CPU-only Varianten
+#
+# ==============================================================================
+
+# Web Framework
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+python-multipart>=0.0.9
+
+# LLM / KI (nur API Clients, keine Modelle)
+ollama>=0.2.0
+google-generativeai>=0.8.0
+
+# Vektordatenbank (nur Client, ohne ML)
+# chromadb ohne sentence-transformers installieren
+chromadb>=0.5.0
+elasticsearch>=8.12.0
+elasticsearch-dsl>=8.12.0
+tiktoken>=0.8.0
+
+# PyTorch CPU-only (statt CUDA) - nur falls ChromaDB es benötigt
+# torch>=2.0.0 --index-url https://download.pytorch.org/whl/cpu
+
+# Datenbank
+aiosqlite>=0.19.0
+
+# Konfiguration
+pyyaml>=6.0.1
+
+# Geodaten
+geopy>=2.4.1
+
+# Bildverarbeitung (CPU-only)
+Pillow>=10.3.0
+
+# Utilities
+httpx>=0.27.0
+aiofiles>=23.2.1
+
+# ⚠️  NICHT in Docker:
+# - sentence-transformers (→ ChromaDB Container)
+# - pytorch (→ ChromaDB Container)
+# - pytest/selenium (→ nur Development)
+
+# Machine Learning (für Face Recognition - CPU only)
+scikit-learn>=1.3.0

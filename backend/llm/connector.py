@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import base64
 import logging
+import os
 from pathlib import Path
 from typing import Any
 
@@ -44,6 +45,23 @@ def get_cfg() -> dict:
     global _cfg
     if _cfg is None:
         _cfg = _load_config()
+
+        # ENV-Variablen haben Priorität über config.yaml (Security Best Practice)
+        # ⚠️  PRIVACY: Nutze externe APIs nur wenn du bewusst Daten teilen willst!
+        if "OPENAI_API_KEY" in os.environ:
+            _cfg["llm"]["api_key"] = os.environ["OPENAI_API_KEY"]
+            logger.warning("⚠️  OPENAI_API_KEY aus ENV geladen - Daten werden an OpenAI gesendet!")
+        elif "ANTHROPIC_API_KEY" in os.environ:
+            _cfg["llm"]["api_key"] = os.environ["ANTHROPIC_API_KEY"]
+            logger.warning("⚠️  ANTHROPIC_API_KEY aus ENV geladen - Daten werden an Anthropic gesendet!")
+        elif "GEMINI_API_KEY" in os.environ:
+            _cfg["llm"]["api_key"] = os.environ["GEMINI_API_KEY"]
+            logger.warning("⚠️  GEMINI_API_KEY aus ENV geladen - Daten werden an Google gesendet!")
+
+        # Ollama Host aus ENV (falls auf anderem Host)
+        if "OLLAMA_HOST" in os.environ:
+            _cfg["llm"]["base_url"] = os.environ["OLLAMA_HOST"]
+
     return _cfg
 
 

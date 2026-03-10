@@ -1,2 +1,3 @@
-2026/03/09-14:56:15.981 35fdf Creating DB /home/bacher/prj/mabrains/memosaur/.wwebjs_auth/session/Default/Service Worker/Database since it was missing.
-2026/03/09-14:56:16.011 35fdf Reusing MANIFEST /home/bacher/prj/mabrains/memosaur/.wwebjs_auth/session/Default/Service Worker/Database/MANIFEST-000001
+2026/03/10-15:36:48.844 2e Reusing MANIFEST /app/.wwebjs_auth/session/Default/Service Worker/Database/MANIFEST-000001
+2026/03/10-15:36:48.844 2e Recovering log #3
+2026/03/10-15:36:48.845 2e Reusing old log /app/.wwebjs_auth/session/Default/Service Worker/Database/000003.log 

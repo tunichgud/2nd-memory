@@ -5,19 +5,30 @@
 
 ## Übersicht
 
-Dieses Setup definiert **8 spezialisierte Agenten** für den **Antigravity Manager View**.
+Dieses Setup definiert **10 spezialisierte Agenten** für den **Antigravity Manager View**.
 Jeder Agent hat eine klare Rolle und Übergabepunkte an den nächsten.
 
 ```
-Feature Request
+Business Goal / Feature Idea
       │
       ▼
-┌─────────────────┐
-│   ARCHITECT     │  Plant · Spezifiziert · Fragt nach
-│   (Thinking)    │
-└────────┬────────┘
-         │ Approved Plan
-         ▼
+┌───────────────────────────────────────────┐
+│         PRODUCT & UX (parallel)           │
+├─────────────────┬─────────────────────────┤
+│       BD        │         UX              │
+│  (Thinking)     │     (Standard)          │
+│  Requirements   │   User Flows            │
+│  Prioritization │   Wireframes            │
+└────────┬────────┴─────────┬───────────────┘
+         │                  │
+         └──────────┬───────┘
+                    ▼
+         ┌─────────────────┐
+         │   ARCHITECT     │  Plant · Spezifiziert · Fragt nach
+         │   (Thinking)    │
+         └────────┬────────┘
+                  │ Approved Plan
+                  ▼
 ┌────────────────────────────────────────────────────────┐
 │           FEATURE DEVELOPERS (parallel)                │
 ├────────────────┬────────────────┬────────────┬─────────┤
@@ -44,7 +55,12 @@ Feature Request
 
 ### Agent-Domains
 
+**Strategy:** Product Manager (BD) + UX Manager (2, parallel möglich)
+  - `@bd`: Requirements, Prioritization, Success Metrics, Go-to-Market
+  - `@ux`: User Flows, Wireframes, Accessibility, Interaction Design
+
 **Planning:** Architect (1)
+
 **Implementation:** 4 Feature-Developers (parallel execution möglich)
   - `@whatsapp-dev`: WhatsApp, Import, Bot
   - `@face-recognition-dev`: Face Detection, Clustering, Entities
@@ -52,6 +68,7 @@ Feature Request
   - `@general-dev`: Infrastructure, Config, Media, Maps
 
 **Quality:** Tester (1)
+
 **Maintenance:** Refactorer (1) + Scribe (1)
 
 ---
@@ -68,7 +85,17 @@ Feature Request
 
 ### Im Manager View — neue Mission starten:
 
-**Architect** (immer zuerst bei neuen Features):
+**Product Manager** (bei neuen Business-Anforderungen, OPTIONAL aber empfohlen):
+```
+@bd Wir wollen [Business Goal]. Erstelle ein PRD mit User Stories und Priorisierung.
+```
+
+**UX Manager** (bei UI/UX-Änderungen, parallel zu BD möglich):
+```
+@ux Designe den User Flow für [Feature] mit Wireframes und Interaktionsstaten.
+```
+
+**Architect** (immer bei neuen Features):
 ```
 @architect Ich möchte [Feature] implementieren. Erstelle einen Plan.
 ```
@@ -119,6 +146,9 @@ Antigravity erlaubt mehrere Agenten gleichzeitig. Sinnvolle Kombinationen:
 
 | Parallel | Warum |
 |----------|-------|
+| **BD + UX** | Requirements und User Flows gleichzeitig entwickeln |
+| **BD + Architect** | PRD schreiben während Technical Design entsteht |
+| **UX + Frontend Developer** | Wireframes → Implementation ohne Wartezeit |
 | Tester + Scribe | Tests schreiben während Docs entstehen |
 | Architect (Feature A) + Developer (Feature B) | Planung läuft vor, Implementation folgt |
 | WhatsApp-Dev + Face-Recognition-Dev | Unabhängige Domains, keine File-Konflikte |
@@ -126,6 +156,7 @@ Antigravity erlaubt mehrere Agenten gleichzeitig. Sinnvolle Kombinationen:
 | Refactorer + Scribe | Code verbessern + dokumentieren gleichzeitig |
 
 **Nicht parallel:**
+- BD + Developer (ohne Architect dazwischen — PRD muss erst in Technical Plan übersetzt werden)
 - Architect + Developer am gleichen Feature (Developer wartet auf Plan)
 - Zwei Developers auf derselben Datei (Race condition)
 - WhatsApp-Dev + General-Dev auf `backend/main.py` (Router registration conflict)
@@ -136,6 +167,8 @@ Antigravity erlaubt mehrere Agenten gleichzeitig. Sinnvolle Kombinationen:
 
 | Agent | Modus | Warum |
 |-------|-------|-------|
+| **BD (Product Manager)** | **Sonnet Thinking** | Strategische Priorisierung, Business-Impact-Analyse |
+| **UX Manager** | **Sonnet Standard** | UI-Patterns sind etabliert, kein Deep Thinking |
 | Architect | Sonnet Thinking | Braucht tiefes Reasoning für Planung |
 | WhatsApp-Dev | Sonnet Standard | Feature-fokussiert, klare Patterns |
 | Face-Recognition-Dev | Sonnet Standard | CV-Algorithmen, numerische Arbeit |
@@ -153,7 +186,9 @@ Antigravity erlaubt mehrere Agenten gleichzeitig. Sinnvolle Kombinationen:
 .antigravity/
 ├── README.md                    ← Diese Datei
 ├── rules.md                     ← Globale Regeln (alle Agenten lesen das)
-├── architect.md                 ← Planungs-Agent
+├── bd.md                        ← Product Manager (Business/Strategy)
+├── ux.md                        ← UX Manager (User Flows/Wireframes)
+├── architect.md                 ← Planungs-Agent (Technical Design)
 ├── whatsapp-dev.md             ← WhatsApp Feature Developer
 ├── face-recognition-dev.md     ← Face Recognition Developer
 ├── chat-rag-dev.md             ← Chat & RAG Developer
@@ -161,6 +196,7 @@ Antigravity erlaubt mehrere Agenten gleichzeitig. Sinnvolle Kombinationen:
 ├── tester.md                   ← Test-Agent
 ├── refactorer.md               ← Refactoring-Agent
 ├── scribe.md                   ← Dokumentations-Agent
+├── prompt-engineer.md          ← Prompt Engineering Specialist
 └── coder.md                    ← Legacy (ersetzt durch 4 Feature-Devs)
 ```
 
@@ -168,9 +204,11 @@ Antigravity erlaubt mehrere Agenten gleichzeitig. Sinnvolle Kombinationen:
 
 ## Tipps
 
+- **Strategische Features? Start mit BD** — Business Value klären, bevor du baust
+- **UI-Changes? Start mit UX** — Wireframes verhindern 3 Redesign-Runden
 - **Starte immer mit Architect** — auch für kleine Features. 2 Minuten Planung spart 20 Minuten Debugging.
 - **Wähle den richtigen Developer** — WhatsApp-Feature? Nutze `@whatsapp-dev`, nicht `@general-dev`
-- **Parallelisiere wenn möglich** — z.B. `@whatsapp-dev` + `@face-recognition-dev` gleichzeitig
+- **Parallelisiere wenn möglich** — z.B. `@bd + @ux` oder `@whatsapp-dev + @face-recognition-dev` gleichzeitig
 - **Lass Tester blockieren** — wenn Tests rot sind, merged nichts.
 - **Scribe am Ende** — nicht während Entwicklung, sonst veraltet Doku sofort.
 - **Refactorer separat** — nie gleichzeitig mit neuen Features, sonst verlierst du den Überblick.

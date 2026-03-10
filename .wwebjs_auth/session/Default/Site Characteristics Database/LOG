@@ -1,2 +1,3 @@
-2026/03/09-14:56:15.346 35ff7 Creating DB /home/bacher/prj/mabrains/memosaur/.wwebjs_auth/session/Default/Site Characteristics Database since it was missing.
-2026/03/09-14:56:15.371 35ff7 Reusing MANIFEST /home/bacher/prj/mabrains/memosaur/.wwebjs_auth/session/Default/Site Characteristics Database/MANIFEST-000001
+2026/03/10-15:36:48.870 30 Reusing MANIFEST /app/.wwebjs_auth/session/Default/Site Characteristics Database/MANIFEST-000001
+2026/03/10-15:36:48.872 30 Recovering log #3
+2026/03/10-15:36:48.872 30 Reusing old log /app/.wwebjs_auth/session/Default/Site Characteristics Database/000003.log 
