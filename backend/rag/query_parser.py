@@ -63,11 +63,12 @@ def _get_parse_system_prompt() -> str:
     day_before_yesterday = (now - timedelta(days=2)).strftime('%Y-%m-%d')
     tomorrow = (now + timedelta(days=1)).strftime('%Y-%m-%d')
 
-    # Diese Woche (Montag bis Sonntag)
+    # Diese Woche (Montag bis HEUTE - nicht bis Sonntag!)
+    # WICHTIG: Wir suchen nicht in der Zukunft!
     week_start = (now - timedelta(days=now.weekday())).strftime('%Y-%m-%d')
-    week_end = (now + timedelta(days=6 - now.weekday())).strftime('%Y-%m-%d')
+    week_end = current_date_iso  # HEUTE, nicht Sonntag!
 
-    # Letzte Woche
+    # Letzte Woche (Montag bis Sonntag der Vorwoche)
     last_week_start = (now - timedelta(days=now.weekday() + 7)).strftime('%Y-%m-%d')
     last_week_end = (now - timedelta(days=now.weekday() + 1)).strftime('%Y-%m-%d')
 
@@ -77,6 +78,12 @@ def _get_parse_system_prompt() -> str:
 
 Analysiere die Anfrage und extrahiere strukturierte Informationen als JSON.
 Antworte NUR mit gültigem JSON, ohne Erklärungen oder Markdown-Blöcke.
+
+⚠️ WICHTIG: Chat-History Context nutzen!
+- Wenn die aktuelle Frage sich auf vorherige Antworten bezieht, nutze diesen Kontext
+- Beispiel: "Wo war ich im August?" → Antwort: "München"
+           "Wie fühlte sich Sarah dabei?" → Inferiere: München + August!
+- Extrahiere implizite Informationen aus dem Gesprächsverlauf
 
 Verfügbare Collections:
 - "photos": Fotos mit GPS, Datum, Personen (persons-Feld: kommasepariert)
@@ -104,9 +111,14 @@ Relative Zeitangaben (von HEUTE = {current_date_iso} aus):
 - "heute Morgen" → date_from="{current_date_iso}", date_to="{current_date_iso}"
 - "gestern" → date_from="{yesterday}", date_to="{yesterday}"
 - "vorgestern" → date_from="{day_before_yesterday}", date_to="{day_before_yesterday}"
-- "morgen" → date_from="{tomorrow}", date_to="{tomorrow}"
-- "diese Woche" → date_from="{week_start}", date_to="{week_end}"
+- "morgen" → date_from="{tomorrow}", date_to="{tomorrow}" (⚠️ ZUKUNFT - nur bei expliziter Planung!)
+- "diese Woche" → date_from="{week_start}", date_to="{week_end}" (Montag bis HEUTE, NICHT bis Sonntag!)
 - "letzte Woche" → date_from="{last_week_start}", date_to="{last_week_end}"
+
+⚠️ WICHTIG: Suche NIEMALS in der Zukunft!
+- Bei "diese Woche": Nur bis HEUTE ({current_date_iso}), nicht bis Sonntag
+- Bei "diesen Monat": Nur bis HEUTE, nicht bis Monatsende
+- Ausnahme: Explizite Zukunfts-Planung ("Was habe ich morgen vor?")
 
 Absolute Zeitangaben:
 - "letztes Jahr" = {last_year} (NICHT {current_year}!)
@@ -140,7 +152,7 @@ class ParsedQuery:
     parsed_ok: bool = False
 
 
-def parse_query(query: str) -> ParsedQuery:
+def parse_query(query: str, chat_history: list[dict] | None = None) -> ParsedQuery:
     """Extrahiert strukturierte Filter aus einer natürlichsprachigen Anfrage.
 
     Versucht zuerst regelbasiert (schnell, kein LLM-Aufruf nötig für einfache
@@ -151,9 +163,9 @@ def parse_query(query: str) -> ParsedQuery:
     # Schritt 1: Regelbasierte Extraktion (immer ausführen als Basis)
     _extract_rules(pq)
 
-    # Schritt 2: LLM-Verbesserung
+    # Schritt 2: LLM-Verbesserung (mit Chat-History Context!)
     try:
-        _extract_llm(pq)
+        _extract_llm(pq, chat_history)
         pq.parsed_ok = True
     except Exception as exc:
         logger.warning("LLM Query-Parsing fehlgeschlagen, nutze Regelbasiert: %s", exc)
@@ -209,14 +221,30 @@ def _extract_rules(pq: ParsedQuery) -> None:
     pq.relevant_collections = list(dict.fromkeys(cols))  # dedupliziert, Reihenfolge erhalten
 
 
-def _extract_llm(pq: ParsedQuery) -> None:
-    """LLM-basierte Verbesserung der regelbasierten Extraktion."""
+def _extract_llm(pq: ParsedQuery, chat_history: list[dict] | None = None) -> None:
+    """LLM-basierte Verbesserung der regelbasierten Extraktion.
+
+    Args:
+        pq: ParsedQuery object to populate
+        chat_history: Optional chat history for context (last 3 messages)
+    """
     from backend.llm.connector import chat
 
     messages = [
         {"role": "system", "content": _get_parse_system_prompt()},
-        {"role": "user", "content": pq.raw},
     ]
+
+    # Add recent chat history for context (last 3 messages = 1.5 exchanges)
+    if chat_history:
+        recent_history = chat_history[-6:]  # Last 3 Q&A pairs
+        for msg in recent_history:
+            messages.append({
+                "role": msg["role"],
+                "content": msg["content"]
+            })
+
+    # Add current query
+    messages.append({"role": "user", "content": pq.raw})
 
     raw_response = chat(messages)
 

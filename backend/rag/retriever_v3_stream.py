@@ -83,8 +83,8 @@ async def answer_v3_stream(
         # ====================================================================
         # Phase 1: Query Parsing (LLM-basiertes Temporal Reasoning!)
         # ====================================================================
-        # Use query_parser for temporal extraction (v2 logic, but better!)
-        parsed: ParsedQuery = parse_query(query)
+        # Use query_parser for temporal extraction WITH chat_history context!
+        parsed: ParsedQuery = parse_query(query, chat_history=chat_history)
 
         # Also run query_analyzer for Chain-of-Thought decomposition
         analyzed: AnalyzedQuery = analyze_query(query)
