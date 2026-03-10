@@ -1,17 +1,12 @@
-2026/03/10-21:27:04.727 ce984 Reusing MANIFEST /home/bacher/prj/mabrains/memosaur/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
-2026/03/10-21:27:04.727 ce984 Recovering log #603
-2026/03/10-21:27:04.755 ce984 Reusing old log /home/bacher/prj/mabrains/memosaur/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/000603.log 
-2026/03/10-21:27:07.854 ce986 Level-0 table #615: started
-2026/03/10-21:27:07.879 ce986 Level-0 table #615: 1146858 bytes OK
-2026/03/10-21:27:07.885 ce986 Delete type=0 #603
-2026/03/10-21:27:07.986 ce986 Compacting 1@1 + 8@2 files
-2026/03/10-21:27:08.051 ce986 Generated table #616@1: 82555 keys, 2238705 bytes
-2026/03/10-21:27:08.084 ce986 Generated table #617@1: 24061 keys, 2185377 bytes
-2026/03/10-21:27:08.108 ce986 Generated table #618@1: 2761 keys, 2153886 bytes
-2026/03/10-21:27:08.149 ce986 Generated table #619@1: 19742 keys, 2215474 bytes
-2026/03/10-21:27:08.195 ce986 Generated table #620@1: 20013 keys, 2182353 bytes
-2026/03/10-21:27:08.247 ce986 Generated table #621@1: 66671 keys, 2207410 bytes
-2026/03/10-21:27:08.303 ce986 Generated table #622@1: 99792 keys, 2248916 bytes
-2026/03/10-21:27:08.330 ce986 Generated table #623@1: 45740 keys, 1179887 bytes
-2026/03/10-21:27:08.330 ce986 Compacted 1@1 + 8@2 files => 16612008 bytes
-2026/03/10-21:27:08.334 ce986 compacted to: files[ 0 0 8 0 0 0 0 ]
+2026/03/10-21:32:07.903 cf2a5 Reusing MANIFEST /home/bacher/prj/mabrains/memosaur/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/03/10-21:32:07.903 cf2a5 Recovering log #614
+2026/03/10-21:32:07.913 cf2a5 Reusing old log /home/bacher/prj/mabrains/memosaur/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/000614.log 
+2026/03/10-21:32:07.913 cf2a5 Delete type=2 #610
+2026/03/10-21:32:07.913 cf2a5 Delete type=2 #607
+2026/03/10-21:32:07.913 cf2a5 Delete type=2 #609
+2026/03/10-21:32:07.914 cf2a5 Delete type=2 #605
+2026/03/10-21:32:07.914 cf2a5 Delete type=2 #606
+2026/03/10-21:32:07.914 cf2a5 Delete type=2 #612
+2026/03/10-21:32:07.914 cf2a5 Delete type=2 #615
+2026/03/10-21:32:07.914 cf2a5 Delete type=2 #608
+2026/03/10-21:32:07.914 cf2a5 Delete type=2 #611

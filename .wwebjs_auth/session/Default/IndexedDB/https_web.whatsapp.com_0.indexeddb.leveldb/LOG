@@ -1,12 +1,49 @@
-2026/03/10-21:32:07.903 cf2a5 Reusing MANIFEST /home/bacher/prj/mabrains/memosaur/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
-2026/03/10-21:32:07.903 cf2a5 Recovering log #614
-2026/03/10-21:32:07.913 cf2a5 Reusing old log /home/bacher/prj/mabrains/memosaur/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/000614.log 
-2026/03/10-21:32:07.913 cf2a5 Delete type=2 #610
-2026/03/10-21:32:07.913 cf2a5 Delete type=2 #607
-2026/03/10-21:32:07.913 cf2a5 Delete type=2 #609
-2026/03/10-21:32:07.914 cf2a5 Delete type=2 #605
-2026/03/10-21:32:07.914 cf2a5 Delete type=2 #606
-2026/03/10-21:32:07.914 cf2a5 Delete type=2 #612
-2026/03/10-21:32:07.914 cf2a5 Delete type=2 #615
-2026/03/10-21:32:07.914 cf2a5 Delete type=2 #608
-2026/03/10-21:32:07.914 cf2a5 Delete type=2 #611
+2026/03/10-23:38:55.418 d97d5 Reusing MANIFEST /home/bacher/prj/mabrains/memosaur/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/03/10-23:38:55.419 d97d5 Recovering log #614
+2026/03/10-23:38:55.471 d97d5 Reusing old log /home/bacher/prj/mabrains/memosaur/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/000614.log 
+2026/03/10-23:38:58.977 d97d5 Level-0 table #626: started
+2026/03/10-23:38:59.011 d97d5 Level-0 table #626: 1132020 bytes OK
+2026/03/10-23:38:59.025 d97d5 Delete type=0 #614
+2026/03/10-23:38:59.027 d97d5 Compacting 1@1 + 8@2 files
+2026/03/10-23:38:59.103 d97d5 Generated table #627@1: 87927 keys, 2245983 bytes
+2026/03/10-23:38:59.192 d97d5 Generated table #628@1: 24697 keys, 2186968 bytes
+2026/03/10-23:38:59.228 d97d5 Generated table #629@1: 2775 keys, 2155351 bytes
+2026/03/10-23:38:59.311 d97d5 Generated table #630@1: 18156 keys, 2208896 bytes
+2026/03/10-23:38:59.362 d97d5 Generated table #631@1: 21465 keys, 2191002 bytes
+2026/03/10-23:38:59.449 d97d5 Generated table #632@1: 60951 keys, 2199221 bytes
+2026/03/10-23:38:59.509 d97d5 Generated table #633@1: 99986 keys, 2251632 bytes
+2026/03/10-23:38:59.587 d97d5 Generated table #634@1: 51693 keys, 1315367 bytes
+2026/03/10-23:38:59.587 d97d5 Compacted 1@1 + 8@2 files => 16754420 bytes
+2026/03/10-23:38:59.599 d97d5 compacted to: files[ 0 0 8 0 0 0 0 ]
+2026/03/10-23:38:59.600 d97d5 Delete type=2 #616
+2026/03/10-23:38:59.600 d97d5 Delete type=2 #622
+2026/03/10-23:38:59.600 d97d5 Delete type=2 #626
+2026/03/10-23:38:59.600 d97d5 Delete type=2 #617
+2026/03/10-23:38:59.600 d97d5 Delete type=2 #621
+2026/03/10-23:38:59.600 d97d5 Delete type=2 #618
+2026/03/10-23:38:59.600 d97d5 Delete type=2 #620
+2026/03/10-23:38:59.600 d97d5 Delete type=2 #619
+2026/03/10-23:38:59.600 d97d5 Delete type=2 #623
+2026/03/10-23:39:01.068 d97d5 Level-0 table #636: started
+2026/03/10-23:39:01.102 d97d5 Level-0 table #636: 901445 bytes OK
+2026/03/10-23:39:01.126 d97d5 Delete type=0 #625
+2026/03/10-23:39:01.351 d97d5 Compacting 1@1 + 8@2 files
+2026/03/10-23:39:01.444 d97d5 Generated table #637@1: 88982 keys, 2239741 bytes
+2026/03/10-23:39:01.488 d97d5 Generated table #638@1: 26253 keys, 2195098 bytes
+2026/03/10-23:39:01.561 d97d5 Generated table #639@1: 2772 keys, 2153863 bytes
+2026/03/10-23:39:01.612 d97d5 Generated table #640@1: 17381 keys, 2207117 bytes
+2026/03/10-23:39:01.700 d97d5 Generated table #641@1: 22277 keys, 2195064 bytes
+2026/03/10-23:39:01.761 d97d5 Generated table #642@1: 58182 keys, 2193684 bytes
+2026/03/10-23:39:01.868 d97d5 Generated table #643@1: 99798 keys, 2248792 bytes
+2026/03/10-23:39:01.909 d97d5 Generated table #644@1: 54762 keys, 1385826 bytes
+2026/03/10-23:39:01.909 d97d5 Compacted 1@1 + 8@2 files => 16819185 bytes
+2026/03/10-23:39:01.919 d97d5 compacted to: files[ 0 0 8 0 0 0 0 ]
+2026/03/10-23:39:01.919 d97d5 Delete type=2 #631
+2026/03/10-23:39:01.919 d97d5 Delete type=2 #634
+2026/03/10-23:39:01.919 d97d5 Delete type=2 #629
+2026/03/10-23:39:01.919 d97d5 Delete type=2 #627
+2026/03/10-23:39:01.919 d97d5 Delete type=2 #636
+2026/03/10-23:39:01.919 d97d5 Delete type=2 #630
+2026/03/10-23:39:01.919 d97d5 Delete type=2 #632
+2026/03/10-23:39:01.919 d97d5 Delete type=2 #633
+2026/03/10-23:39:01.920 d97d5 Delete type=2 #628

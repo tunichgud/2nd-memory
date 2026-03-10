@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from backend.rag.query_analyzer import analyze_query, should_use_chain_of_thought, AnalyzedQuery
 from backend.rag.temporal_utils import expand_temporal_query, TemporalRange
@@ -220,6 +220,16 @@ def retrieve_v3(
                 # Deduplizieren & Score-Filtering
                 for r in results:
                     if r["id"] not in seen_ids and r.get("score", 0) >= min_score:
+                        # OPTION A: Strenges Datumsfilter (Post-Processing)
+                        # Wenn explizite Daten gegeben, erlaube KEINE Abweichungen
+                        if date_from and date_to and _has_strict_date_filter(analyzed):
+                            if not _matches_date_range_strict(r, date_from, date_to):
+                                logger.debug(
+                                    "STRICT DATE FILTER: Verwerfe %s (Datum außerhalb %s..%s)",
+                                    r["id"][:20], date_from, date_to
+                                )
+                                continue
+
                         r["temporal_range_label"] = temporal_range.label
                         r["query_variant"] = query_variant
                         all_sources.append(r)
@@ -245,6 +255,141 @@ def retrieve_v3(
                 len(all_sources), len(query_variants), len(temporal_ranges))
 
     return all_sources
+
+
+def _generate_no_results_message(query: str, analyzed: AnalyzedQuery) -> str:
+    """
+    Generiert eine benutzerfreundliche Nachricht wenn keine Ergebnisse gefunden wurden.
+
+    OPTION C: Klare Kommunikation statt verwirrende Halluzinationen.
+
+    Args:
+        query: Original-Query
+        analyzed: Analysierte Query mit Datum/Personen/Orten
+
+    Returns:
+        Formatierte "Keine Ergebnisse"-Nachricht mit hilfreichen Hinweisen
+    """
+    from backend.llm.prompt_utils import get_year_context
+
+    year_ctx = get_year_context()
+    query_lower = analyzed.raw.lower()
+    parts = []
+
+    # Bestimme was gesucht wurde (basierend auf Query-Typ)
+    search_type = "Informationen"
+    if "nachrichten" in query_lower or "chat" in query_lower or "whatsapp" in query_lower:
+        search_type = "Nachrichten"
+    elif "foto" in query_lower or "bild" in query_lower:
+        search_type = "Fotos"
+    elif "restaurant" in query_lower or "ort" in query_lower:
+        search_type = "Bewertungen oder Orte"
+    else:
+        # Default: Versuche aus Query-Typ zu inferieren
+        if analyzed.query_type == "recommendation":
+            search_type = "Informationen"
+        else:
+            search_type = "Einträge"
+
+    # Zeitangabe
+    time_desc = "zu diesem Zeitpunkt"
+
+    if "heute" in query_lower:
+        time_desc = f"vom heutigen Tag ({year_ctx['current_date']})"
+    elif "gestern" in query_lower:
+        yesterday = (datetime.now() - timedelta(days=1)).strftime('%d.%m.%Y')
+        time_desc = f"von gestern ({yesterday})"
+    elif "diese woche" in query_lower:
+        time_desc = "aus dieser Woche"
+    elif "letzte woche" in query_lower:
+        time_desc = "aus letzter Woche"
+
+    # Hauptnachricht
+    parts.append(f"Ich habe keine {search_type} {time_desc} gefunden.")
+
+    # Hilfreiche Zusatzinfo
+    parts.append("")
+    parts.append("Mögliche Gründe:")
+    parts.append(f"• Es wurden noch keine {search_type} für diesen Zeitraum gespeichert")
+    parts.append(f"• Die {search_type} liegen außerhalb des gesuchten Zeitraums")
+
+    # Vorschlag
+    parts.append("")
+    parts.append("💡 **Tipp:** Versuche es mit:")
+    parts.append(f"• \"Was habe ich gestern gemacht?\"")
+    parts.append(f"• \"Zeige mir Nachrichten aus dieser Woche\"")
+    parts.append(f"• Erweitere den Suchzeitraum (z.B. \"letzte Woche\" statt \"heute\")")
+
+    return "\n".join(parts)
+
+
+def _has_strict_date_filter(analyzed: AnalyzedQuery | None) -> bool:
+    """
+    Prüft ob Query ein striktes Datumsfilter braucht.
+
+    Strikte Filter bei:
+    - "heute", "gestern", "vorgestern" (exakte Tage)
+    - "diese Woche", "letzte Woche" (exakte Zeiträume)
+
+    KEINE strikten Filter bei:
+    - "letztes Jahr", "im August" (breite Zeiträume, fuzzy erlaubt)
+    - Keine Datumsangabe (offene Suche)
+    """
+    if not analyzed:
+        return False
+
+    # Prüfe ob Query exakte relative Zeitangaben enthält
+    query_lower = analyzed.raw.lower()
+    strict_keywords = [
+        "heute", "gestern", "vorgestern", "morgen",
+        "diese woche", "letzte woche", "dieses wochenende", "letztes wochenende"
+    ]
+
+    return any(kw in query_lower for kw in strict_keywords)
+
+
+def _matches_date_range_strict(result: dict, date_from: str, date_to: str) -> bool:
+    """
+    Prüft ob Ergebnis EXAKT im Datumsbereich liegt (kein Fuzzy-Matching).
+
+    Args:
+        result: Suchergebnis mit metadata.date_ts
+        date_from: ISO-Datum (YYYY-MM-DD)
+        date_to: ISO-Datum (YYYY-MM-DD)
+
+    Returns:
+        True wenn Ergebnis im Bereich liegt, False sonst
+    """
+    meta = result.get("metadata", {})
+
+    # Fallback: Wenn kein Datum im Ergebnis, nicht filtern
+    if "date_ts" not in meta:
+        logger.debug("Kein date_ts in %s, erlaube Ergebnis", result.get("id", "")[:20])
+        return True
+
+    try:
+        # Konvertiere Timestamps zu Dates (nur Tag, ignoriere Uhrzeit)
+        result_ts = int(meta["date_ts"])
+        result_date = datetime.fromtimestamp(result_ts, tz=timezone.utc).date()
+
+        filter_from = datetime.fromisoformat(date_from).date()
+        filter_to = datetime.fromisoformat(date_to).date()
+
+        # Strikter Vergleich: Muss im Bereich sein
+        is_in_range = filter_from <= result_date <= filter_to
+
+        if not is_in_range:
+            logger.debug(
+                "STRICT FILTER REJECT: %s (Datum: %s, Filter: %s..%s)",
+                result.get("id", "")[:20], result_date, filter_from, filter_to
+            )
+
+        return is_in_range
+
+    except (ValueError, TypeError) as exc:
+        logger.warning("Datumskonvertierung fehlgeschlagen für %s: %s", result.get("id", ""), exc)
+        # Bei Fehler: Erlaube Ergebnis (defensive Strategie)
+        return True
 
 
 def _get_relevant_collections(
@@ -434,7 +579,29 @@ Wenn die Anfrage komplex ist, arbeite in Schritten:
 
 **WICHTIG**: Schreibe BEVOR du ein Tool aufrufst 1-2 Sätze, was du tun wirst.
 
-## Regeln
+## ⚠️ STRIKTE DATUMS-REGELN (OPTION B - WICHTIG!)
+
+**Wenn User nach "heute", "gestern", "diese Woche" etc. fragt:**
+
+1. **Prüfe ZUERST das Datum in den Quellen!**
+   - Jede Quelle hat ein Datum (meist in Metadaten oder am Anfang des Dokuments)
+   - **Ignoriere ALLE Quellen mit falschem Datum!**
+
+2. **Wenn KEINE Quellen vom korrekten Datum existieren:**
+   - Sage KLAR: "Ich habe keine [Nachrichten/Fotos/...] vom [Datum] gefunden."
+   - Erwähne NICHT Quellen von anderen Tagen als "relevant"
+   - Biete optional an: "Möchtest du Ergebnisse von anderen Tagen sehen?"
+
+3. **Beispiele:**
+   - User fragt "heute" ({year_ctx['current_date']}) → Zeige NUR Quellen vom {year_ctx['current_date']}!
+   - User fragt "gestern" → Zeige NUR Quellen vom Vortag!
+   - User fragt "letzte Woche" → Zeige NUR Quellen aus letzter Woche!
+
+4. **Häufiger Fehler (VERMEIDE!):**
+   ❌ FALSCH: "Hier sind Nachrichten von ähnlichen Tagen..."
+   ✅ RICHTIG: "Ich habe keine Nachrichten vom {year_ctx['current_date']} gefunden."
+
+## Weitere Regeln
 1. Nutze NUR Informationen aus den Quellen (keine Halluzinationen!)
 2. Verwende INLINE-REFERENZEN: [[1]], [[2]] für Quellen-Nummern
 3. Bei fehlenden Daten: Sage klar "Ich habe keine Informationen über..."
@@ -493,6 +660,19 @@ def answer_v3(
     if not use_cot:
         # Simple Retrieval (wie v2)
         sources = retrieve_v3(query, user_id, analyzed=analyzed)
+
+        # OPTION C: Bessere "Keine Ergebnisse"-Nachricht
+        if not sources and _has_strict_date_filter(analyzed):
+            # Spezielle Nachricht wenn strikte Datumsfilter keine Ergebnisse lieferten
+            no_results_msg = _generate_no_results_message(query, analyzed)
+            return {
+                "answer": no_results_msg,
+                "sources": [],
+                "analyzed_query": analyzed,
+                "reasoning_steps": [],
+                "no_results": True
+            }
+
         context = compress_sources(sources, budget=ContextBudget(max_tokens=8000), top_n_full=5)
 
         messages = [
