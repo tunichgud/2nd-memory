@@ -122,32 +122,34 @@ async def query_stream_v1(
     req: V1QueryRequest,
     db: aiosqlite.Connection = Depends(get_db),
 ):
-    """Token-aware RAG-Abfrage per Server-Sent Events (SSE). 
-    Yields JSON Chunks mit {"type": "plan"|"text"|"sources", "content": ...}
+    """Real-Time RAG mit Denkprozess-Streaming (v3).
+
+    Yields JSON Chunks mit:
+      - {"type": "query_analysis", "content": {...}}  // Analysierte Query
+      - {"type": "retrieval", "content": {...}}       // Retrieval Progress
+      - {"type": "thought", "content": "..."}         // Interne Reasoning
+      - {"type": "text", "content": "..."}            // Streaming Answer
+      - {"type": "sources", "content": [...]}         // Finale Quellen
+      - {"type": "error", "content": "..."}           // Fehler
     """
-    logger.info("=== DEBUG API /v1/query_stream ===")
+    logger.info("=== DEBUG API /v1/query_stream (v3) ===")
     logger.info("  query:    %s", req.query)
-    logger.info("==================================")
+    logger.info("=======================================")
 
     # User prüfen
     cursor = await db.execute("SELECT id FROM users WHERE id = ? AND is_active = 1", (req.user_id,))
     if not await cursor.fetchone():
         raise HTTPException(status_code=404, detail="User nicht gefunden oder inaktiv")
 
-    from backend.rag.retriever_v2 import answer_v2_stream
-    
-    # Da answer_v2_stream asynchrone DB Reads via aiosqlite/Chroma in asyncio.run laufen lässt
-    # und wir hier schon in async def sind, muss der Generator so gebaut sein, 
-    # dass FastAPI ihn direkt konsumieren kann.
-    # Da unser chat_stream bereits asynchron funktioniert, können wir ihn als
-    # media_type "text/event-stream" ausgeben:
+    # UPGRADE: Nutze v3 Stream statt v2
+    from backend.rag.retriever_v3_stream import answer_v3_stream
 
     async def stream_generator():
         try:
-            async for chunk in answer_v2_stream(
+            async for chunk in answer_v3_stream(
                 query=req.query,
-                chat_history=[{"role": msg.role, "content": msg.content} for msg in req.chat_history],
                 user_id=req.user_id,
+                chat_history=[{"role": msg.role, "content": msg.content} for msg in req.chat_history],
                 person_names=req.person_names,
                 location_names=req.location_names,
                 collections=req.collections,
@@ -155,6 +157,8 @@ async def query_stream_v1(
                 min_score=req.min_score,
                 date_from=req.date_from,
                 date_to=req.date_to,
+                use_chain_of_thought=True,
+                show_thoughts=True,  # TODO: Make configurable via User Settings
             ):
                 yield chunk
         except Exception as e:

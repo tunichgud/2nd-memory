@@ -113,9 +113,11 @@ async function _sendQueryStream(query, abortSignal) {
       try {
         const chunk = JSON.parse(chunkStr);
 
-        // NEW EVENT TYPES
+        // NEW EVENT TYPES (v3 Streaming)
         if (chunk.type === "query_analysis") {
           addQueryAnalysisStep(responseUi, chunk.content);
+        } else if (chunk.type === "retrieval") {
+          addRetrievalStep(responseUi, chunk.content);
         } else if (chunk.type === "thought") {
           addThoughtStep(responseUi, chunk.content);
         } else if (chunk.type === "tool_call") {
@@ -126,7 +128,7 @@ async function _sendQueryStream(query, abortSignal) {
             updateToolResultStep(responseUi, responseUi.lastToolStepId, chunk.content);
           }
         }
-        // LEGACY EVENT TYPES (Fallback)
+        // LEGACY EVENT TYPES (Fallback for v2)
         else if (chunk.type === "plan") {
           addThoughtStep(responseUi, chunk.content);
         } else if (chunk.type === "sources") {
@@ -280,6 +282,99 @@ function addQueryAnalysisStep(ui, analysis) {
 
   ui.timelineSteps.appendChild(step);
   setTimeout(() => step.classList.remove('opacity-0'), 10);
+  scrollBottom();
+}
+
+function addRetrievalStep(ui, retrievalData) {
+  const collectionIcons = {
+    photos: '📷',
+    messages: '💬',
+    reviews: '⭐',
+    saved_places: '📍'
+  };
+
+  // Check if this is an update to existing step or new step
+  const existingStep = ui.timelineSteps.querySelector('.retrieval-step');
+
+  if (retrievalData.status === 'in_progress') {
+    // Create or update "in progress" step
+    if (existingStep) {
+      // Update existing step with spinner
+      const statusDiv = existingStep.querySelector('.retrieval-status');
+      if (statusDiv) {
+        statusDiv.innerHTML = '<div class="animate-spin text-orange-400">⚙️</div>';
+      }
+    } else {
+      // Create new step
+      const step = document.createElement('div');
+      step.className = 'timeline-step retrieval-step opacity-0 animate-fadeIn';
+
+      step.innerHTML = `
+        <div class="flex items-start gap-2 p-2 bg-gray-800/50 rounded-lg border-l-2 border-orange-500">
+          <div class="text-orange-400 mt-0.5">🔍</div>
+          <div class="flex-1">
+            <div class="text-gray-300 font-semibold mb-1">${retrievalData.message || 'Retrieval läuft...'}</div>
+          </div>
+          <div class="retrieval-status">
+            <div class="animate-spin text-orange-400">⚙️</div>
+          </div>
+        </div>
+      `;
+
+      ui.timelineSteps.appendChild(step);
+      setTimeout(() => step.classList.remove('opacity-0'), 10);
+      scrollBottom();
+    }
+  } else if (retrievalData.status === 'completed') {
+    // Update existing step with final results
+    if (existingStep) {
+      const collectionsText = retrievalData.collections && retrievalData.collections.length > 0
+        ? retrievalData.collections.map(c => `${collectionIcons[c] || '📂'} ${c}`).join(', ')
+        : 'Alle Quellen';
+
+      existingStep.innerHTML = `
+        <div class="flex items-start gap-2 p-2 bg-gray-800/50 rounded-lg border-l-2 border-green-500">
+          <div class="text-orange-400 mt-0.5">🔍</div>
+          <div class="flex-1">
+            <div class="text-gray-300 font-semibold mb-1">Retrieval abgeschlossen</div>
+            <div class="text-gray-400 space-y-1 text-[10px]">
+              <div>Gefunden: <span class="text-green-300 font-bold">${retrievalData.total_sources || 0} Quellen</span></div>
+              <div>Collections: <span class="text-blue-300">${collectionsText}</span></div>
+              ${retrievalData.top_score ? `<div>Top Score: <span class="text-yellow-300">${retrievalData.top_score}</span></div>` : ''}
+            </div>
+          </div>
+          <div class="text-green-400 text-lg">✓</div>
+        </div>
+      `;
+    }
+  } else {
+    // Legacy: Single event without status (fallback)
+    const step = document.createElement('div');
+    step.className = 'timeline-step retrieval-step opacity-0 animate-fadeIn';
+
+    const collectionsText = retrievalData.collections && retrievalData.collections.length > 0
+      ? retrievalData.collections.map(c => `${collectionIcons[c] || '📂'} ${c}`).join(', ')
+      : 'Alle Quellen';
+
+    step.innerHTML = `
+      <div class="flex items-start gap-2 p-2 bg-gray-800/50 rounded-lg border-l-2 border-orange-500">
+        <div class="text-orange-400 mt-0.5">🔍</div>
+        <div class="flex-1">
+          <div class="text-gray-300 font-semibold mb-1">Retrieval abgeschlossen</div>
+          <div class="text-gray-400 space-y-1 text-[10px]">
+            <div>Gefunden: <span class="text-green-300 font-bold">${retrievalData.total_sources || 0} Quellen</span></div>
+            <div>Collections: <span class="text-blue-300">${collectionsText}</span></div>
+            ${retrievalData.top_score ? `<div>Top Score: <span class="text-yellow-300">${retrievalData.top_score}</span></div>` : ''}
+          </div>
+        </div>
+        <div class="text-green-400 text-lg">✓</div>
+      </div>
+    `;
+
+    ui.timelineSteps.appendChild(step);
+    setTimeout(() => step.classList.remove('opacity-0'), 10);
+  }
+
   scrollBottom();
 }
 
