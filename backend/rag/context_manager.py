@@ -190,7 +190,8 @@ def compress_sources(
     sources: list[dict],
     budget: ContextBudget | None = None,
     top_n_full: int = 5,
-    use_llm_summary: bool = False
+    use_llm_summary: bool = False,
+    keyword_sources: list[dict] | None = None,
 ) -> str:
     """
     Komprimiert eine Liste von Quellen intelligent auf ein Token-Budget.
@@ -200,12 +201,16 @@ def compress_sources(
     2. Mittlere Quellen: Komprimiert (COMPACT)
     3. Rest: Minimal (nur Metadaten + erster Satz)
     4. Optional: LLM-Summarization für sehr lange Texte
+    5. keyword_sources: Werden chronologisch in eigenem Block angehängt
+       (unabhängig vom Score-Ranking, festes Budget 2000 Tokens)
 
     Args:
         sources: Liste von Source-Dicts mit 'document', 'metadata', 'score', 'collection'
         budget: ContextBudget (default: 8k tokens total)
         top_n_full: Wie viele Top-Quellen bekommen Volltext?
         use_llm_summary: LLM-basierte Summarization für lange Texte (langsam!)
+        keyword_sources: Keyword-Treffer — chronologisch sortiert, kompakt,
+            eigenes Token-Budget (nicht in Score-Sortierung gemischt).
 
     Returns:
         Formatierter Context-String (optimiert für Token-Budget)
@@ -213,7 +218,7 @@ def compress_sources(
     if budget is None:
         budget = ContextBudget()
 
-    if not sources:
+    if not sources and not keyword_sources:
         return "Keine passenden Einträge gefunden."
 
     SOURCE_LABELS = {
@@ -297,6 +302,42 @@ def compress_sources(
 
     logger.info("Context Compression: %d Quellen genutzt, %d tokens (%.1f%% Budget)",
                 len(parts), used_tokens, (used_tokens / available_tokens) * 100)
+
+    # ── Keyword-Block: chronologisch, eigenes Budget ──────────────────────────
+    # Keyword-Quellen (z.B. alle Nachrichten mit "Jazz") werden NICHT in die
+    # Score-Sortierung oben gemischt — sie kämen sonst alle vor den semantischen
+    # Treffern und würden entweder abgeschnitten oder dominieren.
+    # Stattdessen: kompakter chronologischer Block am Ende des Kontexts.
+    if keyword_sources:
+        KEYWORD_BUDGET_TOKENS = 2500
+        kw_parts = []
+        kw_used = 0
+        # Chronologisch sortieren (älteste zuerst → Kontext lesbar wie ein Tagebuch)
+        kw_sorted = sorted(
+            keyword_sources,
+            key=lambda s: s.get("metadata", {}).get("timestamp", ""),
+        )
+        for kw_src in kw_sorted:
+            icon, label = SOURCE_LABELS.get(kw_src["collection"], ("📄", kw_src["collection"].upper()))
+            meta = kw_src.get("metadata", {})
+            date_str = meta.get("date_iso", meta.get("timestamp", ""))[:10]
+            chat = meta.get("chat_name", "")
+            header_parts = [f"[{label}]", date_str]
+            if chat:
+                header_parts.append(chat)
+            header = " | ".join(filter(None, header_parts))
+            doc = compress_text(kw_src["document"], max_tokens=120, mode=CompressionMode.COMPACT)
+            entry = f"{header}\n{doc}"
+            entry_tokens = count_tokens(entry)
+            if kw_used + entry_tokens > KEYWORD_BUDGET_TOKENS:
+                break
+            kw_parts.append(entry)
+            kw_used += entry_tokens
+
+        if kw_parts:
+            kw_block = "=== KEYWORD-TREFFER (chronologisch) ===\n" + "\n\n".join(kw_parts)
+            logger.info("Keyword-Block: %d/%d Chunks, %d tokens", len(kw_parts), len(keyword_sources), kw_used)
+            parts.append(kw_block)
 
     return "\n\n---\n\n".join(parts)
 

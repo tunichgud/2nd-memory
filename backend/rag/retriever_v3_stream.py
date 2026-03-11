@@ -185,6 +185,11 @@ async def answer_v3_stream(
         # Der Query-Parser (LLM) befüllt schluesselwoerter mit Termen die exakt
         # im Text vorkommen müssen — z.B. Tiernamen ("Jazz"), seltene Eigennamen.
         # Semantic Search versagt bei diesen, weil Embeddings zu diffus sind.
+        #
+        # WICHTIG: Keyword-Chunks werden NICHT in die sources-Liste gemischt,
+        # damit compress_sources sie NICHT nach Score sortiert (Score=0.85 fix).
+        # Stattdessen bekommen sie einen eigenen chronologischen Block (2500 Tokens).
+        kw_sources_for_context: list[dict] = []
         if parsed.schluesselwoerter:
             from backend.rag.store import keyword_search
             existing_ids = {s["id"] for s in sources}
@@ -194,18 +199,15 @@ async def answer_v3_stream(
                 date_from=effective_date_from,
                 date_to=effective_date_to,
             )
-            added = 0
             for r in kw_results:
                 if r["id"] not in existing_ids:
-                    sources.append(r)
+                    kw_sources_for_context.append(r)
                     existing_ids.add(r["id"])
-                    added += 1
-            if added:
+            if kw_sources_for_context:
                 logger.info(
-                    "Keyword-Search %s → %d neue Chunks hinzugefügt",
-                    parsed.schluesselwoerter, added
+                    "Keyword-Search %s → %d Chunks (eigener Block, nicht in Score-Ranking)",
+                    parsed.schluesselwoerter, len(kw_sources_for_context)
                 )
-                sources.sort(key=lambda s: s.get("score", 0), reverse=True)
 
         trace.log_retrieval(sources)
 
@@ -213,6 +215,7 @@ async def answer_v3_stream(
         yield _event("retrieval", {
             "status": "completed",
             "total_sources": len(sources),
+            "keyword_sources": len(kw_sources_for_context),
             "collections": list(set(s["collection"] for s in sources)) if sources else [],
             "top_score": round(sources[0]["score"], 2) if sources else 0.0
         }) + "\n\n"
@@ -233,7 +236,12 @@ async def answer_v3_stream(
         if show_thoughts and len(sources) > 10:
             yield _event("thought", f"Komprimiere {len(sources)} Quellen für optimale Token-Nutzung") + "\n\n"
 
-        context = compress_sources(sources, budget=ContextBudget(max_tokens=8000), top_n_full=5)
+        context = compress_sources(
+            sources,
+            budget=ContextBudget(max_tokens=8000),
+            top_n_full=5,
+            keyword_sources=kw_sources_for_context or None,
+        )
 
         # ====================================================================
         # Phase 6: Build Conversation Messages
