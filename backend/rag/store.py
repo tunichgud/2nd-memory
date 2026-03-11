@@ -124,7 +124,7 @@ def get_indexed_ids(collection_name: str) -> set[str]:
 def keyword_search(
     collection_name: str,
     keywords: list[str],
-    n_results: int = 20,
+    n_results: int | None = None,
     where: dict | None = None,
     date_from: str | None = None,
     date_to: str | None = None,
@@ -133,12 +133,13 @@ def keyword_search(
 
     Sucht Chunks die ALLE angegebenen Keywords enthalten (AND-Verknüpfung).
     Gibt eine Liste von Dicts mit 'id', 'document', 'metadata', 'score' zurück.
-    score=1.0 für alle Treffer (kein Ranking — nur Filterung).
+    score=0.85 für alle Treffer (kein Ranking — nur Filterung).
 
     Args:
         collection_name: Name der Collection (z.B. "messages").
         keywords: Liste von Strings, die im Dokument vorkommen müssen.
-        n_results: Maximale Anzahl Ergebnisse.
+            Leere Liste [] bedeutet nur Datum-Filter, kein Keyword-Filter.
+        n_results: Maximale Anzahl Ergebnisse. None = alle Treffer zurückgeben.
         where: Optionaler Metadata-Filter (ChromaDB where-Syntax).
         date_from: Optionales Startdatum YYYY-MM-DD (filtert via timestamp-Metadata).
         date_to: Optionales Enddatum YYYY-MM-DD.
@@ -150,9 +151,11 @@ def keyword_search(
         return []
 
     # Build where_document filter (AND über alle keywords)
+    # Leere keywords-Liste → kein where_document-Filter (nur Datum/where)
+    where_doc: dict | None = None
     if len(keywords) == 1:
-        where_doc: dict = {"$contains": keywords[0]}
-    else:
+        where_doc = {"$contains": keywords[0]}
+    elif len(keywords) > 1:
         where_doc = {"$and": [{"$contains": kw} for kw in keywords]}
 
     # Datum-Filter via metadata (timestamp als ISO-String)
@@ -175,12 +178,16 @@ def keyword_search(
     elif len(all_filters) > 1:
         combined_where = {"$and": all_filters}
 
+    # n_results=None → alle Treffer (col.count() als obere Schranke)
+    effective_limit = min(n_results, col.count()) if n_results is not None else col.count()
+
     try:
         get_kwargs: dict[str, Any] = {
-            "where_document": where_doc,
-            "limit": min(n_results, col.count()),
+            "limit": effective_limit,
             "include": ["documents", "metadatas"],
         }
+        if where_doc is not None:
+            get_kwargs["where_document"] = where_doc
         if combined_where:
             get_kwargs["where"] = combined_where
 

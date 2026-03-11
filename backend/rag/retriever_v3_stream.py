@@ -181,6 +181,32 @@ async def answer_v3_stream(
             date_to=effective_date_to,
         )
 
+        # ── Hybrid: Keyword-Suche via parsed.schluesselwoerter ───────────────
+        # Der Query-Parser (LLM) befüllt schluesselwoerter mit Termen die exakt
+        # im Text vorkommen müssen — z.B. Tiernamen ("Jazz"), seltene Eigennamen.
+        # Semantic Search versagt bei diesen, weil Embeddings zu diffus sind.
+        if parsed.schluesselwoerter:
+            from backend.rag.store import keyword_search
+            existing_ids = {s["id"] for s in sources}
+            kw_results = keyword_search(
+                collection_name="messages",
+                keywords=parsed.schluesselwoerter,
+                date_from=effective_date_from,
+                date_to=effective_date_to,
+            )
+            added = 0
+            for r in kw_results:
+                if r["id"] not in existing_ids:
+                    sources.append(r)
+                    existing_ids.add(r["id"])
+                    added += 1
+            if added:
+                logger.info(
+                    "Keyword-Search %s → %d neue Chunks hinzugefügt",
+                    parsed.schluesselwoerter, added
+                )
+                sources.sort(key=lambda s: s.get("score", 0), reverse=True)
+
         trace.log_retrieval(sources)
 
         # Stream Retrieval Results (AFTER retrieval completes)

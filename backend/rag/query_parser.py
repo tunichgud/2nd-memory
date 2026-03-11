@@ -106,7 +106,13 @@ JSON-Schema:
   "date_from": null,       // ISO-Datum YYYY-MM-DD oder null (inklusive)
   "date_to": null,         // ISO-Datum YYYY-MM-DD oder null (inklusive)
   "topics": [],            // Themen: "restaurant", "location", "activity", "person"
-  "relevant_collections": [] // Subset von ["photos","reviews","saved_places","messages"]
+  "relevant_collections": [], // Subset von ["photos","reviews","saved_places","messages"]
+  "schluesselwoerter": []  // Exakte Begriffe die im Text vorkommen MÜSSEN (Keyword-Suche).
+                           // Nutze dies für: Tiernamen (Jazz, Willi), seltene Eigennamen,
+                           // spezifische Ereignisse ("Schlaganfall", "Hochzeit").
+                           // NICHT für normale Personennamen die in "persons" stehen.
+                           // Beispiel: "Wann starb Jazz?" → schluesselwoerter=["Jazz"]
+                           // Beispiel: "Was schrieb Sarah über Willi?" → schluesselwoerter=["Willi"]
 }}
 
 ⚠️  WICHTIG: Regeln für Datumsberechnung (STRIKT EINHALTEN!):
@@ -152,6 +158,8 @@ class ParsedQuery:
     date_to: str | None = None
     topics: list[str] = field(default_factory=list)
     relevant_collections: list[str] = field(default_factory=list)
+    # Exakte Suchbegriffe für Keyword-Suche (z.B. Eigennamen wie Haustiere, seltene Namen)
+    schluesselwoerter: list[str] = field(default_factory=list)
     # Berechnete ChromaDB where-Filter pro Collection
     metadata_filters: dict[str, dict | None] = field(default_factory=dict)
     # Ob der Parser erfolgreich war
@@ -304,6 +312,9 @@ def _extract_llm(pq: ParsedQuery, chat_history: list[dict] | None = None) -> Non
         # Vereinigung, LLM-Reihenfolge bevorzugt
         merged = list(dict.fromkeys(llm_cols + pq.relevant_collections))
         pq.relevant_collections = merged
+
+    if data.get("schluesselwoerter"):
+        pq.schluesselwoerter = [k.strip() for k in data["schluesselwoerter"] if k.strip()]
 
 
 def _set_month_range(pq: ParsedQuery, year: int, month: int) -> None:
