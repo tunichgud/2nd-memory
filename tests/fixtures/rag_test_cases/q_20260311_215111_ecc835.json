@@ -215,10 +215,10 @@
     "parsed_query": {}
   },
   "golden": {
-    "answer": "Jazz wurde zuletzt im April 2021 in den Nachrichten erwähnt — Sarah schrieb 'Ich vermisse Jazzi'. Dies deutet darauf hin, dass Jazz zu diesem Zeitpunkt bereits gestorben war.",
+    "answer": "Jazz starb am 28. Januar 2021. Im April 2021 schrieb Sarah 'Ich vermisse Jazzi' — die letzte bekannte Erwähnung in den Nachrichten. Zuletzt lebend erwähnt wurde Jazz im Dezember 2020 (Sarah: 'Jazz stinkt. Muss sie vllt raus zum pullern?').",
     "required_facts": [
       "Jazz",
-      "2021",
+      "28. Januar 2021",
       "vermisse"
     ],
     "forbidden_facts": [],

@@ -140,24 +140,26 @@ QUERIES = [
     },
 
     # ── B) JAZZ — NACHRICHTEN-CROSS-DOMAIN (Messages + Messages) ───────────────
-    # Jazz: 140 Erwähnungen, Schlaganfall Jan/Feb 2020, "Ich vermisse Jazzi" April 2021
+    # Jazz: 140 Erwähnungen, erster Schlaganfall Jan 2020 (Tierärztin: "letztes Aufbäumen"),
+    # eingeschläfert am 28.01.2021 (letzte Mahlzeit: Lasagne + Monikas Kuchen),
+    # letzte Erwähnung April 2021 ("Ich vermisse Jazzi" — Sarah)
 
     # Wann hatte Jazz die Schlaganfälle?
     {
         "query": "Was ist mit Jazzi passiert — wann hatte er/sie die Schlaganfälle?",
-        "golden_answer": "Jazz (Hündin) hatte im Januar und Februar 2020 Schlaganfälle. In den Nachrichten werden die Anfälle in diesem Zeitraum mehrfach erwähnt.",
-        "required_facts": ["Jazz", "Schlaganfall", "2020"],
+        "golden_answer": "Jazz (Hündin) hatte Ende Januar 2020 ihren ersten Schlaganfall — am 29. Januar 2020 schrieb Josh: 'Jazz geht es zwar besser, wir konnten heute die ersten kleinen Schritte zusammen machen'. Die Tierärztin Frau Lesyk sprach am 25. Januar 2021 von einem 'letzten Aufbäumen'. Jazz wurde am 28. Januar 2021 eingeschläfert — ihre letzte Mahlzeit war Lasagne und Monikas Kuchen.",
+        "required_facts": ["Jazz", "Schlaganfall", "Januar 2020"],
         "forbidden_facts": [],
         "sources_spec": [
             ("messages", "Jazz Schlaganfall krank 2020", 7),
         ],
     },
 
-    # Wann wurde Jazz zuletzt lebendig erwähnt?
+    # Wann wurde Jazz zuletzt erwähnt?
     {
         "query": "Wann wurde Jazz zuletzt in Nachrichten erwähnt — und in welchem Kontext?",
-        "golden_answer": "Jazz wurde zuletzt im April 2021 in den Nachrichten erwähnt — Sarah schrieb 'Ich vermisse Jazzi'. Dies deutet darauf hin, dass Jazz zu diesem Zeitpunkt bereits gestorben war.",
-        "required_facts": ["Jazz", "2021", "vermisse"],
+        "golden_answer": "Jazz starb am 28. Januar 2021. Im April 2021 schrieb Sarah 'Ich vermisse Jazzi' — die letzte bekannte Erwähnung in den Nachrichten. Zuletzt lebend erwähnt wurde Jazz im Dezember 2020 (Sarah: 'Jazz stinkt. Muss sie vllt raus zum pullern?').",
+        "required_facts": ["Jazz", "28. Januar 2021", "vermisse"],
         "forbidden_facts": [],
         "sources_spec": [
             ("messages", "Jazz vermisse tot letzter Eintrag 2021", 6),
@@ -168,11 +170,11 @@ QUERIES = [
     # Wer hat über Jazz gesprochen und in welchem Kontext?
     {
         "query": "Wer hat in den Nachrichten über den Hund Jazz gesprochen — und was wurde gesagt?",
-        "golden_answer": "Über Jazz schrieben hauptsächlich Sarah und Josh. Sarah erwähnte Jazz oft liebevoll, fragte nach seinem/ihrem Zustand, und schrieb im April 2021 'Ich vermisse Jazzi'. Monika wird auch in Verbindung mit Jazz genannt (Fotos in Winningen).",
-        "required_facts": ["Jazz", "Sarah", "Monika"],
+        "golden_answer": "Über Jazz schrieben hauptsächlich Sarah und Josh. Josh teilte aktuelle Updates zu Jazz' Gesundheit (z.B. Jan 2020: 'Jazz geht es zwar besser'). Sarah sorgte sich liebevoll um Jazz und schrieb nach Jazzes Tod im April 2021 'Ich vermisse Jazzi'. Jazz war Joshs Hündin — Sarah und Josh teilten sich zeitweise die Fürsorge.",
+        "required_facts": ["Jazz", "Sarah", "Josh"],
         "forbidden_facts": [],
         "sources_spec": [
-            ("messages", "Jazz Hund Sarah Monika erwähnt", 7),
+            ("messages", "Jazz Hund Sarah Josh erwähnt", 7),
         ],
     },
 

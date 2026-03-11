@@ -161,11 +161,11 @@
     "parsed_query": {}
   },
   "golden": {
-    "answer": "Über Jazz schrieben hauptsächlich Sarah und Josh. Sarah erwähnte Jazz oft liebevoll, fragte nach seinem/ihrem Zustand, und schrieb im April 2021 'Ich vermisse Jazzi'. Monika wird auch in Verbindung mit Jazz genannt (Fotos in Winningen).",
+    "answer": "Über Jazz schrieben hauptsächlich Sarah und Josh. Josh teilte aktuelle Updates zu Jazz' Gesundheit (z.B. Jan 2020: 'Jazz geht es zwar besser'). Sarah sorgte sich liebevoll um Jazz und schrieb nach Jazzes Tod im April 2021 'Ich vermisse Jazzi'. Jazz war Joshs Hündin — Sarah und Josh teilten sich zeitweise die Fürsorge.",
     "required_facts": [
       "Jazz",
       "Sarah",
-      "Monika"
+      "Josh"
     ],
     "forbidden_facts": [],
     "set_by": "prompt-engineer",
