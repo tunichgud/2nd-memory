@@ -2,13 +2,19 @@
 """
 upload_photos.py — Fotos manuell in Memosaur importieren
 
-Legt Fotos in uploads/ ab und führe dieses Script aus.
-Optionale Metadaten: uploads/meta.yaml
+Standard-Verzeichnis wird aus config.yaml (paths.upload_dir) gelesen.
+Kann relativ (zum Projektwurzel) oder absolut angegeben werden.
+
+Priorität für das Upload-Verzeichnis:
+  1. --dir Argument (CLI)
+  2. paths.upload_dir in config.yaml
+  3. Fallback: uploads/ (relativ zur Projektwurzel)
 
 Verwendung:
-    python3 scripts/upload_photos.py [--dir uploads] [--dry-run]
+    python3 scripts/upload_photos.py [--dry-run]
+    python3 scripts/upload_photos.py --dir /mnt/c/Users/Josh/Pictures/Jazz [--dry-run]
 
-Beispiel meta.yaml:
+Beispiel meta.yaml (im Upload-Verzeichnis):
     defaults:
         persons: ["Jazz"]           # Standard-Personen für alle Fotos
         user_id: "00000000-0000-0000-0000-000000000001"
@@ -198,14 +204,56 @@ def upload_photos(
     return stats
 
 
+def _resolve_upload_dir(cli_dir: str | None) -> Path:
+    """Löst das Upload-Verzeichnis auf.
+
+    Priorität:
+      1. --dir CLI-Argument (absolut oder relativ zur Projektwurzel)
+      2. paths.upload_dir in config.yaml (absolut oder relativ)
+      3. Fallback: uploads/ relativ zur Projektwurzel
+    """
+    if cli_dir is not None:
+        p = Path(cli_dir)
+        resolved = p if p.is_absolute() else BASE_DIR / p
+        logger.info(f"Upload-Verzeichnis (--dir): {resolved}")
+        return resolved
+
+    # Versuche config.yaml
+    cfg_path = BASE_DIR / "config.yaml"
+    if cfg_path.exists():
+        try:
+            with open(cfg_path, encoding="utf-8") as f:
+                cfg = yaml.safe_load(f)
+            upload_dir_cfg = cfg.get("paths", {}).get("upload_dir")
+            if upload_dir_cfg:
+                p = Path(upload_dir_cfg)
+                resolved = p if p.is_absolute() else BASE_DIR / p
+                logger.info(f"Upload-Verzeichnis (config.yaml): {resolved}")
+                return resolved
+        except Exception as e:
+            logger.warning(f"config.yaml konnte nicht gelesen werden: {e}")
+
+    # Fallback
+    resolved = BASE_DIR / "uploads"
+    logger.info(f"Upload-Verzeichnis (Fallback): {resolved}")
+    return resolved
+
+
 def main():
     parser = argparse.ArgumentParser(description="Fotos manuell in Memosaur importieren")
-    parser.add_argument("--dir", default="uploads", help="Upload-Verzeichnis (default: uploads/)")
+    parser.add_argument(
+        "--dir",
+        default=None,
+        help=(
+            "Upload-Verzeichnis. Absoluter oder relativer Pfad. "
+            "Default: paths.upload_dir aus config.yaml (oder uploads/)"
+        ),
+    )
     parser.add_argument("--dry-run", action="store_true", help="Nur simulieren, nichts schreiben")
     parser.add_argument("--user-id", default="00000000-0000-0000-0000-000000000001")
     args = parser.parse_args()
 
-    upload_dir = BASE_DIR / args.dir
+    upload_dir = _resolve_upload_dir(args.dir)
     if not upload_dir.exists():
         upload_dir.mkdir(parents=True)
         logger.info(f"Verzeichnis erstellt: {upload_dir}")
