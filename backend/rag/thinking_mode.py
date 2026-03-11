@@ -27,6 +27,7 @@ SSE-Event-Typen (unverändert):
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import re
@@ -282,7 +283,7 @@ async def _call_researcher(
     )
 
     try:
-        return chat([
+        return await asyncio.to_thread(chat, [
             {"role": "system", "content": _RESEARCHER_SYSTEM},
             {"role": "user",   "content": user_content},
         ])
@@ -306,7 +307,7 @@ async def _call_challenger(
     )
 
     try:
-        return chat([
+        return await asyncio.to_thread(chat, [
             {"role": "system", "content": _CHALLENGER_SYSTEM},
             {"role": "user",   "content": user_content},
         ])
@@ -338,7 +339,7 @@ async def _call_decider(
     )
 
     try:
-        response = chat([
+        response = await asyncio.to_thread(chat, [
             {"role": "system", "content": system},
             {"role": "user",   "content": user_content},
         ])
@@ -367,7 +368,7 @@ async def _call_final_synthesis(
     )
 
     try:
-        return chat([
+        return await asyncio.to_thread(chat, [
             {"role": "system", "content": _FINAL_SYNTHESIS_SYSTEM},
             {"role": "user",   "content": user_content},
         ])
