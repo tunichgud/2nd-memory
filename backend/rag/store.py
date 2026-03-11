@@ -158,25 +158,8 @@ def keyword_search(
     elif len(keywords) > 1:
         where_doc = {"$and": [{"$contains": kw} for kw in keywords]}
 
-    # Datum-Filter via metadata (timestamp als ISO-String)
-    meta_filters: list[dict] = []
-    if date_from:
-        meta_filters.append({"timestamp": {"$gte": date_from}})
-    if date_to:
-        # Bis-Datum inklusiv: nutze bis_datum + "T23:59:59"
-        meta_filters.append({"timestamp": {"$lte": date_to + "T23:59:59"}})
-
-    # Kombiniere user-where mit datum-where
-    combined_where: dict | None = None
-    all_filters: list[dict] = []
-    if where:
-        all_filters.append(where)
-    all_filters.extend(meta_filters)
-
-    if len(all_filters) == 1:
-        combined_where = all_filters[0]
-    elif len(all_filters) > 1:
-        combined_where = {"$and": all_filters}
+    # Kombiniere optionalen user-where-Filter
+    combined_where: dict | None = where or None
 
     # n_results=None → alle Treffer (col.count() als obere Schranke)
     effective_limit = min(n_results, col.count()) if n_results is not None else col.count()
@@ -196,16 +179,30 @@ def keyword_search(
         metas = result.get("metadatas") or []
         ids = result.get("ids") or []
 
-        return [
-            {
+        # Datum-Filter: post-filter via Python-String-Vergleich auf ISO-Timestamps.
+        # Hintergrund: ChromaDB $gte/$lte erwartet numerische Werte, kann
+        # ISO-Strings nicht vergleichen. ISO-Format ist lexikografisch sortierbar
+        # (YYYY-MM-DDTHH:MM:SS), daher funktioniert String-Vergleich korrekt.
+        date_from_str = (date_from or "")[:10]  # "YYYY-MM-DD" oder ""
+        date_to_str = (date_to or "")[:10]      # "YYYY-MM-DD" oder ""
+
+        results = []
+        for doc_id, doc, meta in zip(ids, docs, metas):
+            ts = str(meta.get("timestamp", ""))[:10]  # "YYYY-MM-DD"
+            if date_from_str and ts and ts < date_from_str:
+                continue
+            if date_to_str and ts and ts > date_to_str:
+                continue
+            results.append({
                 "id": f"{collection_name}_{doc_id}",
                 "collection": collection_name,
                 "document": doc,
                 "metadata": meta,
                 "score": 0.85,  # Keyword-Match: fixer Score höher als typischer Similarity-Score
-            }
-            for doc_id, doc, meta in zip(ids, docs, metas)
-        ]
+            })
+
+        return results
+
     except Exception as exc:
         logger.warning("keyword_search Fehler: %s", exc)
         return []

@@ -87,9 +87,21 @@ Aufgabe:
 2. Prüfe: Gibt es Widersprüche zwischen extrahierten Fakten?
 3. Wenn kritisches Faktum fehlt: gib konkrete Suchparameter an.
 
+VOCABULARY-MISMATCH-REGEL (kritisch!):
+Keywords müssen Wörter sein, die TATSÄCHLICH im originalen Chat-Text vorkommen.
+NIEMALS analytische Meta-Begriffe verwenden — echte Menschen schreiben die nie.
+
+VERBOTEN (analytisch, nie im Chat):       STATTDESSEN (echte Alltagssprache):
+"Jazz Identität"                          "Gassi", "Futter", "Leine", "Tierarzt"
+"Jazz Haustier", "Jazz Person"            "bellte", "Pfote", "brav", "Halsband"
+"Jazz Todesdatum", "wer ist Jazz"         "eingeschläfert", "Regenbogenbrücke"
+"Jazz Joshua Bacher"                      "vermisse", "traurig", "letzter Tag"
+
 Beispiel — Todesdatum eines Haustieres fehlt:
-  FEHLENDE FAKTEN: Sterbebeleg (kein Chunk mit "gestorben"/"eingeschläfert")
-  SUCHPARAMETER: date_from=2021-01-28, date_to=2021-06-30, keywords=["Jazz","eingeschläfert","gestorben"]
+  LÜCKEN:
+  - Sterbebeleg fehlt (kein Chunk mit konkretem Datum + "eingeschläfert"/"gestorben")
+  SUCHPARAMETER: date_from=2021-01-01, date_to=2021-06-30, keywords=["eingeschläfert"]
+  HINWEIS: Suche nach Todestag mit echten Chat-Wörtern, nicht analytischen Begriffen
 
 Format (strikt einhalten):
 LÜCKEN:
