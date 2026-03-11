@@ -1,325 +1,427 @@
 """
 thinking_mode.py – Researcher → Challenger → Decider Pipeline für Memosaur.
 
-Prinzip (Single-LLM, kein separater API-Call pro Agent):
-    1. RESEARCHER: Analysiert die Quellen und erstellt einen Antwort-Entwurf + Forschungsplan.
-    2. CHALLENGER:  Stellt die Schlussfolgerungen des Researchers infrage.
-                   Prüft Vollständigkeit, alternative Interpretationen, vergessene Quellen.
-    3. DECIDER:    Entscheidet, ob weiter recherchiert werden soll oder die Antwort reicht.
-                   Berücksichtigt Iteration-Tiefe (max. 3) und Kosten-Nutzen.
+Prinzip:
+    1. RESEARCHER  Analysiert Quellen, erstellt Antwort-Entwurf + benennt Lücken.
+    2. CHALLENGER  Hinterfragt den Entwurf kritisch. Schlägt bei fehlenden Fakten
+                   konkrete Retrieval-Parameter (Datum, Keywords) für Nachsuche vor.
+    3. DECIDER     Entscheidet: finalisieren ODER neue Retrieval-Runde mit Fokus.
+                   Bei "continue" wird retrieval_fn aufgerufen → akkumulierter Kontext.
 
-Der Dialog (Researcher ↔ Challenger ↔ Decider) wird als SSE-Events gestreamt,
-damit das Frontend ihn als eingeklappte Timeline zeigen kann.
+Gegenüber der Vorgängerversion neu:
+    - Aktives Nachforschen: retrieval_fn-Parameter erlaubt echtes Re-Retrieval
+      statt nur Text-Kommentare ohne Konsequenz.
+    - Decider-JSON enthält strukturierte retrieval_focus-Parameter.
+    - Challenger-Prompt explizit auf fehlende Fakten + konkrete Suchvorschläge ausgerichtet.
+    - God-Function aufgebrochen in _call_researcher / _call_challenger / _call_decider.
+    - Alle Imports auf Datei-Top verschoben.
 
-Event-Typen (neu):
+SSE-Event-Typen (unverändert):
     {"type": "thinking_start", "content": {"iteration": 1, "max_iterations": 3}}
-    {"type": "researcher",     "content": "...Entwurf und Forschungsplan..."}
-    {"type": "challenger",     "content": "...Einwände und offene Fragen..."}
-    {"type": "decider",        "content": {"decision": "continue"|"finalize", "reasoning": "..."}}
-    {"type": "thinking_end",   "content": {"iterations": 2, "verdict": "finalized"}}
-
-Diese Events werden neben den bestehenden Events aus retriever_v3_stream gestreamt.
+    {"type": "researcher",     "content": {"iteration": 1, "content": "..."}}
+    {"type": "challenger",     "content": {"iteration": 1, "content": "..."}}
+    {"type": "decider",        "content": {"decision": "continue"|"finalize", ...}}
+    {"type": "retrieval_focus","content": {"date_from": "...", "keywords": [...], ...}}
+    {"type": "thinking_end",   "content": {"iterations": 2}}
 """
+
 from __future__ import annotations
 
+import json
 import logging
+import re
 from typing import AsyncGenerator
 
-from backend.llm.connector import chat, get_cfg
+from backend.llm.connector import chat
+from backend.rag.constants import MAX_THINKING_ITERATIONS
+from backend.rag.rag_types import RetrievalFn, RetrievalParams
 
 logger = logging.getLogger(__name__)
-
-MAX_ITERATIONS = 3
 
 
 # ============================================================================
 # PROMPTS
 # ============================================================================
 
-RESEARCHER_SYSTEM = """\
+_RESEARCHER_SYSTEM = """\
 Du bist der RESEARCHER in einem mehrstufigen Analyse-System für persönliche Erinnerungen.
 
 Deine Aufgabe:
-1. Analysiere die gegebene Nutzeranfrage und die verfügbaren Quellen (Fotos, Nachrichten, Bewertungen, Orte)
-2. Erstelle einen **Antwort-Entwurf**: Was kannst du direkt aus den Quellen beantworten?
-3. Identifiziere **Lücken**: Welche Aspekte der Frage sind noch nicht beantwortet?
-4. Schlage **weitere Recherche-Schritte** vor falls nötig (z.B. andere Zeiträume, andere Personen)
+1. Analysiere die Nutzeranfrage und die verfügbaren Quellen (Fotos, Nachrichten, Bewertungen, Orte).
+2. Erstelle einen ANTWORT-ENTWURF: Was kannst du direkt aus den Quellen beantworten?
+3. Benenne LÜCKEN: Welche konkreten Fakten (Datum, Ort, Name) fehlen noch?
+4. Schlage RECHERCHE-SCHRITTE vor, falls Lücken bestehen.
 
-Format deiner Antwort (immer genau so):
+Format (genau einhalten):
 ANTWORT-ENTWURF:
-[Dein Antwort-Entwurf auf Basis der verfügbaren Quellen]
+[Dein Entwurf auf Basis der verfügbaren Quellen]
 
 LÜCKEN:
-[Was ist noch unklar oder unbeantwortet?]
+[Fehlende konkrete Fakten — oder "Keine" wenn vollständig]
 
 RECHERCHE-VORSCHLÄGE:
-[Konkrete Schritte für tiefere Recherche, oder "Keine" wenn vollständig]
+[Konkrete Schritte für tiefere Recherche — oder "Keine" wenn vollständig]
 
-Antworte auf Deutsch. Sei präzise und faktentreu — erfinde keine Informationen."""
+Antworte auf Deutsch. Erfinde keine Informationen."""
 
-CHALLENGER_SYSTEM = """\
+
+_CHALLENGER_SYSTEM = """\
 Du bist der CHALLENGER in einem mehrstufigen Analyse-System für persönliche Erinnerungen.
 
 Deine Aufgabe:
-1. Hinterfrage den ANTWORT-ENTWURF des Researchers kritisch
+1. Hinterfrage den ANTWORT-ENTWURF des Researchers kritisch.
 2. Prüfe: Wurden alle relevanten Quellen berücksichtigt?
-3. Prüfe: Sind die Schlussfolgerungen korrekt oder gibt es alternative Interpretationen?
-4. Identifiziere: Was wurde NICHT gefragt, könnte aber dennoch interessant sein?
-5. Schlage **zusätzliche Aspekte** vor, die die Antwort bereichern würden
+3. Prüfe: Sind Schlussfolgerungen korrekt oder gibt es alternative Interpretationen?
+4. Wenn ein konkretes Faktum (Datum, Todesfall, Ort, Name) fehlt oder unsicher ist:
+   Schlage einen KONKRETEN SUCHFOKUS vor mit:
+   - Zeitraum (date_from / date_to im Format YYYY-MM-DD)
+   - Keywords die im Text vorkommen MÜSSEN (z.B. Tiernamen, Ereignisse)
+   - Einen kurzen Hinweis was gesucht werden soll
 
-Format deiner Antwort (immer genau so):
+Beispiel — wenn Todesdatum eines Haustieres fehlt:
+  SUCHFOKUS: date_from=2021-01-01, date_to=2021-06-30, keywords=["Jazz", "eingeschläfert", "gestorben"]
+  HINWEIS: Nachrichten nach dem letzten bekannten Schlaganfall durchsuchen
+
+Format (genau einhalten):
 EINWÄNDE:
-[Konkrete Kritikpunkte am Antwort-Entwurf]
+[Konkrete Kritikpunkte]
 
 VERGESSENE ASPEKTE:
-[Was wurde übersehen oder könnte noch interessant sein?]
+[Was wurde übersehen?]
 
-ERGÄNZUNGSVORSCHLÄGE:
-[Was sollte die finale Antwort noch enthalten?]
+SUCHFOKUS (nur wenn ein wichtiges Faktum fehlt, sonst weglassen):
+date_from=YYYY-MM-DD, date_to=YYYY-MM-DD, keywords=["term1", "term2"]
+HINWEIS: [Was wird gesucht]
 
-Sei konstruktiv-kritisch. Dein Ziel ist die bestmögliche Antwort für den Nutzer.
-Antworte auf Deutsch."""
+Sei konstruktiv-kritisch. Antworte auf Deutsch."""
 
-DECIDER_SYSTEM = """\
+
+_DECIDER_SYSTEM = """\
 Du bist der DECIDER in einem mehrstufigen Analyse-System für persönliche Erinnerungen.
 
-Du hast Folgendes gesehen:
-- Die ursprüngliche Nutzeranfrage
+Du hast gesehen:
+- Die Nutzeranfrage
 - Den Antwort-Entwurf des Researchers
-- Die Einwände des Challengers
+- Die Einwände des Challengers inkl. optionalem SUCHFOKUS
 - Aktuelle Iteration: {iteration} von maximal {max_iterations}
 
 Deine Aufgabe:
-Entscheide, ob weitere Recherche sinnvoll ist, ODER ob die Antwort jetzt finalisiert werden soll.
+Entscheide ob weitere Recherche sinnvoll ist ODER ob finalisiert werden soll.
 
-Berücksichtige dabei:
-- Kosten: Jede weitere Iteration kostet Zeit und Ressourcen
-- Nutzen: Würde weitere Recherche die Antwort-Qualität messbar verbessern?
-- Vollständigkeit: Sind die wesentlichen Fakten bereits vorhanden?
+Wenn der Challenger einen SUCHFOKUS vorgeschlagen hat UND das gesuchte Faktum
+wirklich wichtig für die Antwort ist: wähle "continue" und übernimm den Fokus.
 
 Antworte IMMER im folgenden JSON-Format:
-{{"decision": "continue" | "finalize", "reasoning": "...", "focus": "...(nur wenn continue)"}}
+{{
+  "decision": "continue" | "finalize",
+  "reasoning": "...",
+  "retrieval_focus": {{
+    "date_from": "YYYY-MM-DD",
+    "date_to": "YYYY-MM-DD",
+    "keywords": ["term1", "term2"],
+    "hint": "Kurze Beschreibung was gesucht wird"
+  }}
+}}
 
-- "continue": Weitere Recherche sinnvoll (nur wenn noch echte Lücken bestehen UND Iteration < {max_iterations})
-- "finalize": Antwort ist gut genug, weiter macht keinen Sinn
+"retrieval_focus" ist OPTIONAL — nur bei "continue" und nur wenn der Challenger
+einen konkreten SUCHFOKUS geliefert hat. Andernfalls weglassen.
 
 Bei Iteration {max_iterations} MUSST du "finalize" wählen."""
 
-FINAL_SYNTHESIS_SYSTEM = """\
+
+_FINAL_SYNTHESIS_SYSTEM = """\
 Du bist ein Synthese-Agent für persönliche Erinnerungen.
 
-Du hast mehrere Analyse-Runden abgeschlossen:
-- Der Researcher hat die Quellen analysiert
-- Der Challenger hat Lücken und Ergänzungen identifiziert
-- Der Decider hat zur Finalisierung entschieden
+Du hast mehrere Analyse-Runden abgeschlossen.
 
-Deine Aufgabe: Erstelle die finale, vollständige Antwort für den Nutzer.
-
-Regeln:
-1. Beantworte die ursprüngliche Frage vollständig und präzise
-2. Integriere die wertvollen Ergänzungen des Challengers
+Erstelle die finale, vollständige Antwort für den Nutzer:
+1. Beantworte die ursprüngliche Frage vollständig und präzise.
+2. Integriere wertvolle Ergänzungen des Challengers.
 3. Zitiere Quellen mit [[1]], [[2]] etc.
-4. Nutze ausschließlich Fakten aus den bereitgestellten Quellen
-5. Antworte auf Deutsch, klar und strukturiert"""
+4. Nutze ausschließlich Fakten aus den bereitgestellten Quellen.
+5. Antworte auf Deutsch, klar und strukturiert."""
 
 
 # ============================================================================
-# THINKING MODE ENGINE
+# ÖFFENTLICHE API
 # ============================================================================
 
 async def thinking_mode_stream(
     query: str,
     context: str,
-    max_iterations: int = MAX_ITERATIONS,
+    max_iterations: int = MAX_THINKING_ITERATIONS,
+    retrieval_fn: RetrievalFn | None = None,
 ) -> AsyncGenerator[str, None]:
     """
-    Führt die Researcher → Challenger → Decider Pipeline aus.
+    Researcher → Challenger → Decider Pipeline mit optionalem aktiven Nachforschen.
 
     Args:
-        query: Die ursprüngliche Nutzeranfrage
-        context: Formatierter Kontext aus den RAG-Quellen
-        max_iterations: Maximale Anzahl Durchläufe (default: 3)
+        query:          Die ursprüngliche Nutzeranfrage.
+        context:        Formatierter Kontext aus dem initialen Retrieval.
+        max_iterations: Maximale Anzahl Durchläufe.
+        retrieval_fn:   Optional. Wenn übergeben und Decider sagt "continue",
+                        wird echtes Re-Retrieval mit retrieval_focus durchgeführt.
+                        Signatur: async (RetrievalParams) -> str (neuer Kontext-String)
 
     Yields:
         JSON-Strings für SSE Events (ohne trailing \\n\\n)
     """
-    import json
-
-    def event(etype: str, content) -> str:
-        return json.dumps({"type": etype, "content": content}, ensure_ascii=False)
-
-    # Tracking-State
+    accumulated_context = context
     researcher_draft = ""
     challenger_critique = ""
     iteration = 0
 
-    yield event("thinking_start", {
+    yield _event("thinking_start", {
         "iteration": 1,
         "max_iterations": max_iterations,
-        "message": "Starte Thinking Mode — Researcher analysiert Quellen..."
-    }) + "\n\n"
+        "message": "Starte Thinking Mode — Researcher analysiert Quellen...",
+    })
 
     while iteration < max_iterations:
         iteration += 1
 
-        # ────────────────────────────────────────────────────────────────────
-        # Phase A: RESEARCHER
-        # ────────────────────────────────────────────────────────────────────
-        researcher_input = f"""NUTZERANFRAGE: {query}
+        # ── Phase A: RESEARCHER ──────────────────────────────────────────────
+        researcher_draft = await _call_researcher(
+            query=query,
+            context=accumulated_context,
+            prev_draft=researcher_draft if iteration > 1 else "",
+            prev_critique=challenger_critique if iteration > 1 else "",
+            iteration=iteration,
+        )
+        yield _event("researcher", {"iteration": iteration, "content": researcher_draft})
 
-VERFÜGBARE QUELLEN:
-{context}
+        # ── Phase B: CHALLENGER ──────────────────────────────────────────────
+        challenger_critique = await _call_challenger(
+            query=query,
+            researcher_draft=researcher_draft,
+            context_preview=accumulated_context[:3000],
+            iteration=iteration,
+        )
+        yield _event("challenger", {"iteration": iteration, "content": challenger_critique})
 
-{f'VORHERIGE ANALYSE (Iteration {iteration-1}):' if iteration > 1 else ''}
-{researcher_draft if iteration > 1 else ''}
-
-{f'CHALLENGER-EINWÄNDE (Iteration {iteration-1}):' if iteration > 1 else ''}
-{challenger_critique if iteration > 1 else ''}
-
-Führe deine Analyse durch:"""
-
-        try:
-            researcher_response = chat([
-                {"role": "system", "content": RESEARCHER_SYSTEM},
-                {"role": "user",   "content": researcher_input},
-            ])
-            researcher_draft = researcher_response
-        except Exception as e:
-            logger.error("Researcher-Fehler in Iteration %d: %s", iteration, e)
-            researcher_draft = f"[Fehler: {e}]"
-
-        yield event("researcher", {
-            "iteration": iteration,
-            "content": researcher_draft,
-        }) + "\n\n"
-
-        # ────────────────────────────────────────────────────────────────────
-        # Phase B: CHALLENGER
-        # ────────────────────────────────────────────────────────────────────
-        challenger_input = f"""URSPRÜNGLICHE ANFRAGE: {query}
-
-ANTWORT-ENTWURF DES RESEARCHERS (Iteration {iteration}):
-{researcher_draft}
-
-VERFÜGBARE QUELLEN (Überblick):
-{context[:3000]}...
-
-Stelle den Entwurf kritisch infrage:"""
-
-        try:
-            challenger_response = chat([
-                {"role": "system", "content": CHALLENGER_SYSTEM},
-                {"role": "user",   "content": challenger_input},
-            ])
-            challenger_critique = challenger_response
-        except Exception as e:
-            logger.error("Challenger-Fehler in Iteration %d: %s", iteration, e)
-            challenger_critique = f"[Fehler: {e}]"
-
-        yield event("challenger", {
-            "iteration": iteration,
-            "content": challenger_critique,
-        }) + "\n\n"
-
-        # ────────────────────────────────────────────────────────────────────
-        # Phase C: DECIDER
-        # ────────────────────────────────────────────────────────────────────
-        decider_system = DECIDER_SYSTEM.format(
+        # ── Phase C: DECIDER ─────────────────────────────────────────────────
+        decision_data = await _call_decider(
+            query=query,
+            researcher_draft=researcher_draft,
+            challenger_critique=challenger_critique,
             iteration=iteration,
             max_iterations=max_iterations,
         )
-        decider_input = f"""NUTZERANFRAGE: {query}
-
-ANTWORT-ENTWURF (Researcher, Iteration {iteration}):
-{researcher_draft}
-
-EINWÄNDE (Challenger, Iteration {iteration}):
-{challenger_critique}
-
-Deine Entscheidung (JSON):"""
-
-        try:
-            decider_response = chat([
-                {"role": "system", "content": decider_system},
-                {"role": "user",   "content": decider_input},
-            ])
-            # JSON parsen
-            import re
-            json_match = re.search(r'\{[^{}]+\}', decider_response, re.DOTALL)
-            if json_match:
-                decision_data = json.loads(json_match.group())
-            else:
-                # Fallback: Iteration aufbrauchen
-                decision_data = {
-                    "decision": "finalize" if iteration >= max_iterations else "continue",
-                    "reasoning": decider_response[:200],
-                    "focus": "",
-                }
-        except Exception as e:
-            logger.error("Decider-Fehler in Iteration %d: %s", iteration, e)
-            decision_data = {
-                "decision": "finalize",
-                "reasoning": f"Fehler im Decider: {e}",
-                "focus": "",
-            }
-
         decision_data["iteration"] = iteration
-        yield event("decider", decision_data) + "\n\n"
+        yield _event("decider", decision_data)
 
-        # ────────────────────────────────────────────────────────────────────
-        # Abbruch-Bedingung
-        # ────────────────────────────────────────────────────────────────────
-        if decision_data.get("decision") == "finalize" or iteration >= max_iterations:
+        # ── Abbruch-Bedingung ────────────────────────────────────────────────
+        should_finalize = (
+            decision_data.get("decision") == "finalize"
+            or iteration >= max_iterations
+        )
+
+        # ── Aktives Nachforschen (nur wenn retrieval_fn vorhanden) ───────────
+        if not should_finalize and retrieval_fn:
+            focus = decision_data.get("retrieval_focus")
+            if focus and isinstance(focus, dict):
+                retrieval_params: RetrievalParams = {
+                    k: v for k, v in focus.items()  # type: ignore[misc]
+                    if k in ("date_from", "date_to", "keywords", "hint")
+                }
+                yield _event("retrieval_focus", retrieval_params)
+                try:
+                    new_context = await retrieval_fn(retrieval_params)
+                    accumulated_context = _merge_contexts(accumulated_context, new_context)
+                    logger.info(
+                        "Thinking Mode Iteration %d: neuer Kontext hinzugefügt (%d Zeichen)",
+                        iteration, len(new_context),
+                    )
+                except Exception as exc:
+                    logger.warning("retrieval_fn fehlgeschlagen in Iteration %d: %s", iteration, exc)
+
+        if should_finalize:
             break
 
-        # Für nächste Iteration: Fokus aus Decider übernehmen
-        if decision_data.get("focus"):
-            # Nicht verwendbar ohne neues Retrieval — aber als Kontext weitergeben
-            researcher_draft = f"{researcher_draft}\n\n[FOKUS für nächste Runde: {decision_data['focus']}]"
-
-    # ────────────────────────────────────────────────────────────────────────
-    # FINALE SYNTHESE
-    # ────────────────────────────────────────────────────────────────────────
-    yield event("thinking_end", {
+    # ── Finale Synthese ──────────────────────────────────────────────────────
+    yield _event("thinking_end", {
         "iterations": iteration,
-        "verdict": "finalized",
         "message": f"Thinking Mode abgeschlossen nach {iteration} Iteration(en)",
-    }) + "\n\n"
+    })
 
-    # Finale Antwort aus Researcher-Draft + Challenger-Ergänzungen synthetisieren
-    synthesis_input = f"""URSPRÜNGLICHE ANFRAGE: {query}
+    final_answer = await _call_final_synthesis(
+        query=query,
+        researcher_draft=researcher_draft,
+        challenger_critique=challenger_critique,
+        context=accumulated_context,
+    )
 
-ANALYSE-ERGEBNIS (Researcher, letzte Iteration):
-{researcher_draft}
+    for chunk in _split_into_chunks(final_answer, chunk_size=100):
+        yield _event("text", chunk)
 
-ERGÄNZUNGEN (Challenger):
-{challenger_critique}
 
-VOLLSTÄNDIGE QUELLEN:
-{context}
+# ============================================================================
+# INTERNE AGENT-CALLS (SRP: je eine Funktion pro Agent)
+# ============================================================================
 
-Erstelle jetzt die finale, vollständige Antwort für den Nutzer:"""
+async def _call_researcher(
+    query: str,
+    context: str,
+    prev_draft: str,
+    prev_critique: str,
+    iteration: int,
+) -> str:
+    """Ruft den Researcher-Agent auf und gibt seinen Text-Output zurück."""
+    prev_section = ""
+    if iteration > 1 and prev_draft:
+        prev_section = (
+            f"\nVORHERIGE ANALYSE (Iteration {iteration - 1}):\n{prev_draft}"
+            f"\n\nCHALLENGER-EINWÄNDE (Iteration {iteration - 1}):\n{prev_critique}"
+        )
+
+    user_content = (
+        f"NUTZERANFRAGE: {query}\n\n"
+        f"VERFÜGBARE QUELLEN:\n{context}"
+        f"{prev_section}\n\n"
+        "Führe deine Analyse durch:"
+    )
 
     try:
-        final_answer = chat([
-            {"role": "system", "content": FINAL_SYNTHESIS_SYSTEM},
-            {"role": "user",   "content": synthesis_input},
+        return chat([
+            {"role": "system", "content": _RESEARCHER_SYSTEM},
+            {"role": "user",   "content": user_content},
         ])
-    except Exception as e:
-        logger.error("Synthese-Fehler: %s", e)
-        final_answer = researcher_draft  # Fallback auf letzten Draft
+    except Exception as exc:
+        logger.error("Researcher-Fehler in Iteration %d: %s", iteration, exc)
+        return f"[Researcher-Fehler: {exc}]"
 
-    # Finale Antwort als text-Event streamen (Token-by-Token wäre ideal,
-    # aber für den Benchmark reicht ein einzelnes Event)
-    for chunk in _split_into_chunks(final_answer, chunk_size=100):
-        yield event("text", chunk) + "\n\n"
+
+async def _call_challenger(
+    query: str,
+    researcher_draft: str,
+    context_preview: str,
+    iteration: int,
+) -> str:
+    """Ruft den Challenger-Agent auf und gibt seinen Text-Output zurück."""
+    user_content = (
+        f"URSPRÜNGLICHE ANFRAGE: {query}\n\n"
+        f"ANTWORT-ENTWURF DES RESEARCHERS (Iteration {iteration}):\n{researcher_draft}\n\n"
+        f"VERFÜGBARE QUELLEN (Überblick):\n{context_preview}...\n\n"
+        "Stelle den Entwurf kritisch infrage:"
+    )
+
+    try:
+        return chat([
+            {"role": "system", "content": _CHALLENGER_SYSTEM},
+            {"role": "user",   "content": user_content},
+        ])
+    except Exception as exc:
+        logger.error("Challenger-Fehler in Iteration %d: %s", iteration, exc)
+        return f"[Challenger-Fehler: {exc}]"
+
+
+async def _call_decider(
+    query: str,
+    researcher_draft: str,
+    challenger_critique: str,
+    iteration: int,
+    max_iterations: int,
+) -> dict:
+    """
+    Ruft den Decider-Agent auf.
+
+    Returns:
+        Dict mit mindestens {"decision": "continue"|"finalize", "reasoning": "..."}
+        Optional: {"retrieval_focus": {"date_from": ..., "keywords": [...], ...}}
+    """
+    system = _DECIDER_SYSTEM.format(iteration=iteration, max_iterations=max_iterations)
+    user_content = (
+        f"NUTZERANFRAGE: {query}\n\n"
+        f"ANTWORT-ENTWURF (Researcher, Iteration {iteration}):\n{researcher_draft}\n\n"
+        f"EINWÄNDE (Challenger, Iteration {iteration}):\n{challenger_critique}\n\n"
+        "Deine Entscheidung (JSON):"
+    )
+
+    try:
+        response = chat([
+            {"role": "system", "content": system},
+            {"role": "user",   "content": user_content},
+        ])
+        return _parse_decider_json(response, iteration, max_iterations)
+    except Exception as exc:
+        logger.error("Decider-Fehler in Iteration %d: %s", iteration, exc)
+        return {
+            "decision": "finalize",
+            "reasoning": f"Fehler im Decider: {exc}",
+        }
+
+
+async def _call_final_synthesis(
+    query: str,
+    researcher_draft: str,
+    challenger_critique: str,
+    context: str,
+) -> str:
+    """Erstellt die finale Antwort aus allen gesammelten Erkenntnissen."""
+    user_content = (
+        f"URSPRÜNGLICHE ANFRAGE: {query}\n\n"
+        f"ANALYSE-ERGEBNIS (Researcher, letzte Iteration):\n{researcher_draft}\n\n"
+        f"ERGÄNZUNGEN (Challenger):\n{challenger_critique}\n\n"
+        f"VOLLSTÄNDIGE QUELLEN:\n{context}\n\n"
+        "Erstelle jetzt die finale, vollständige Antwort für den Nutzer:"
+    )
+
+    try:
+        return chat([
+            {"role": "system", "content": _FINAL_SYNTHESIS_SYSTEM},
+            {"role": "user",   "content": user_content},
+        ])
+    except Exception as exc:
+        logger.error("Synthese-Fehler: %s", exc)
+        return researcher_draft  # Fallback auf letzten Draft
+
+
+# ============================================================================
+# HILFSFUNKTIONEN
+# ============================================================================
+
+def _parse_decider_json(response: str, iteration: int, max_iterations: int) -> dict:
+    """
+    Parst die JSON-Antwort des Deciders.
+
+    Fallback-Strategie bei Parse-Fehler: finalize wenn letzte Iteration,
+    sonst continue (damit wir nicht ewig stecken bleiben).
+    """
+    json_match = re.search(r'\{.*\}', response, re.DOTALL)
+    if json_match:
+        try:
+            return json.loads(json_match.group())
+        except json.JSONDecodeError:
+            pass
+
+    logger.warning("Decider JSON-Parse fehlgeschlagen in Iteration %d", iteration)
+    return {
+        "decision": "finalize" if iteration >= max_iterations else "continue",
+        "reasoning": response[:200],
+    }
+
+
+def _merge_contexts(original: str, addition: str) -> str:
+    """
+    Fügt neuen Kontext an den bestehenden an.
+
+    Verhindert einfache Duplikate (identischer Text) durch string-Check.
+    """
+    if not addition or addition.strip() in original:
+        return original
+    return original + "\n\n=== NACHFORSCHUNG ===\n" + addition
+
+
+def _event(event_type: str, content: object) -> str:
+    """Formatiert ein SSE-Event als JSON-String (ohne trailing \\n\\n)."""
+    return json.dumps({"type": event_type, "content": content}, ensure_ascii=False)
 
 
 def _split_into_chunks(text: str, chunk_size: int = 100) -> list[str]:
-    """Teilt Text in Chunks auf für Streaming-Simulation."""
+    """Teilt Text in Wort-Chunks für Streaming-Simulation."""
     words = text.split(" ")
-    chunks = []
-    current = []
+    chunks: list[str] = []
+    current: list[str] = []
     current_len = 0
     for word in words:
         current.append(word)
