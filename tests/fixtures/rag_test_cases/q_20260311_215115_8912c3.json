@@ -1,0 +1,248 @@
+{
+  "test_id": "q_20260311_215115_8912c3",
+  "query": "Wo war ich im Frühjahr 2025 auf Reisen — außerhalb von Ahrensburg?",
+  "snapshot": {
+    "captured_at": "2026-03-11T21:51:15",
+    "sources": [
+      {
+        "id": "photos_a114720c",
+        "collection": "photos",
+        "document": "Foto: 20250202_160306.jpg\nDatum: 02.02.2025 um 15:03 Uhr\nOrt: Stepenitztal, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.87526°N, 11.04350°E\nPersonen: Joshua Bacher, Nora",
+        "metadata": {
+          "has_sarah": false,
+          "lon": 11.0435009,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_iso": "2025-02-02T15:03:06+00:00",
+          "place_name": "Stepenitztal, Mecklenburg-Vorpommern, Deutschland",
+          "date_ts": 1738508586,
+          "persons": "Josh,Joshua Bacher,Nora",
+          "has_josh": true,
+          "lat": 53.8752599,
+          "has_joshua": true,
+          "filename": "20250202_160306.jpg",
+          "source": "google_photos",
+          "alt": 23.0,
+          "has_nora": true,
+          "cluster": ""
+        },
+        "score": 0.1726
+      },
+      {
+        "id": "photos_51993f85",
+        "collection": "photos",
+        "document": "Foto: 20250202_160319.jpg\nDatum: 02.02.2025 um 15:03 Uhr\nOrt: Stepenitztal, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.87519°N, 11.04351°E\nPersonen: Nora, Joshua Bacher",
+        "metadata": {
+          "date_iso": "2025-02-02T15:03:19+00:00",
+          "lat": 53.875189,
+          "has_josh": true,
+          "has_nora": true,
+          "filename": "20250202_160319.jpg",
+          "cluster": "",
+          "persons": "Josh,Joshua Bacher,Nora",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "source": "google_photos",
+          "alt": 61.0,
+          "has_sarah": false,
+          "lon": 11.0435134,
+          "place_name": "Stepenitztal, Mecklenburg-Vorpommern, Deutschland",
+          "has_joshua": true,
+          "date_ts": 1738508599
+        },
+        "score": 0.1702
+      },
+      {
+        "id": "photos_209e2cde",
+        "collection": "photos",
+        "document": "Foto: 20250202_160309.jpg\nDatum: 02.02.2025 um 15:03 Uhr\nOrt: Stepenitztal, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.87519°N, 11.04351°E\nPersonen: Joshua Bacher, Nora",
+        "metadata": {
+          "lat": 53.875189,
+          "has_joshua": true,
+          "has_nora": true,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "has_sarah": false,
+          "alt": 61.0,
+          "lon": 11.0435134,
+          "place_name": "Stepenitztal, Mecklenburg-Vorpommern, Deutschland",
+          "date_ts": 1738508589,
+          "cluster": "",
+          "source": "google_photos",
+          "filename": "20250202_160309.jpg",
+          "date_iso": "2025-02-02T15:03:09+00:00",
+          "has_josh": true,
+          "persons": "Josh,Joshua Bacher,Nora"
+        },
+        "score": 0.1699
+      },
+      {
+        "id": "photos_8fd8836f",
+        "collection": "photos",
+        "document": "Foto: 20250202_160331.jpg\nDatum: 02.02.2025 um 15:03 Uhr\nOrt: Stepenitztal, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.87519°N, 11.04351°E\nPersonen: Nora, Joshua Bacher",
+        "metadata": {
+          "has_sarah": false,
+          "filename": "20250202_160331.jpg",
+          "lon": 11.0435134,
+          "date_ts": 1738508611,
+          "has_nora": true,
+          "source": "google_photos",
+          "date_iso": "2025-02-02T15:03:31+00:00",
+          "alt": 61.0,
+          "has_joshua": true,
+          "has_josh": true,
+          "cluster": "",
+          "persons": "Josh,Joshua Bacher,Nora",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lat": 53.875189,
+          "place_name": "Stepenitztal, Mecklenburg-Vorpommern, Deutschland"
+        },
+        "score": 0.1698
+      },
+      {
+        "id": "photos_7d4bfb1a",
+        "collection": "photos",
+        "document": "Foto: 20250202_160316.jpg\nDatum: 02.02.2025 um 15:03 Uhr\nOrt: Stepenitztal, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.87519°N, 11.04351°E\nPersonen: Joshua Bacher, Nora",
+        "metadata": {
+          "lon": 11.0435134,
+          "source": "google_photos",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "filename": "20250202_160316.jpg",
+          "date_ts": 1738508596,
+          "has_nora": true,
+          "lat": 53.875189,
+          "has_joshua": true,
+          "cluster": "",
+          "date_iso": "2025-02-02T15:03:16+00:00",
+          "has_sarah": false,
+          "persons": "Josh,Joshua Bacher,Nora",
+          "alt": 61.0,
+          "has_josh": true,
+          "place_name": "Stepenitztal, Mecklenburg-Vorpommern, Deutschland"
+        },
+        "score": 0.1677
+      },
+      {
+        "id": "photos_6e710095",
+        "collection": "photos",
+        "document": "Foto: 20250501_194515.jpg\nDatum: 01.05.2025 um 17:45 Uhr\nOrt: Stepenitztal, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.87515°N, 11.04333°E\nPersonen: Joshua Bacher, Nora",
+        "metadata": {
+          "persons": "Josh,Joshua Bacher,Nora",
+          "date_iso": "2025-05-01T17:45:15+00:00",
+          "lat": 53.8751464,
+          "has_nora": true,
+          "has_joshua": true,
+          "lon": 11.0433344,
+          "has_josh": true,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "source": "google_photos",
+          "alt": 42.0,
+          "date_ts": 1746121515,
+          "cluster": "Wismar",
+          "place_name": "Stepenitztal, Mecklenburg-Vorpommern, Deutschland",
+          "has_sarah": false,
+          "filename": "20250501_194515.jpg"
+        },
+        "score": 0.1626
+      },
+      {
+        "id": "photos_d1db8354",
+        "collection": "photos",
+        "document": "Foto: 20251004_185908.jpg\nDatum: 04.10.2025 um 16:59 Uhr\nOrt: Stepenitztal, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.87517°N, 11.04386°E\nPersonen: Nora",
+        "metadata": {
+          "has_nora": true,
+          "has_joshua": false,
+          "alt": 56.0,
+          "cluster": "Wismar",
+          "lat": 53.875169799999995,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "source": "google_photos",
+          "lon": 11.0438606,
+          "date_ts": 1759597148,
+          "persons": "Nora",
+          "place_name": "Stepenitztal, Mecklenburg-Vorpommern, Deutschland",
+          "date_iso": "2025-10-04T16:59:08+00:00",
+          "filename": "20251004_185908.jpg",
+          "has_sarah": false
+        },
+        "score": 0.1594
+      },
+      {
+        "id": "messages_d765977a",
+        "collection": "messages",
+        "document": "Aber ja, Döner macht schöner",
+        "metadata": {
+          "chat_id": "491632939138@c.us",
+          "type": "chat",
+          "is_from_me": false,
+          "sender": "Marius",
+          "has_media": false,
+          "source": "whatsapp",
+          "timestamp": "2026-03-11T10:55:53",
+          "chat_name": "Marius Mew"
+        },
+        "score": 0.4146
+      },
+      {
+        "id": "messages_7422e104",
+        "collection": "messages",
+        "document": "Bis Freitag, 13.03.!",
+        "metadata": {
+          "type": "image",
+          "timestamp": "2026-03-11T15:17:53",
+          "has_media": true,
+          "source": "whatsapp",
+          "sender": "Viola",
+          "chat_id": "status@broadcast",
+          "is_from_me": false,
+          "chat_name": "status@broadcast"
+        },
+        "score": 0.3771
+      },
+      {
+        "id": "messages_7a132b00",
+        "collection": "messages",
+        "document": "Kurz resume? War's geil? Auch ein bisschen froh, wieder Zuhause zu sein?",
+        "metadata": {
+          "is_from_me": true,
+          "chat_id": "491798924094@c.us",
+          "chat_name": "Steffen Remus",
+          "timestamp": "2026-03-10T20:07:29",
+          "source": "whatsapp",
+          "has_media": false,
+          "type": "chat",
+          "sender": "Ich"
+        },
+        "score": 0.3689
+      },
+      {
+        "id": "messages_656ecc93",
+        "collection": "messages",
+        "document": "Wir können auch Fisch machen.",
+        "metadata": {
+          "source": "whatsapp",
+          "type": "chat",
+          "has_media": false,
+          "chat_name": "Marius Mew",
+          "sender": "Marius",
+          "is_from_me": false,
+          "chat_id": "491632939138@c.us",
+          "timestamp": "2026-03-11T10:57:29"
+        },
+        "score": 0.3612
+      }
+    ],
+    "system_prompt": "⚠️ WICHTIG - AKTUELLES DATUM: 11.03.2026 (Mittwoch)\n\nZeitliche Berechnungen IMMER von diesem Datum aus:\n- \"letztes Wochenende\" = Samstag 07.03.2026 + Sonntag 08.03.2026\n- \"diese Woche\" = 09.03.2026 bis 15.03.2026\n- \"gestern\" = 10.03.2026\n- \"vorgestern\" = 09.03.2026\n- \"letztes Jahr\" = 2025\n- \"dieses Jahr\" = 2026\n\nDu bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.\nDu hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.\n\n🎯 WICHTIGSTE REGEL für \"Wo war ich?\"-Fragen:\n1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)\n2. Extrahiere aus den Foto-Metadaten das \"Stadtname:\"-Feld oder \"Ort:\"-Feld. Das \"Stadtname:\"-Feld ist der EXAKTE STADTNAME — nutze immer diesen (z.B. \"Ahrensburg\", nicht \"Hamburg-Ost\")\n3. Liste ALLE unterschiedlichen Städte/Orte auf, die in den Quellen auftauchen — auch wenn nur ein Foto aus diesem Ort stammt\n4. Nenne die Orte als erste Information in deiner Antwort\n5. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)\n\nBEISPIEL:\nUser: \"Wo war ich im August 2022 mit Nora?\"\n→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.\n→ Tool: search_photos(personen=[\"Nora\"], von_datum=\"2022-08-01\", bis_datum=\"2022-08-31\")\n→ Observation: [Foto vom 15.08.2022, cluster=\"München-Schwabing\", GPS: 48.16°N 11.58°E]\n→ Antwort: \"Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]].\"\n\nReAct (Reasoning and Acting) Ansatz:\n- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:\n  * Welche Informationen fehlen mir noch (Datum, Ort, Personen)?\n  * Beispiel: \"Wie ging es Sarah, als ich mit Nora in München war?\"\n    -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=[\"Nora\"], orte=[\"München\"]).\n    -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.\n\n- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.\n\nWeitere Regeln:\n1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere NIEMALS Fakten.\n2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).\n3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.\n4. Antworte auf Deutsch. Falls nach \"Gefühlen\" oder \"Stimmung\" gefragt wird, nutze `search_messages`.\n5. Bei Ortsfragen: nutze das \"Ort:\"-Feld oder \"Cluster/Ort:\"-Feld aus den Quellen. Das \"Ort:\"-Feld ist immer der tatsächliche Ortsname (z.B. \"Ahrensburg\"), nutze es bevorzugt.\n6. Falls keine passenden Daten für den gefragten Zeitraum gefunden wurden: Sage klar \"Ich habe dazu keine Einträge in deinen Daten.\" NIEMALS Orte, Zeiten oder Namen erfinden die nicht in den Quellen stehen.\n7. Falls nach einem heutigen Termin gefragt wird und keine aktuellen Quellen vorhanden sind: Gib an was die zuletzt gefundenen relevanten Daten zeigen und erkläre, dass für heute keine Einträge vorliegen.\n\nANTWORTSTIL:\n- Präzise und kurz (3-4 Sätze für einfache Fragen)\n- Exakte Ortsangaben ZUERST (z.B. \"Du warst in München\", nicht \"Es gibt Fotos aus einer Stadt\")\n- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)",
+    "parsed_query": {}
+  },
+  "golden": {
+    "answer": "Im Frühjahr 2025 warst du in Wismar (mit Nora, Mai 2025) und im Stepenitztal. Diese Reisen sind durch Fotos aus dem Mai und Juni 2025 dokumentiert.",
+    "required_facts": [
+      "Wismar",
+      "Mai 2025",
+      "Nora"
+    ],
+    "forbidden_facts": [
+      "Ahrensburg"
+    ],
+    "set_by": "prompt-engineer",
+    "set_at": "2026-03-11T21:51:15"
+  }
+}

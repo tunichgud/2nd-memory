@@ -1,0 +1,207 @@
+{
+  "test_id": "q_20260311_215112_fe7796",
+  "query": "Wie habe ich den Tierpark Wismar bewertet und war ich dort mit jemandem auf Fotos?",
+  "snapshot": {
+    "captured_at": "2026-03-11T21:51:12",
+    "sources": [
+      {
+        "id": "reviews_125a6883",
+        "collection": "reviews",
+        "document": "Bewertung: Tierpark Wismar\nAdresse: Parkplatz Bürgerpark, Zum Festpl. 30, 23966 Wismar, Deutschland\nLand: DE\nKoordinaten: 53.88725°N, 11.42835°E\nDatum: 03.05.2025",
+        "metadata": {
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "source": "google_reviews",
+          "rating": 0,
+          "date_ts": 1746256066,
+          "name": "Tierpark Wismar",
+          "lon": 11.4283542,
+          "address": "Parkplatz Bürgerpark, Zum Festpl. 30, 23966 Wismar, Deutschland",
+          "country": "DE",
+          "date_iso": "2025-05-03T07:07:46.795036Z",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xac7a6d4e23be1bb5",
+          "lat": 53.8872471
+        },
+        "score": 0.2772
+      },
+      {
+        "id": "reviews_125a6883",
+        "collection": "reviews",
+        "document": "Bewertung: Tierpark Wismar\nAdresse: Parkplatz Bürgerpark, Zum Festpl. 30, 23966 Wismar, Deutschland\nLand: DE\nKoordinaten: 53.88725°N, 11.42835°E\nDatum: 03.05.2025",
+        "metadata": {
+          "rating": 0,
+          "country": "DE",
+          "lon": 11.4283542,
+          "date_iso": "2025-05-03T07:07:45.069497Z",
+          "date_ts": 1746256065,
+          "name": "Tierpark Wismar",
+          "lat": 53.8872471,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "source": "google_reviews",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xac7a6d4e23be1bb5",
+          "address": "Parkplatz Bürgerpark, Zum Festpl. 30, 23966 Wismar, Deutschland"
+        },
+        "score": 0.2772
+      },
+      {
+        "id": "reviews_f3773a51",
+        "collection": "reviews",
+        "document": "Bewertung: Tierpark Wismar\nAdresse: Parkplatz Bürgerpark, Zum Festpl. 30, 23966 Wismar, Deutschland\nLand: DE\nKoordinaten: 53.88725°N, 11.42835°E\nDatum: 11.05.2025",
+        "metadata": {
+          "date_ts": 1746965448,
+          "name": "Tierpark Wismar",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lon": 11.4283542,
+          "address": "Parkplatz Bürgerpark, Zum Festpl. 30, 23966 Wismar, Deutschland",
+          "lat": 53.8872471,
+          "source": "google_reviews",
+          "date_iso": "2025-05-11T12:10:48.181889Z",
+          "country": "DE",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xac7a6d4e23be1bb5",
+          "rating": 0
+        },
+        "score": 0.2771
+      },
+      {
+        "id": "reviews_d0da9172",
+        "collection": "reviews",
+        "document": "Bewertung: Agentenzentrale\nAdresse: Kurstraße 12, 14776 Brandenburg an der Havel, Deutschland\nLand: DE\nKoordinaten: 52.40849°N, 12.55935°E\nDatum: 06.08.2024\nBewertung: 5/5 Sterne\nRezension: Immer diese Raucher... Tja, trotzdem coole Kneipe.\nDetails: Ambiente: 5/5",
+        "metadata": {
+          "rating": 5,
+          "address": "Kurstraße 12, 14776 Brandenburg an der Havel, Deutschland",
+          "lat": 52.4084919,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "country": "DE",
+          "source": "google_reviews",
+          "name": "Agentenzentrale",
+          "date_iso": "2024-08-06T22:15:04.022412Z",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x84bdea332059f859",
+          "date_ts": 1722982504,
+          "lon": 12.5593482
+        },
+        "score": 0.2679
+      },
+      {
+        "id": "reviews_3838ff93",
+        "collection": "reviews",
+        "document": "Bewertung: Zum Herzog von Anhalt\nAdresse: Großer Berg1/Ecke, Jugendstraße, 06785 Oranienbaum-Wörlitz, Deutschland\nLand: DE\nKoordinaten: 51.81214°N, 12.48590°E\nDatum: 07.09.2025\nBewertung: 5/5 Sterne\nDetails: Essen: 5/5, Service: 5/5, Ambiente: 5/5",
+        "metadata": {
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "name": "Zum Herzog von Anhalt",
+          "date_iso": "2025-09-07T20:53:25.836003Z",
+          "date_ts": 1757278405,
+          "rating": 5,
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x6b0e1d3d55fe66f4",
+          "lat": 51.8121414,
+          "address": "Großer Berg1/Ecke, Jugendstraße, 06785 Oranienbaum-Wörlitz, Deutschland",
+          "country": "DE",
+          "source": "google_reviews",
+          "lon": 12.485897
+        },
+        "score": 0.263
+      },
+      {
+        "id": "photos_d1db8354",
+        "collection": "photos",
+        "document": "Foto: 20251004_185908.jpg\nDatum: 04.10.2025 um 16:59 Uhr\nOrt: Stepenitztal, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.87517°N, 11.04386°E\nPersonen: Nora",
+        "metadata": {
+          "has_joshua": false,
+          "date_ts": 1759597148,
+          "place_name": "Stepenitztal, Mecklenburg-Vorpommern, Deutschland",
+          "filename": "20251004_185908.jpg",
+          "date_iso": "2025-10-04T16:59:08+00:00",
+          "persons": "Nora",
+          "has_nora": true,
+          "source": "google_photos",
+          "alt": 56.0,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lon": 11.0438606,
+          "lat": 53.875169799999995,
+          "has_sarah": false,
+          "cluster": "Wismar"
+        },
+        "score": 0.2841
+      },
+      {
+        "id": "photos_51993f85",
+        "collection": "photos",
+        "document": "Foto: 20250202_160319.jpg\nDatum: 02.02.2025 um 15:03 Uhr\nOrt: Stepenitztal, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.87519°N, 11.04351°E\nPersonen: Nora, Joshua Bacher",
+        "metadata": {
+          "has_sarah": false,
+          "has_nora": true,
+          "source": "google_photos",
+          "date_ts": 1738508599,
+          "place_name": "Stepenitztal, Mecklenburg-Vorpommern, Deutschland",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "alt": 61.0,
+          "cluster": "",
+          "filename": "20250202_160319.jpg",
+          "has_joshua": true,
+          "lon": 11.0435134,
+          "date_iso": "2025-02-02T15:03:19+00:00",
+          "has_josh": true,
+          "lat": 53.875189,
+          "persons": "Josh,Joshua Bacher,Nora"
+        },
+        "score": 0.2801
+      },
+      {
+        "id": "photos_8fd8836f",
+        "collection": "photos",
+        "document": "Foto: 20250202_160331.jpg\nDatum: 02.02.2025 um 15:03 Uhr\nOrt: Stepenitztal, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.87519°N, 11.04351°E\nPersonen: Nora, Joshua Bacher",
+        "metadata": {
+          "place_name": "Stepenitztal, Mecklenburg-Vorpommern, Deutschland",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lon": 11.0435134,
+          "date_iso": "2025-02-02T15:03:31+00:00",
+          "has_joshua": true,
+          "date_ts": 1738508611,
+          "lat": 53.875189,
+          "persons": "Josh,Joshua Bacher,Nora",
+          "filename": "20250202_160331.jpg",
+          "alt": 61.0,
+          "has_nora": true,
+          "has_josh": true,
+          "cluster": "",
+          "source": "google_photos",
+          "has_sarah": false
+        },
+        "score": 0.2798
+      },
+      {
+        "id": "photos_c5f0dcf3",
+        "collection": "photos",
+        "document": "Foto: 20250202_081505.jpg\nDatum: 02.02.2025 um 07:15 Uhr\nOrt: Stepenitztal, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.87537°N, 11.04358°E\nPersonen: Nora",
+        "metadata": {
+          "has_joshua": false,
+          "place_name": "Stepenitztal, Mecklenburg-Vorpommern, Deutschland",
+          "has_nora": true,
+          "source": "google_photos",
+          "persons": "Nora",
+          "cluster": "",
+          "lon": 11.0435813,
+          "date_ts": 1738480505,
+          "lat": 53.8753689,
+          "date_iso": "2025-02-02T07:15:05+00:00",
+          "has_sarah": false,
+          "alt": 56.0,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "filename": "20250202_081505.jpg"
+        },
+        "score": 0.2786
+      }
+    ],
+    "system_prompt": "⚠️ WICHTIG - AKTUELLES DATUM: 11.03.2026 (Mittwoch)\n\nZeitliche Berechnungen IMMER von diesem Datum aus:\n- \"letztes Wochenende\" = Samstag 07.03.2026 + Sonntag 08.03.2026\n- \"diese Woche\" = 09.03.2026 bis 15.03.2026\n- \"gestern\" = 10.03.2026\n- \"vorgestern\" = 09.03.2026\n- \"letztes Jahr\" = 2025\n- \"dieses Jahr\" = 2026\n\nDu bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.\nDu hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.\n\n🎯 WICHTIGSTE REGEL für \"Wo war ich?\"-Fragen:\n1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)\n2. Extrahiere aus den Foto-Metadaten das \"Stadtname:\"-Feld oder \"Ort:\"-Feld. Das \"Stadtname:\"-Feld ist der EXAKTE STADTNAME — nutze immer diesen (z.B. \"Ahrensburg\", nicht \"Hamburg-Ost\")\n3. Liste ALLE unterschiedlichen Städte/Orte auf, die in den Quellen auftauchen — auch wenn nur ein Foto aus diesem Ort stammt\n4. Nenne die Orte als erste Information in deiner Antwort\n5. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)\n\nBEISPIEL:\nUser: \"Wo war ich im August 2022 mit Nora?\"\n→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.\n→ Tool: search_photos(personen=[\"Nora\"], von_datum=\"2022-08-01\", bis_datum=\"2022-08-31\")\n→ Observation: [Foto vom 15.08.2022, cluster=\"München-Schwabing\", GPS: 48.16°N 11.58°E]\n→ Antwort: \"Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]].\"\n\nReAct (Reasoning and Acting) Ansatz:\n- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:\n  * Welche Informationen fehlen mir noch (Datum, Ort, Personen)?\n  * Beispiel: \"Wie ging es Sarah, als ich mit Nora in München war?\"\n    -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=[\"Nora\"], orte=[\"München\"]).\n    -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.\n\n- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.\n\nWeitere Regeln:\n1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere NIEMALS Fakten.\n2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).\n3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.\n4. Antworte auf Deutsch. Falls nach \"Gefühlen\" oder \"Stimmung\" gefragt wird, nutze `search_messages`.\n5. Bei Ortsfragen: nutze das \"Ort:\"-Feld oder \"Cluster/Ort:\"-Feld aus den Quellen. Das \"Ort:\"-Feld ist immer der tatsächliche Ortsname (z.B. \"Ahrensburg\"), nutze es bevorzugt.\n6. Falls keine passenden Daten für den gefragten Zeitraum gefunden wurden: Sage klar \"Ich habe dazu keine Einträge in deinen Daten.\" NIEMALS Orte, Zeiten oder Namen erfinden die nicht in den Quellen stehen.\n7. Falls nach einem heutigen Termin gefragt wird und keine aktuellen Quellen vorhanden sind: Gib an was die zuletzt gefundenen relevanten Daten zeigen und erkläre, dass für heute keine Einträge vorliegen.\n\nANTWORTSTIL:\n- Präzise und kurz (3-4 Sätze für einfache Fragen)\n- Exakte Ortsangaben ZUERST (z.B. \"Du warst in München\", nicht \"Es gibt Fotos aus einer Stadt\")\n- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)",
+    "parsed_query": {}
+  },
+  "golden": {
+    "answer": "Du hast den Tierpark Wismar im Mai 2025 bewertet. Aus Wismar gibt es auch Fotos vom Mai 2025, auf denen Nora zu sehen ist.",
+    "required_facts": [
+      "Tierpark Wismar",
+      "Mai 2025",
+      "Nora"
+    ],
+    "forbidden_facts": [],
+    "set_by": "prompt-engineer",
+    "set_at": "2026-03-11T21:51:12"
+  }
+}

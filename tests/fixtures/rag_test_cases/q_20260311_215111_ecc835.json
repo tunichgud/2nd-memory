@@ -1,0 +1,228 @@
+{
+  "test_id": "q_20260311_215111_ecc835",
+  "query": "Wann wurde Jazz zuletzt in Nachrichten erwähnt — und in welchem Kontext?",
+  "snapshot": {
+    "captured_at": "2026-03-11T21:51:11",
+    "sources": [
+      {
+        "id": "messages_bc7bddf6",
+        "collection": "messages",
+        "document": "Oh nein, pitschnasser Thule draußen...",
+        "metadata": {
+          "chat_name": "Sarah Ohnesorge",
+          "has_media": false,
+          "type": "chat",
+          "source": "whatsapp",
+          "sender": "Sarah",
+          "timestamp": "2026-03-11T16:03:09",
+          "chat_id": "491786838260@c.us",
+          "is_from_me": false
+        },
+        "score": 0.4608
+      },
+      {
+        "id": "messages_e6e6400d",
+        "collection": "messages",
+        "document": "ich sitze jetzt dooferweise durchgehend in Terminen",
+        "metadata": {
+          "source": "whatsapp",
+          "type": "chat",
+          "is_from_me": true,
+          "sender": "Ich",
+          "chat_name": "Marius Mew",
+          "has_media": false,
+          "chat_id": "491798924094@c.us",
+          "timestamp": "2026-03-11T11:11:01"
+        },
+        "score": 0.459
+      },
+      {
+        "id": "messages_d57912b5",
+        "collection": "messages",
+        "document": "Hat sich jemand bei mir gemeldet die letzte Stunde?",
+        "metadata": {
+          "sender": "Ich",
+          "has_media": false,
+          "chat_name": "Joshua Bacher",
+          "type": "chat",
+          "is_from_me": true,
+          "chat_id": "491798924094@c.us",
+          "timestamp": "2026-03-10T19:16:08",
+          "source": "whatsapp"
+        },
+        "score": 0.4463
+      },
+      {
+        "id": "messages_3bcfa5c5",
+        "collection": "messages",
+        "document": "Warte nochmal bis Malte zusagt 😃",
+        "metadata": {
+          "source": "whatsapp",
+          "is_from_me": false,
+          "sender": "Marius",
+          "timestamp": "2026-03-11T11:17:07",
+          "type": "chat",
+          "chat_id": "491632939138@c.us",
+          "chat_name": "Marius Mew",
+          "has_media": false
+        },
+        "score": 0.4345
+      },
+      {
+        "id": "messages_f93f4469",
+        "collection": "messages",
+        "document": "prima, mit Italiener inkludieren wir doch Malte in jedem Fall besser",
+        "metadata": {
+          "sender": "Ich",
+          "source": "whatsapp",
+          "has_media": false,
+          "chat_name": "Marius Mew",
+          "chat_id": "491798924094@c.us",
+          "type": "chat",
+          "is_from_me": true,
+          "timestamp": "2026-03-11T11:30:20"
+        },
+        "score": 0.4319
+      },
+      {
+        "id": "messages_0188e689",
+        "collection": "messages",
+        "document": "Moin Sarah, Dienstag 17.30-18.00 würde mir gut passen. \nPfeilshofer Weg 34 im Parterre rechts bei Mohr.",
+        "metadata": {
+          "has_media": false,
+          "source": "whatsapp",
+          "timestamp": "2026-03-10T12:54:59",
+          "is_from_me": false,
+          "sender": "Sarah",
+          "chat_name": "Sarah Ohnesorge",
+          "type": "chat",
+          "chat_id": "491786838260@c.us"
+        },
+        "score": 0.4175
+      },
+      {
+        "id": "messages_d8ac9f7c",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[13.01.20 11:10] Sarah Ohnesorge: Ach, da ist schon das 2. da?!\n[13.01.20 11:10] Sarah Ohnesorge: Ja, ich glaub Schnaps trinken aufs Kind.\n[13.01.20 11:10] Sarah Ohnesorge: Und nur die Männer. Ich bin Freitag von morgens bis später Abend weg wegen Weihnachtsfeier direkt nach der Arbeit. Nur als Erinnerung wegen Jazz.\n[13.01.20 11:59] Josh: ok\n[13.01.20 12:00] Josh: wir fahren tatsächlich am Samstag nach Lübeck - spielen Rollenspiel dort.\n[13.01.20 12:00] Josh: just to let you know. :)\n[13.01.20 12:00] Josh: Kannst Du im März an dem RPG Wochenende auf Jazz aufpassen?\n[13.01.20 12:01] Josh: das ist der 6. bis 8. März.\n[13.01.20 18:08] Sarah Ohnesorge: Ich schaue nach, wenn ich zu Hause bin!\n[13.01.20 18:09] Josh: gerade erst raus aus der Arbeit?",
+        "metadata": {
+          "date_ts": 1578910200,
+          "mentioned_persons": "Josh,Sarah Ohnesorge",
+          "timestamp": "2020-01-13T11:10:00",
+          "lat": 0.0,
+          "migration_date": "2026-03-09T23:06:20.424170",
+          "date_iso": "13.01.20 11:10",
+          "lon": 0.0,
+          "chat_name": "Sarah Ohnesorge",
+          "migration_source": "txt_import",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "persons": "Sarah Ohnesorge,Josh",
+          "chat_id": "491786838260@c.us",
+          "source": "whatsapp",
+          "primary_sender": "Sarah Ohnesorge"
+        },
+        "score": 0.4015
+      },
+      {
+        "id": "messages_dc15f9c1",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[31.10.19 11:03] Josh: Eigentlich wollte ich nur Brötchen kaufen, schwupps war ich im Park.\n[31.10.19 11:03] Josh: <Medien ausgeschlossen>\n[31.10.19 11:03] Josh: Jazz ist sogar richtig mobil;\n[31.10.19 11:05] Josh: Oh, man sieht die Ohren von Jazz nur im Profil... Der Rest des Hundes hat sich im Schatten getarnt. :)\n[31.10.19 11:16] Sarah Ohnesorge: Schön! 😊\n[31.10.19 16:59] Josh: Kuuuuuchen!\n[31.10.19 16:59] Josh: Lecker 🙂\n[31.10.19 17:41] Sarah Ohnesorge: Hau rein!\n[31.10.19 19:14] Sarah Ohnesorge: Hast Du Hunger? Wir wollen asiatisches Essen holen.\n[31.10.19 19:16] Josh: ich hab mir heute mittag schon was bestellt.",
+        "metadata": {
+          "migration_date": "2026-03-09T23:06:00.269671",
+          "migration_source": "txt_import",
+          "mentioned_persons": "Josh,Sarah Ohnesorge",
+          "chat_id": "491786838260@c.us",
+          "persons": "Sarah Ohnesorge,Josh",
+          "primary_sender": "Josh",
+          "lat": 0.0,
+          "date_iso": "31.10.19 11:03",
+          "chat_name": "Sarah Ohnesorge",
+          "source": "whatsapp",
+          "date_ts": 1572516180,
+          "timestamp": "2019-10-31T11:03:00",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lon": 0.0
+        },
+        "score": 0.397
+      },
+      {
+        "id": "messages_d7e74ebf",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[26.10.19 12:33] Sarah Ohnesorge: Um 18:30 geht's heut Abend los!\n[26.10.19 15:46] Josh: Jazz kann mit zu Karen. :)\n[26.10.19 15:55] Sarah Ohnesorge: - Destilliertes Wasser - Duschgel - Haarfarbe - Balsamicocreme - Aufbach- Chiabatta - 700g Rinderhack - Basilikum (Topf?!) - Wenn's gibt: frischen Thymian - Mind. 400g Lasagneplatten - 1 Petersilienwurzel - 2x Rotwein (Luna argenta)\n[26.10.19 15:56] Sarah Ohnesorge: <Medien ausgeschlossen>\n[26.10.19 16:26] Josh: Bist du sicher dass es diesen Wein hier hat?\n[26.10.19 16:26] Sarah Ohnesorge: Hatte Micha gesagt\n[26.10.19 16:26] Sarah Ohnesorge: Sonst einen Andren.\n[26.10.19 16:27] Sarah Ohnesorge: Ist nur weil ich schiss hab, dass der aus Italia nicht schmeckt\n[26.10.19 16:29] Josh: Okay\n[26.10.19 16:29] Josh: Hab ich",
+        "metadata": {
+          "persons": "Sarah Ohnesorge,Josh",
+          "chat_id": "491786838260@c.us",
+          "date_iso": "26.10.19 12:33",
+          "primary_sender": "Sarah Ohnesorge",
+          "timestamp": "2019-10-26T12:33:00",
+          "date_ts": 1572085980,
+          "chat_name": "Sarah Ohnesorge",
+          "mentioned_persons": "Jazz,Josh,Karen,Sarah Ohnesorge",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lat": 0.0,
+          "lon": 0.0,
+          "migration_date": "2026-03-09T23:05:58.645832",
+          "migration_source": "txt_import",
+          "source": "whatsapp"
+        },
+        "score": 0.3154
+      },
+      {
+        "id": "messages_fdf07ced",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[28.01.20 15:10] Sarah Ohnesorge: Jo\n[29.01.20 05:55] Josh: https://ze.tt/schwere-momente-des-abschieds-wenn-haustierbesitzerinnen-trauern/\n[29.01.20 09:25] Josh: Jazz geht es zwar besser, wir konnten heute die ersten kleinen Schritte zusammen machen, aber es ist noch nicht so, dass es geht.\n[29.01.20 09:40] Sarah Ohnesorge: Ich bin die ganze Zeit in Gedanken bei Euch! ❤\n[29.01.20 10:24] Sarah Ohnesorge: Ich liebe Dich! Und die kleine Jazzi auch!\n[29.01.20 10:24] Josh: ❤\n[29.01.20 10:25] Josh: <Medien ausgeschlossen>\n[29.01.20 10:30] Josh: Wibke schreibt, die andere alte Hundedame die sie beaufsichtigt, hatte schon mehrer Schlaganfälle, und hat sich immer wieder erholt. Ähnlich hat sich ja auch die Tierärztin geäußert. Lass mal die Daumen drücken, dass das wieder wird.\n[29.01.20 10:37] Sarah Ohnesorge: Das machen wir!!!\n[29.01.20 10:37] Sarah Ohnesorge: Ein sehr schönes Bild!",
+        "metadata": {
+          "chat_id": "491786838260@c.us",
+          "lon": 0.0,
+          "timestamp": "2020-01-28T15:10:00",
+          "date_ts": 1580220600,
+          "primary_sender": "Sarah Ohnesorge",
+          "date_iso": "28.01.20 15:10",
+          "source": "whatsapp",
+          "mentioned_persons": "Josh,Sarah Ohnesorge",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "migration_source": "txt_import",
+          "persons": "Sarah Ohnesorge,Josh",
+          "chat_name": "Sarah Ohnesorge",
+          "migration_date": "2026-03-09T23:06:22.978725",
+          "lat": 0.0
+        },
+        "score": 0.3144
+      },
+      {
+        "id": "messages_b237f464",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[17.02.20 18:17] Sarah Ohnesorge: Sie wünscht es. 👸\n[17.02.20 18:34] Josh: Sag mal: Bist du morgen Abend zuhause und kannst Jazz neues Hundefutter annehmen_\n[17.02.20 18:36] Sarah Ohnesorge: Ja. Bin aber frühestens 19uhr da.\n[18.02.20 08:15] Josh: Guten Morgen :)\n[18.02.20 08:30] Sarah Ohnesorge: Guten Morgen! :)\n[18.02.20 09:24] Josh: Hast Du gut geschlafen?\n[18.02.20 09:24] Josh: Ich wie ein Stein\n[18.02.20 09:24] Josh: war mit Jazz noch mal um 1 Uhr draussen\n[18.02.20 09:24] Josh: Dann konnte ich auch schlafen gehen.\n[18.02.20 09:25] Josh: habe gar nicht mitbekommen, dass sie aufgestanden ist und rübergegangen.",
+        "metadata": {
+          "date_iso": "17.02.20 18:17",
+          "chat_name": "Sarah Ohnesorge",
+          "lon": 0.0,
+          "primary_sender": "Sarah Ohnesorge",
+          "source": "whatsapp",
+          "lat": 0.0,
+          "timestamp": "2020-02-17T18:17:00",
+          "mentioned_persons": "Josh,Sarah Ohnesorge",
+          "chat_id": "491786838260@c.us",
+          "migration_date": "2026-03-09T23:06:29.921026",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "persons": "Sarah Ohnesorge,Josh",
+          "date_ts": 1581959820,
+          "migration_source": "txt_import"
+        },
+        "score": 0.3115
+      }
+    ],
+    "system_prompt": "⚠️ WICHTIG - AKTUELLES DATUM: 11.03.2026 (Mittwoch)\n\nZeitliche Berechnungen IMMER von diesem Datum aus:\n- \"letztes Wochenende\" = Samstag 07.03.2026 + Sonntag 08.03.2026\n- \"diese Woche\" = 09.03.2026 bis 15.03.2026\n- \"gestern\" = 10.03.2026\n- \"vorgestern\" = 09.03.2026\n- \"letztes Jahr\" = 2025\n- \"dieses Jahr\" = 2026\n\nDu bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.\nDu hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.\n\n🎯 WICHTIGSTE REGEL für \"Wo war ich?\"-Fragen:\n1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)\n2. Extrahiere aus den Foto-Metadaten das \"Stadtname:\"-Feld oder \"Ort:\"-Feld. Das \"Stadtname:\"-Feld ist der EXAKTE STADTNAME — nutze immer diesen (z.B. \"Ahrensburg\", nicht \"Hamburg-Ost\")\n3. Liste ALLE unterschiedlichen Städte/Orte auf, die in den Quellen auftauchen — auch wenn nur ein Foto aus diesem Ort stammt\n4. Nenne die Orte als erste Information in deiner Antwort\n5. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)\n\nBEISPIEL:\nUser: \"Wo war ich im August 2022 mit Nora?\"\n→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.\n→ Tool: search_photos(personen=[\"Nora\"], von_datum=\"2022-08-01\", bis_datum=\"2022-08-31\")\n→ Observation: [Foto vom 15.08.2022, cluster=\"München-Schwabing\", GPS: 48.16°N 11.58°E]\n→ Antwort: \"Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]].\"\n\nReAct (Reasoning and Acting) Ansatz:\n- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:\n  * Welche Informationen fehlen mir noch (Datum, Ort, Personen)?\n  * Beispiel: \"Wie ging es Sarah, als ich mit Nora in München war?\"\n    -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=[\"Nora\"], orte=[\"München\"]).\n    -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.\n\n- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.\n\nWeitere Regeln:\n1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere NIEMALS Fakten.\n2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).\n3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.\n4. Antworte auf Deutsch. Falls nach \"Gefühlen\" oder \"Stimmung\" gefragt wird, nutze `search_messages`.\n5. Bei Ortsfragen: nutze das \"Ort:\"-Feld oder \"Cluster/Ort:\"-Feld aus den Quellen. Das \"Ort:\"-Feld ist immer der tatsächliche Ortsname (z.B. \"Ahrensburg\"), nutze es bevorzugt.\n6. Falls keine passenden Daten für den gefragten Zeitraum gefunden wurden: Sage klar \"Ich habe dazu keine Einträge in deinen Daten.\" NIEMALS Orte, Zeiten oder Namen erfinden die nicht in den Quellen stehen.\n7. Falls nach einem heutigen Termin gefragt wird und keine aktuellen Quellen vorhanden sind: Gib an was die zuletzt gefundenen relevanten Daten zeigen und erkläre, dass für heute keine Einträge vorliegen.\n\nANTWORTSTIL:\n- Präzise und kurz (3-4 Sätze für einfache Fragen)\n- Exakte Ortsangaben ZUERST (z.B. \"Du warst in München\", nicht \"Es gibt Fotos aus einer Stadt\")\n- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)",
+    "parsed_query": {}
+  },
+  "golden": {
+    "answer": "Jazz wurde zuletzt im April 2021 in den Nachrichten erwähnt — Sarah schrieb 'Ich vermisse Jazzi'. Dies deutet darauf hin, dass Jazz zu diesem Zeitpunkt bereits gestorben war.",
+    "required_facts": [
+      "Jazz",
+      "2021",
+      "vermisse"
+    ],
+    "forbidden_facts": [],
+    "set_by": "prompt-engineer",
+    "set_at": "2026-03-11T21:51:11"
+  }
+}

@@ -1,0 +1,201 @@
+{
+  "test_id": "q_20260311_215111_c87d37",
+  "query": "Was war das für ein Ausflugsziel Stepenitztal — und war ich dort mit jemandem?",
+  "snapshot": {
+    "captured_at": "2026-03-11T21:51:11",
+    "sources": [
+      {
+        "id": "photos_9650f4d7",
+        "collection": "photos",
+        "document": "Foto: 20250419_181916.jpg\nDatum: 19.04.2025 um 16:19 Uhr\nOrt: Stepenitztal, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.87665°N, 11.04322°E\nPersonen: Nora\nBildbeschreibung: Hier ist eine Beschreibung des Bildes in 2-4 Sätzen:\n\nAuf dem Bild sind zwei kleine Mädchen, vermutlich Geschwister, zu sehen, die auf einer Schaukel zwischen zwei Bäumen spielen. Die Umgebung ist eine grüne Wiese mit einem alten, reetgedeckten Haus im Hintergrund und einem Gewächshaus in der Ferne. Die Szene vermittelt eine fröhliche und entspannte Stimmung und deutet auf einen sonnigen Tag im Freien hin.",
+        "metadata": {
+          "filename": "20250419_181916.jpg",
+          "alt": 71.0,
+          "lat": 53.876654599999995,
+          "has_nora": true,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "persons": "Nora",
+          "source": "google_photos",
+          "lon": 11.043219,
+          "date_ts": 1745079556,
+          "has_sarah": false,
+          "place_name": "Stepenitztal, Mecklenburg-Vorpommern, Deutschland",
+          "cluster": "",
+          "date_iso": "2025-04-19T16:19:16+00:00",
+          "has_joshua": false
+        },
+        "score": 0.181
+      },
+      {
+        "id": "photos_63713e4d",
+        "collection": "photos",
+        "document": "Foto: 20250609_181529.jpg\nDatum: 09.06.2025 um 16:15 Uhr\nOrt: Stepenitztal, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.87508°N, 11.04338°E\nBildbeschreibung: Hier ist eine Beschreibung des Bildes in 2-4 Sätzen:\n\nDas Bild zeigt zwei kleine Kinder, vermutlich ein Junge und ein Mädchen, die in einem Sandkasten spielen. Sie sind draußen in einem Garten mit üppiger Vegetation, wo ein Sandkasten von Steinen umgeben ist. Das Mädchen, das in einer lila Jacke und Jeans sitzt, beugt sich über den Sand, während der Junge in einer Latzhose neben dem Sandkasten steht und einen Zug betrachtet. Die Stimmung wirkt verspielt und die Tageszeit ist vermutlich Nachmittag, basierend auf dem Lichtverhältnisse.",
+        "metadata": {
+          "persons": "",
+          "lon": 11.0433839,
+          "source": "google_photos",
+          "cluster": "",
+          "has_sarah": false,
+          "date_ts": 1749485731,
+          "place_name": "Stepenitztal, Mecklenburg-Vorpommern, Deutschland",
+          "lat": 53.8750802,
+          "has_joshua": false,
+          "has_nora": false,
+          "date_iso": "2025-06-09T16:15:31+00:00",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "filename": "20250609_181529.jpg",
+          "alt": 52.0
+        },
+        "score": 0.1745
+      },
+      {
+        "id": "photos_54453853",
+        "collection": "photos",
+        "document": "Foto: 20250404_161930.jpg\nDatum: 04.04.2025 um 14:19 Uhr\nOrt: Stepenitztal, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.87521°N, 11.04299°E\nPersonen: Joshua Bacher\nBildbeschreibung: Hier ist eine Beschreibung des Bildes in 2-4 Sätzen:\n\nDas Bild zeigt einen Mann mit Bart und einen kleinen Jungen auf einer Trampolin. Der Mann dehnt sich auf dem Trampolin aus, während der Junge sitzend mit seinen Füßen spielt. Die Szene spielt im Freien vor dem Hintergrund eines bewaldeten Geländes, was darauf hindeutet, dass es sich um einen Garten oder einen ähnlichen Außenbereich handelt. Die Stimmung ist verspielt und entspannt, und das Licht deutet auf einen sonnigen Tag hin.",
+        "metadata": {
+          "date_iso": "2025-04-04T14:19:30+00:00",
+          "cluster": "",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "filename": "20250404_161930.jpg",
+          "persons": "Joshua Bacher",
+          "source": "google_photos",
+          "has_nora": true,
+          "has_sarah": false,
+          "alt": 50.0,
+          "lon": 11.042990200000002,
+          "lat": 53.875212399999995,
+          "has_joshua": true,
+          "date_ts": 1743776370,
+          "place_name": "Stepenitztal, Mecklenburg-Vorpommern, Deutschland"
+        },
+        "score": 0.171
+      },
+      {
+        "id": "photos_a3f94f8d",
+        "collection": "photos",
+        "document": "Foto: 20250419_181921.jpg\nDatum: 19.04.2025 um 16:19 Uhr\nOrt: Stepenitztal, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.87665°N, 11.04331°E\nPersonen: Nora\nBildbeschreibung: Hier ist eine Beschreibung des Bildes in 2-4 Sätzen:\n\nDas Bild zeigt zwei kleine Mädchen, vermutlich Geschwister, die auf einer Schaukel unter zwei Bäumen spielen. Sie befinden sich im Freien in einer ländlichen Umgebung, vermutlich auf einem Hof, da im Hintergrund ein reetgedecktes Haus und eine Gewächshauskonstruktion zu sehen sind. Die Stimmung wirkt fröhlich und verspielt, und die Tageszeit scheint ein bewölkter Nachmittag zu sein.",
+        "metadata": {
+          "filename": "20250419_181921.jpg",
+          "source": "google_photos",
+          "has_joshua": false,
+          "persons": "Nora",
+          "has_sarah": false,
+          "date_iso": "2025-04-19T16:19:21+00:00",
+          "alt": 78.0,
+          "has_nora": true,
+          "date_ts": 1745079561,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "place_name": "Stepenitztal, Mecklenburg-Vorpommern, Deutschland",
+          "cluster": "",
+          "lat": 53.876651900000006,
+          "lon": 11.0433082
+        },
+        "score": 0.1676
+      },
+      {
+        "id": "photos_0f142c3b",
+        "collection": "photos",
+        "document": "Foto: 20250629_125610.jpg\nDatum: 29.06.2025 um 10:56 Uhr\nOrt: Stepenitztal, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.87518°N, 11.04335°E\nPersonen: Nora\nBildbeschreibung: Hier ist eine Beschreibung des Bildes in 2-4 Sätzen:\n\nAuf dem Bild sind zwei Kinder (ein Junge und ein Mädchen) zu sehen, die in einem kleinen, gelben Planschbecken im Freien spielen. Die Umgebung ist eine grüne Wiese mit Bäumen und Büschen im Hintergrund. Die Stimmung wirkt fröhlich und es scheint ein sonniger Tag zu sein. Das Bild vermittelt den Eindruck eines entspannten Nachmittags im Garten.",
+        "metadata": {
+          "has_joshua": false,
+          "alt": 60.0,
+          "date_iso": "2025-06-29T10:56:10+00:00",
+          "filename": "20250629_125610.jpg",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lat": 53.8751843,
+          "has_sarah": false,
+          "cluster": "",
+          "date_ts": 1751194570,
+          "lon": 11.0433506,
+          "place_name": "Stepenitztal, Mecklenburg-Vorpommern, Deutschland",
+          "persons": "Nora",
+          "has_nora": true,
+          "source": "google_photos"
+        },
+        "score": 0.1667
+      },
+      {
+        "id": "photos_5a0cb402",
+        "collection": "photos",
+        "document": "Foto: 20250214_170221.jpg\nDatum: 14.02.2025 um 16:02 Uhr\nOrt: Ahrensburg, Schleswig-Holstein, Deutschland\nKoordinaten: 53.67807°N, 10.21789°E\nPersonen: Nora\nBildbeschreibung: Hier ist eine Beschreibung des Bildes in 2-4 Sätzen:\n\nAuf dem Bild ist ein einzelnes Kind (vermutlich ein Junge) zu sehen, das ohne Oberteil in der verschneiten Umgebung steht. Er trägt Jeans und pantoffelartige Schuhe und scheint zu spielen oder sich im Schnee zu vergnügen. Die Umgebung ist draußen, vermutlich ein Garten oder ein Hof mit einem Holzzaun im Hintergrund. Es scheint ein kühler Tag zu sein, und die Tageszeit lässt sich anhand des Lichts nicht genau bestimmen.",
+        "metadata": {
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "cluster": "",
+          "has_sarah": false,
+          "alt": 104.0,
+          "filename": "20250214_170221.jpg",
+          "has_joshua": false,
+          "lat": 53.6780749,
+          "source": "google_photos",
+          "date_iso": "2025-02-14T16:02:21+00:00",
+          "has_nora": true,
+          "place_name": "Ahrensburg, Schleswig-Holstein, Deutschland",
+          "persons": "Nora",
+          "date_ts": 1739548941,
+          "lon": 10.2178865
+        },
+        "score": 0.1638
+      },
+      {
+        "id": "messages_50de2492",
+        "collection": "messages",
+        "document": "Gestern? Oder meinst du Freitag?",
+        "metadata": {
+          "chat_id": "491632939138@c.us",
+          "chat_name": "Marius Mew",
+          "timestamp": "2026-03-11T10:56:59",
+          "sender": "Marius",
+          "is_from_me": false,
+          "has_media": false,
+          "source": "whatsapp",
+          "type": "chat"
+        },
+        "score": 0.4142
+      },
+      {
+        "id": "messages_e6e6400d",
+        "collection": "messages",
+        "document": "ich sitze jetzt dooferweise durchgehend in Terminen",
+        "metadata": {
+          "has_media": false,
+          "chat_id": "491798924094@c.us",
+          "sender": "Ich",
+          "source": "whatsapp",
+          "type": "chat",
+          "is_from_me": true,
+          "timestamp": "2026-03-11T11:11:01",
+          "chat_name": "Marius Mew"
+        },
+        "score": 0.4029
+      },
+      {
+        "id": "messages_bc7bddf6",
+        "collection": "messages",
+        "document": "Oh nein, pitschnasser Thule draußen...",
+        "metadata": {
+          "source": "whatsapp",
+          "chat_id": "491786838260@c.us",
+          "is_from_me": false,
+          "has_media": false,
+          "chat_name": "Sarah Ohnesorge",
+          "timestamp": "2026-03-11T16:03:09",
+          "type": "chat",
+          "sender": "Sarah"
+        },
+        "score": 0.3888
+      }
+    ],
+    "system_prompt": "⚠️ WICHTIG - AKTUELLES DATUM: 11.03.2026 (Mittwoch)\n\nZeitliche Berechnungen IMMER von diesem Datum aus:\n- \"letztes Wochenende\" = Samstag 07.03.2026 + Sonntag 08.03.2026\n- \"diese Woche\" = 09.03.2026 bis 15.03.2026\n- \"gestern\" = 10.03.2026\n- \"vorgestern\" = 09.03.2026\n- \"letztes Jahr\" = 2025\n- \"dieses Jahr\" = 2026\n\nDu bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.\nDu hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.\n\n🎯 WICHTIGSTE REGEL für \"Wo war ich?\"-Fragen:\n1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)\n2. Extrahiere aus den Foto-Metadaten das \"Stadtname:\"-Feld oder \"Ort:\"-Feld. Das \"Stadtname:\"-Feld ist der EXAKTE STADTNAME — nutze immer diesen (z.B. \"Ahrensburg\", nicht \"Hamburg-Ost\")\n3. Liste ALLE unterschiedlichen Städte/Orte auf, die in den Quellen auftauchen — auch wenn nur ein Foto aus diesem Ort stammt\n4. Nenne die Orte als erste Information in deiner Antwort\n5. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)\n\nBEISPIEL:\nUser: \"Wo war ich im August 2022 mit Nora?\"\n→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.\n→ Tool: search_photos(personen=[\"Nora\"], von_datum=\"2022-08-01\", bis_datum=\"2022-08-31\")\n→ Observation: [Foto vom 15.08.2022, cluster=\"München-Schwabing\", GPS: 48.16°N 11.58°E]\n→ Antwort: \"Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]].\"\n\nReAct (Reasoning and Acting) Ansatz:\n- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:\n  * Welche Informationen fehlen mir noch (Datum, Ort, Personen)?\n  * Beispiel: \"Wie ging es Sarah, als ich mit Nora in München war?\"\n    -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=[\"Nora\"], orte=[\"München\"]).\n    -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.\n\n- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.\n\nWeitere Regeln:\n1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere NIEMALS Fakten.\n2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).\n3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.\n4. Antworte auf Deutsch. Falls nach \"Gefühlen\" oder \"Stimmung\" gefragt wird, nutze `search_messages`.\n5. Bei Ortsfragen: nutze das \"Ort:\"-Feld oder \"Cluster/Ort:\"-Feld aus den Quellen. Das \"Ort:\"-Feld ist immer der tatsächliche Ortsname (z.B. \"Ahrensburg\"), nutze es bevorzugt.\n6. Falls keine passenden Daten für den gefragten Zeitraum gefunden wurden: Sage klar \"Ich habe dazu keine Einträge in deinen Daten.\" NIEMALS Orte, Zeiten oder Namen erfinden die nicht in den Quellen stehen.\n7. Falls nach einem heutigen Termin gefragt wird und keine aktuellen Quellen vorhanden sind: Gib an was die zuletzt gefundenen relevanten Daten zeigen und erkläre, dass für heute keine Einträge vorliegen.\n\nANTWORTSTIL:\n- Präzise und kurz (3-4 Sätze für einfache Fragen)\n- Exakte Ortsangaben ZUERST (z.B. \"Du warst in München\", nicht \"Es gibt Fotos aus einer Stadt\")\n- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)",
+    "parsed_query": {}
+  },
+  "golden": {
+    "answer": "Das Stepenitztal ist ein Naturgebiet (Wandergebiet) in Mecklenburg. Du warst dort mit Nora, es gibt Fotos aus dem Stepenitztal aus dem Jahr 2025.",
+    "required_facts": [
+      "Stepenitztal",
+      "Nora"
+    ],
+    "forbidden_facts": [],
+    "set_by": "prompt-engineer",
+    "set_at": "2026-03-11T21:51:11"
+  }
+}

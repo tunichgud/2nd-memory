@@ -79,206 +79,250 @@ def make_fixture(query: str, golden_answer: str, required_facts: list[str],
 
 
 QUERIES = [
-    # ── A) FOTO + NACHRICHT (zeitlich verknüpft) ────────────────────────────────
+    # ── DESIGN-PRINZIPIEN dieser Queries ────────────────────────────────────────
+    # 1. Nur Foto-Daten aus 2025 (was hochgeladen wurde)
+    # 2. Cross-domain: mindestens 2 Collections müssen kombiniert werden
+    # 3. Golden Answer nur aus verifizierten Datenpunkten — keine Spekulation
+    # 4. Ahrensburg ist Wohnort seit 2023 → keine triviale Foto-Frage dort
+    # 5. Jazz (Hündin, hatte Jan/Feb 2020 Schlaganfälle, April 2021 "Ich vermisse Jazzi"
+    #    von Sarah) → emotionale cross-domain Fragen auf echter Grundlage
+    # 6. Required facts: präzise und aus den Quellen belegbar
+    # ────────────────────────────────────────────────────────────────────────────
+
+    # ── A) FOTO + NACHRICHT (2025 Photos + Messages) ────────────────────────────
+
+    # Wismar-Trip mit Nora: Fotos vom Mai 2025 + Messages mit Zeitkontext
     {
-        "query": "Wo war ich mit Nora und Sarah zusammen im Januar 2025?",
-        "golden_answer": "Ihr wart gemeinsam in Ahrensburg. Am 1. Januar 2025 gibt es ein Foto von euch dreien in Ahrensburg.",
-        "required_facts": ["Ahrensburg", "Januar 2025"],
-        "forbidden_facts": ["München", "Hamburg"],
+        "query": "Wann war ich in Wismar und mit wem?",
+        "golden_answer": "Du warst im Mai 2025 in Wismar, zusammen mit Nora. Es gibt Fotos aus Wismar vom 3. bis 11. Mai 2025.",
+        "required_facts": ["Wismar", "Nora", "Mai 2025"],
+        "forbidden_facts": ["Sarah", "Tom"],
         "sources_spec": [
-            ("photos", "Nora Sarah Januar 2025 Ahrensburg", 6),
-            ("messages", "Nora Sarah Ahrensburg Neujahr", 4),
+            ("photos", "Wismar Nora Mai 2025", 6),
+            ("messages", "Wismar Reise Nora", 4),
         ],
     },
+
+    # München August 2025: Nora + Sarah + Tom — cross-domain Foto+Nachricht
     {
-        "query": "Wann war ich das erste Mal mit Nora in München?",
-        "golden_answer": "Das erste gemeinsame Foto mit Nora in München stammt vom August 2025.",
-        "required_facts": ["München", "August 2025"],
+        "query": "Mit wem war ich im August 2025 in München?",
+        "golden_answer": "Im August 2025 warst du in München mit Nora, Sarah und Tom zusammen. Fotos zeigen euch gemeinsam am 29. und 30. August 2025.",
+        "required_facts": ["München", "August 2025", "Nora", "Sarah", "Tom"],
         "forbidden_facts": [],
         "sources_spec": [
-            ("photos", "Nora München erstes Mal", 8),
+            ("photos", "München August 2025 Personen", 6),
+            ("messages", "München Urlaub August 2025", 4),
         ],
     },
+
+    # Stepenitztal: Fotos + Messages ob Ausflug geplant wurde
     {
-        "query": "Mit wem war ich im Stepenitztal?",
-        "golden_answer": "Im Stepenitztal warst du mit Nora. Es gibt Fotos vom 29. Juni 2025 und vom 30. Mai 2025 aus dem Stepenitztal.",
-        "required_facts": ["Nora", "Stepenitztal"],
-        "forbidden_facts": ["Sarah"],
-        "sources_spec": [
-            ("photos", "Stepenitztal Personen", 6),
-            ("messages", "Stepenitztal Wismar Reise", 3),
-        ],
-    },
-    {
-        "query": "Was haben Sarah und ich im Sommer 2019 gemacht? Gab es Urlaube oder besondere Ereignisse?",
-        "golden_answer": "Im Sommer 2019 hat Sarah Urlaub auf Amrum gemacht. Josh war währenddessen auf einer Surfveranstaltung (vermutlich Fehmarn/Ostsee). Sie haben sich regelmäßig per WhatsApp ausgetauscht.",
-        "required_facts": ["Amrum", "Urlaub", "2019"],
+        "query": "Was war das für ein Ausflugsziel Stepenitztal — und war ich dort mit jemandem?",
+        "golden_answer": "Das Stepenitztal ist ein Naturgebiet (Wandergebiet) in Mecklenburg. Du warst dort mit Nora, es gibt Fotos aus dem Stepenitztal aus dem Jahr 2025.",
+        "required_facts": ["Stepenitztal", "Nora"],
         "forbidden_facts": [],
         "sources_spec": [
-            ("messages", "Urlaub Sommer 2019 Amrum", 6),
-            ("photos", "Sommer 2019 Fehmarn Ostsee", 4),
+            ("photos", "Stepenitztal Wandern Natur", 6),
+            ("messages", "Stepenitztal Wandern Natur Ausflug", 3),
         ],
     },
-    # ── B) REVIEW + FOTO (Ort-verknüpft) ───────────────────────────────────────
+
+    # Silvester / Neujahr 2025: Fotos + Messages zu Plänen/Stimmung
     {
-        "query": "Welche Restaurants in Ahrensburg habe ich bewertet und war ich dort auch mit jemandem auf Fotos?",
-        "golden_answer": "In Ahrensburg wurde das Ristorante Pizzeria da Barone (2/5 Sterne, April 2025) und das Caligo Coffee (5/5 Sterne, August 2024) bewertet. In Ahrensburg gibt es viele Fotos, u.a. mit Nora und Sarah.",
-        "required_facts": ["Ahrensburg", "da Barone", "Caligo Coffee"],
+        "query": "Was habe ich zu Silvester / Neujahr 2025 gemacht?",
+        "golden_answer": "Zu Silvester/Neujahr 2025 warst du in Ahrensburg, gemeinsam mit Nora und Sarah. Es gibt Fotos vom 1. Januar 2025 aus Ahrensburg.",
+        "required_facts": ["Silvester", "Neujahr", "Nora", "Sarah"],
         "forbidden_facts": [],
         "sources_spec": [
-            ("reviews", "Ahrensburg Restaurant Bewertung", 5),
-            ("photos", "Ahrensburg Personen Foto", 4),
+            ("photos", "Silvester Neujahr 2025 Feier", 6),
+            ("messages", "Silvester Neujahr 2025 Pläne Feier", 5),
         ],
     },
+
+    # ── B) JAZZ — NACHRICHTEN-CROSS-DOMAIN (Messages + Messages) ───────────────
+    # Jazz: 140 Erwähnungen, Schlaganfall Jan/Feb 2020, "Ich vermisse Jazzi" April 2021
+
+    # Wann hatte Jazz die Schlaganfälle?
     {
-        "query": "Ich erinnere mich an ein schlechtes Zahnarzt-Erlebnis — wann war das und was ist danach passiert?",
-        "golden_answer": "Du hast die Zahnärzte Dorotheenstraße in Hamburg mit 1/5 Sternen bewertet (März 2025). Als Privatpatient hast du dich nicht gut aufgehoben gefühlt und die Praxis hat sogar eine Abmahnung wegen deiner negativen Rezension versucht.",
-        "required_facts": ["Dorotheenstraße", "1/5 Sterne", "Abmahnung"],
+        "query": "Was ist mit Jazzi passiert — wann hatte er/sie die Schlaganfälle?",
+        "golden_answer": "Jazz (Hündin) hatte im Januar und Februar 2020 Schlaganfälle. In den Nachrichten werden die Anfälle in diesem Zeitraum mehrfach erwähnt.",
+        "required_facts": ["Jazz", "Schlaganfall", "2020"],
         "forbidden_facts": [],
         "sources_spec": [
-            ("reviews", "Zahnarzt schlechte Bewertung Abmahnung", 4),
-            ("messages", "Zahnarzt Arzt Hamburg", 3),
+            ("messages", "Jazz Schlaganfall krank 2020", 7),
         ],
     },
+
+    # Wann wurde Jazz zuletzt lebendig erwähnt?
     {
-        "query": "Wo war ich im September 2025 und was habe ich dort gemacht?",
-        "golden_answer": "Im September 2025 warst du in Oranienbaum-Wörlitz und hast das Restaurant 'Zum Herzog von Anhalt' besucht und mit 5 Sternen bewertet.",
-        "required_facts": ["September 2025", "Herzog von Anhalt", "Oranienbaum"],
+        "query": "Wann wurde Jazz zuletzt in Nachrichten erwähnt — und in welchem Kontext?",
+        "golden_answer": "Jazz wurde zuletzt im April 2021 in den Nachrichten erwähnt — Sarah schrieb 'Ich vermisse Jazzi'. Dies deutet darauf hin, dass Jazz zu diesem Zeitpunkt bereits gestorben war.",
+        "required_facts": ["Jazz", "2021", "vermisse"],
         "forbidden_facts": [],
         "sources_spec": [
-            ("reviews", "September 2025 Restaurant Bewertung", 4),
-            ("photos", "September 2025 Reise Ort", 4),
+            ("messages", "Jazz vermisse tot letzter Eintrag 2021", 6),
+            ("messages", "Jazz Hund 2020 2021", 5),
         ],
     },
+
+    # Wer hat über Jazz gesprochen und in welchem Kontext?
     {
-        "query": "Welchen Campingplatz habe ich in Sardinien am besten bewertet?",
-        "golden_answer": "Du hast den Villaggio Camping La Mandragola in Siniscola mit 5 Sternen bewertet — schöner Campingplatz mit direktem Strandzugang und toller Umgebung.",
-        "required_facts": ["Sardinien", "La Mandragola", "5 Sterne"],
+        "query": "Wer hat in den Nachrichten über den Hund Jazz gesprochen — und was wurde gesagt?",
+        "golden_answer": "Über Jazz schrieben hauptsächlich Sarah und Josh. Sarah erwähnte Jazz oft liebevoll, fragte nach seinem/ihrem Zustand, und schrieb im April 2021 'Ich vermisse Jazzi'. Monika wird auch in Verbindung mit Jazz genannt (Fotos in Winningen).",
+        "required_facts": ["Jazz", "Sarah", "Monika"],
         "forbidden_facts": [],
         "sources_spec": [
-            ("reviews", "Sardinien Camping Bewertung", 5),
-            ("saved_places", "Sardinien Camping", 3),
+            ("messages", "Jazz Hund Sarah Monika erwähnt", 7),
         ],
     },
-    # ── C) SAVED PLACES + NACHRICHT ─────────────────────────────────────────────
+
+    # ── C) REVIEW + FOTO (nur wenn Reviews existieren) ──────────────────────────
+
+    # Tierpark Wismar: Reviews vom Mai 2025 + Fotos aus Wismar
     {
-        "query": "Habe ich den Tierpark Wismar schon mal besucht und bewertet?",
-        "golden_answer": "Ja, du hast den Tierpark Wismar mehrfach bewertet — Bewertungen vom 3. Mai 2025 und 11. Mai 2025 sind vorhanden.",
-        "required_facts": ["Tierpark Wismar", "Mai 2025"],
+        "query": "Wie habe ich den Tierpark Wismar bewertet und war ich dort mit jemandem auf Fotos?",
+        "golden_answer": "Du hast den Tierpark Wismar im Mai 2025 bewertet. Aus Wismar gibt es auch Fotos vom Mai 2025, auf denen Nora zu sehen ist.",
+        "required_facts": ["Tierpark Wismar", "Mai 2025", "Nora"],
         "forbidden_facts": [],
         "sources_spec": [
-            ("reviews", "Tierpark Wismar Bewertung Besuch", 5),
-            ("saved_places", "Wismar Tierpark", 3),
+            ("reviews", "Tierpark Wismar Bewertung", 5),
+            ("photos", "Wismar Mai 2025 Nora", 4),
         ],
     },
+
+    # Hamburg schlechte Erfahrungen: Reviews + Saved Places
     {
-        "query": "Gibt es einen veganen Ort in Hamburg, den ich empfehlen würde?",
-        "golden_answer": "Ja, The Vegan Eagle im Norden Hamburgs (Wischhöfen 4) wurde mit 5 Sternen bewertet. Essen, Service und Ambiente seien alle großartig gewesen.",
-        "required_facts": ["Vegan Eagle", "Hamburg", "5 Sterne"],
+        "query": "Wo in Hamburg hatte ich schlechte Erlebnisse laut meinen Bewertungen?",
+        "golden_answer": "In Hamburg hast du die Zahnärzte Dorotheenstraße mit 1 Stern bewertet (März 2025) — als Privatpatient hattest du dich dort nicht gut aufgehoben gefühlt, und die Praxis versuchte eine Abmahnung wegen deiner negativen Rezension.",
+        "required_facts": ["Hamburg", "1 Stern", "Dorotheenstraße"],
         "forbidden_facts": [],
         "sources_spec": [
-            ("reviews", "vegan Hamburg Restaurant Empfehlung", 4),
-            ("saved_places", "Hamburg vegan Restaurant", 3),
+            ("reviews", "Hamburg schlechte Bewertung 1 Stern Erfahrung", 5),
+            ("saved_places", "Hamburg Arzt Zahnarzt", 3),
         ],
     },
+
+    # Sardinien: positive Reviews + saved places
     {
-        "query": "Habe ich Arztpraxen in Hamburg gespeichert oder bewertet?",
-        "golden_answer": "Ja, du hast die Zahnärzte Dorotheenstraße in Hamburg bewertet (1 Stern) und die Hausarzt-Praxis Forum Winterhude am Winterhuder Marktplatz als gespeicherten Ort. Außerdem gibt es einen Eintrag für Frau Ioanna Paradowski (Ärztin) in Eppendorf.",
-        "required_facts": ["Dorotheenstraße", "Forum Winterhude"],
+        "query": "Was weiß ich über meine Reise nach Sardinien — Bewertungen und gespeicherte Orte?",
+        "golden_answer": "Du hast in Sardinien den Agriturismo B&B Monte Majore mit 5 Sternen bewertet ('Ein absolutes Highlight') und den Villaggio Camping La Mandragola in Siniscola. Mehrere Campingplätze und Unterkünfte sind auch als gespeicherte Orte vorhanden.",
+        "required_facts": ["Sardinien", "Monte Majore", "5 Sterne"],
         "forbidden_facts": [],
         "sources_spec": [
-            ("reviews", "Arzt Zahnarzt Hamburg Bewertung", 4),
-            ("saved_places", "Arzt Hausarzt Hamburg", 4),
+            ("reviews", "Sardinien Camping Hotel Bewertung", 6),
+            ("saved_places", "Sardinien Camping Unterkunft", 4),
         ],
     },
-    # ── D) MULTI-PERSON + MULTI-ZEITRAUM ────────────────────────────────────────
+
+    # ── D) NACHRICHTEN + SAVED PLACES ───────────────────────────────────────────
+
+    # Papa / Monika: wer sind sie und wie tauchen sie in Nachrichten auf?
     {
-        "query": "Wann war Nora zuletzt in München auf Fotos und wann war Sarah das letzte Mal dabei?",
-        "golden_answer": "Nora war zuletzt im August 2025 in München auf Fotos. Sarah war ebenfalls im August 2025 in München dabei (z.B. Fotos vom 29.08.2025 in München-Ost und am 30.08.2025 in Bruck).",
-        "required_facts": ["München", "August 2025", "Nora", "Sarah"],
-        "forbidden_facts": [],
-        "sources_spec": [
-            ("photos", "Nora München letztes Mal", 6),
-            ("photos", "Sarah München letztes Mal", 6),
-        ],
-    },
-    {
-        "query": "Haben Monika und Sarah gemeinsam an Ereignissen teilgenommen?",
-        "golden_answer": "Auf Fotos aus Ahrensburg (Januar 2025, Mai 2025) sind sowohl Nora als auch Sarah zu sehen. Monika ist ebenfalls in Ahrensburg auf Fotos. Eine direkte Überschneidung aller drei in einer Szene lässt sich aus den Metadaten schließen.",
-        "required_facts": ["Ahrensburg", "Monika", "Sarah"],
-        "forbidden_facts": [],
-        "sources_spec": [
-            ("photos", "Monika Sarah Treffen Ahrensburg", 6),
-            ("messages", "Monika Sarah treffen", 4),
-        ],
-    },
-    {
-        "query": "In welchen Ländern war ich auf Reisen und wo habe ich schlechte Erfahrungen gemacht?",
-        "golden_answer": "Du warst in Deutschland, Italien, Portugal, Spanien, Vietnam und auf den Azoren. Schlechte Erfahrungen: Salitre Hostel Lissabon (2 Sterne, Schimmel), A Cabana Esposende Portugal (1 Stern), ElementFish Kite Camp Portugal (2 Sterne), sowie mehrere 1-Stern-Bewertungen in Hamburg.",
-        "required_facts": ["Portugal", "Lissabon", "1 Stern"],
-        "forbidden_facts": [],
-        "sources_spec": [
-            ("reviews", "schlechte Bewertung Erfahrung Ausland", 6),
-            ("saved_places", "Ausland Reise international", 4),
-        ],
-    },
-    # ── E) EMOTIONALE / ZWISCHENMENSCHLICHE QUERIES ─────────────────────────────
-    {
-        "query": "Wie war die Stimmung zwischen Sarah und mir im Februar/März 2020?",
-        "golden_answer": "Im Februar und März 2020 schrieben sich Sarah und Josh regelmäßig. Die Nachrichten zeigen eine enge, unterstützende Beziehung. Es gab Momente der Sorge und gegenseitigen Unterstützung (Josh: 'Geht es Dir gut?', Sarah: 'Ja, ist schön.'). Die Corona-Zeit begann, was Reisen und Treffen erschwerte.",
-        "required_facts": ["2020", "Sarah"],
-        "forbidden_facts": [],
-        "sources_spec": [
-            ("messages", "Sarah Josh Februar März 2020 Stimmung Gefühle", 6),
-        ],
-    },
-    {
-        "query": "Gab es Momente wo Sarah in Nachrichten frustriert oder verärgert war?",
-        "golden_answer": "Ja — im Juli 2019 schrieb Sarah, sie sei 'plötzlich so wütend und unzufrieden geworden'. Im August 2019 klagte sie über einen unerträglichen SEV (Schienenersatzverkehr, 30 Minuten im Bus). Im März 2020 schrieb sie 'Ist mega ätzend hier.'",
-        "required_facts": ["wütend", "2019"],
-        "forbidden_facts": [],
-        "sources_spec": [
-            ("messages", "Sarah frustriert verärgert wütend unzufrieden", 6),
-        ],
-    },
-    {
-        "query": "Hat Josh jemals über Papa oder Monika in Nachrichten gesprochen und in welchem Kontext?",
-        "golden_answer": "Ja — Im Juni 2019 fragte Sarah ob sie sich 'Samstagabend mit Papa und Monika' treffen können, Josh stimmte begeistert zu. Im Januar 2020 erwähnte Josh einen Anruf von 'Dieter'. Monika wird auch in Zusammenhang mit Jazz (dem Hund) erwähnt.",
+        "query": "Wer sind Papa und Monika und welche Rolle spielen sie in den Nachrichten?",
+        "golden_answer": "Papa und Monika sind Familienmitglieder (vermutlich Vater und seine Partnerin). In den Nachrichten werden gemeinsame Treffen erwähnt, z.B. 'Samstagabend mit Papa und Monika'. Monika wird auch im Zusammenhang mit Jazz (dem Hund) und Fotos aus Winningen erwähnt.",
         "required_facts": ["Papa", "Monika"],
         "forbidden_facts": [],
         "sources_spec": [
-            ("messages", "Papa Monika Treffen Familie", 6),
+            ("messages", "Papa Monika Treffen Familie Winningen", 7),
         ],
     },
-    # ── F) ORGANISATIONS-QUERIES ────────────────────────────────────────────────
+
+    # Gespeicherte Orte Hamburg + Nachrichten über Hamburg
     {
-        "query": "Wo habe ich in Hamburg gespeicherte Orte die mit Essen zu tun haben?",
-        "golden_answer": "In Hamburg sind gespeichert: Pizza Social Club (Mühlenkamp), Ky Lan (Dorotheenstraße), Goldbeker (Schinkelstraße), Schramme 10 (Schrammsweg), Zum tanzenden Einhorn (Hammer Steindamm), Gröninger Privatbrauerei.",
+        "query": "Welche Restaurants oder Cafés in Hamburg habe ich gespeichert und worüber wurde in Nachrichten gesprochen?",
+        "golden_answer": "In Hamburg hast du u.a. gespeichert: Pizza Social Club (Mühlenkamp), Ky Lan (Dorotheenstraße), Goldbeker, Schramme 10, The Vegan Eagle (5 Sterne Bewertung). In Nachrichten wurde Hamburg als Wohnort und für Ausgehtipps erwähnt.",
         "required_facts": ["Hamburg", "Pizza Social Club"],
         "forbidden_facts": [],
         "sources_spec": [
-            ("saved_places", "Hamburg Essen Restaurant Café Bar", 8),
+            ("saved_places", "Hamburg Restaurant Café Bar Essen", 6),
+            ("messages", "Hamburg ausgehen Essen Restaurant", 4),
         ],
     },
-    # ── G) VERGLEICHS- / AGGREGATIONS-QUERIES ───────────────────────────────────
+
+    # ── E) MULTI-PERSON FOTO-QUERIES (2025) ──────────────────────────────────
+
+    # Wann war Tom auf Fotos zu sehen?
     {
-        "query": "In welcher Stadt bin ich am häufigsten auf Fotos zu sehen — Hamburg oder München?",
-        "golden_answer": "In den gespeicherten Fotos ist Hamburg häufiger vertreten als München. Nora war in München vor allem im August 2025. Hamburg (inkl. Ahrensburg als Umland) ist über mehrere Jahre mit deutlich mehr Fotos präsent.",
-        "required_facts": ["Hamburg", "München"],
+        "query": "Wann taucht Tom auf Fotos auf und in welchem Zusammenhang?",
+        "golden_answer": "Tom ist auf Fotos aus München im August 2025 zu sehen, zusammen mit Nora und Sarah.",
+        "required_facts": ["Tom", "München", "August 2025"],
         "forbidden_facts": [],
         "sources_spec": [
-            ("photos", "Hamburg Fotos", 6),
-            ("photos", "München Fotos", 6),
+            ("photos", "Tom München August 2025", 6),
+            ("messages", "Tom München Urlaub", 3),
         ],
     },
+
+    # ── F) EMOTIONALE NACHRICHTEN-QUERIES ──────────────────────────────────────
+
+    # Sarah frustriert / verärgert
     {
-        "query": "Welche Urlaubsreise war für mich besonders positiv — laut Bewertungen und Nachrichten?",
-        "golden_answer": "Besonders positiv bewertet wurde der Aufenthalt bei Agriturismo B&B Monte Majore in Sardinien (5 Sterne, 2024) — 'Ein absolutes Highlight'. Ebenfalls sehr positiv: die Azoren-Reise (Surf Center, Terra do Pico Whale Watching, alle 5 Sterne, 2018).",
-        "required_facts": ["Sardinien", "5 Sterne", "Highlight"],
+        "query": "Gab es Momente wo Sarah in Nachrichten frustriert oder unglücklich war?",
+        "golden_answer": "Ja — im Juli 2019 schrieb Sarah, sie sei 'plötzlich so wütend und unzufrieden geworden'. Im August 2019 beschwerte sie sich über den SEV (Schienenersatzverkehr). Im März 2020 schrieb sie 'Ist mega ätzend hier.'",
+        "required_facts": ["wütend", "Sarah", "2019"],
         "forbidden_facts": [],
         "sources_spec": [
-            ("reviews", "Urlaub positiv Highlight beste Erfahrung", 6),
-            ("messages", "Urlaub toll schön Reise", 4),
+            ("messages", "Sarah frustriert verärgert wütend unzufrieden ätzend", 7),
+        ],
+    },
+
+    # Wie haben Sarah und Josh 2020 kommuniziert (Corona-Zeit + Jazz krank)
+    {
+        "query": "Wie haben Sarah und Josh in der Corona-Zeit 2020 kommuniziert — gab es besondere Themen?",
+        "golden_answer": "In der Corona-Zeit 2020 haben Sarah und Josh regelmäßig per WhatsApp kommuniziert. Themen waren: gegenseitige Unterstützung, Jazzi's Krankheit (Schlaganfälle im Januar/Februar 2020), Reisebeschränkungen und Alltagssituationen.",
+        "required_facts": ["2020", "Sarah", "Jazz"],
+        "forbidden_facts": [],
+        "sources_spec": [
+            ("messages", "Sarah Josh 2020 Corona Jazz krank Schlaganfall", 8),
+        ],
+    },
+
+    # ── G) VERGLEICHS-QUERIES ───────────────────────────────────────────────────
+
+    # Vergleich: beste vs. schlechteste Bewertungen
+    {
+        "query": "Was sind meine besten und schlechtesten Reiseerfahrungen laut Bewertungen?",
+        "golden_answer": "Beste Erfahrungen (5 Sterne): Agriturismo B&B Monte Majore Sardinien, Vegan Eagle Hamburg, Azoren-Reise (Surf Center, Whale Watching), Tierpark Wismar. Schlechteste (1 Stern): Zahnärzte Dorotheenstraße Hamburg, A Cabana Esposende Portugal, Salitre Hostel Lissabon.",
+        "required_facts": ["Monte Majore", "Sardinien", "5 Sterne", "1 Stern"],
+        "forbidden_facts": [],
+        "sources_spec": [
+            ("reviews", "beste schlechteste Bewertung Reise Erfahrung", 8),
+        ],
+    },
+
+    # Azoren vs. Sardinien
+    {
+        "query": "War ich auf den Azoren und in Sardinien — und welche Reise hat mir besser gefallen?",
+        "golden_answer": "Du warst auf beiden Reisen. Die Azoren-Reise umfasste Whale Watching und Surfstunden (alle 5 Sterne). In Sardinien warst du auf einem Agriturismo ('Ein absolutes Highlight', 5 Sterne). Beide Reisen waren sehr positiv bewertet.",
+        "required_facts": ["Azoren", "Sardinien", "5 Sterne"],
+        "forbidden_facts": [],
+        "sources_spec": [
+            ("reviews", "Azoren Sardinien Vergleich Bewertung", 6),
+            ("saved_places", "Azoren Sardinien", 3),
+        ],
+    },
+
+    # Wo war ich im Frühjahr 2025 auf Reisen (nicht Ahrensburg)?
+    {
+        "query": "Wo war ich im Frühjahr 2025 auf Reisen — außerhalb von Ahrensburg?",
+        "golden_answer": "Im Frühjahr 2025 warst du in Wismar (mit Nora, Mai 2025) und im Stepenitztal. Diese Reisen sind durch Fotos aus dem Mai und Juni 2025 dokumentiert.",
+        "required_facts": ["Wismar", "Mai 2025", "Nora"],
+        "forbidden_facts": ["Ahrensburg"],
+        "sources_spec": [
+            ("photos", "Wismar Stepenitztal Frühling 2025 Reise", 7),
+            ("messages", "Wismar Reise Frühjahr 2025", 4),
+        ],
+    },
+
+    # Lübeck: War ich dort und was weiß man?
+    {
+        "query": "War ich in Lübeck und gibt es dazu Fotos oder Nachrichten?",
+        "golden_answer": "Ja, es gibt Fotos aus Lübeck aus dem Jahr 2025. Lübeck liegt in der Nähe von Ahrensburg und Wismar.",
+        "required_facts": ["Lübeck"],
+        "forbidden_facts": [],
+        "sources_spec": [
+            ("photos", "Lübeck Fotos Besuch 2025", 5),
+            ("messages", "Lübeck Besuch Stadt", 3),
         ],
     },
 ]

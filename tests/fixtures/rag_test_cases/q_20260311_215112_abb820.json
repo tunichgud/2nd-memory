@@ -1,0 +1,171 @@
+{
+  "test_id": "q_20260311_215112_abb820",
+  "query": "Wo in Hamburg hatte ich schlechte Erlebnisse laut meinen Bewertungen?",
+  "snapshot": {
+    "captured_at": "2026-03-11T21:51:12",
+    "sources": [
+      {
+        "id": "reviews_d04ae4ca",
+        "collection": "reviews",
+        "document": "Bewertung: HMV Hanseatische Materialverwaltung\nAdresse: Stockmeyerstraße 41, 20457 Hamburg, Deutschland\nKoordinaten: 53.54217°N, 10.00957°E\nDatum: 16.05.2025\nBewertung: 5/5 Sterne",
+        "metadata": {
+          "date_iso": "2025-05-16T22:22:40.026423Z",
+          "country": "",
+          "date_ts": 1747434160,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lat": 53.5421669,
+          "name": "HMV Hanseatische Materialverwaltung",
+          "rating": 5,
+          "source": "google_reviews",
+          "lon": 10.0095749,
+          "address": "Stockmeyerstraße 41, 20457 Hamburg, Deutschland",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x34420249c123c994"
+        },
+        "score": 0.4915
+      },
+      {
+        "id": "reviews_b229aacd",
+        "collection": "reviews",
+        "document": "Bewertung: Büromöbel - Hans Bunke GbR\nAdresse: Rahlau 42, 22045 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.57997°N, 10.11717°E\nDatum: 10.03.2020\nBewertung: 4/5 Sterne\nRezension: Schöne Möbel. Vorsicht bei den Preisen. Ich hab einen gebrauchten Schreibtischunterbau erstanden, den ich neu günstiger erhalten hätte.\n\n- Nachtrag auf Reaktion des Verkäufers: ach so, dann habe ich die Aufschrift 'Prototyp' falsch eingeschätzt?",
+        "metadata": {
+          "name": "Büromöbel - Hans Bunke GbR",
+          "date_ts": 1583855094,
+          "country": "DE",
+          "date_iso": "2020-03-10T15:44:54.786268Z",
+          "rating": 4,
+          "source": "google_reviews",
+          "lon": 10.1171657,
+          "lat": 53.5799699,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x4142dd313b8f7801",
+          "address": "Rahlau 42, 22045 Hamburg, Deutschland"
+        },
+        "score": 0.4241
+      },
+      {
+        "id": "reviews_6810e840",
+        "collection": "reviews",
+        "document": "Bewertung: Frau Krause\nAdresse: Simildenstraße 8, 04277 Leipzig, Deutschland\nLand: DE\nKoordinaten: 51.30787°N, 12.37214°E\nDatum: 10.03.2020\nBewertung: 5/5 Sterne",
+        "metadata": {
+          "date_iso": "2020-03-10T15:43:20.616237Z",
+          "country": "DE",
+          "date_ts": 1583855000,
+          "address": "Simildenstraße 8, 04277 Leipzig, Deutschland",
+          "lon": 12.372141,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "name": "Frau Krause",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xfc28b2ba5296789e",
+          "source": "google_reviews",
+          "lat": 51.307872,
+          "rating": 5
+        },
+        "score": 0.4204
+      },
+      {
+        "id": "reviews_2d071e0c",
+        "collection": "reviews",
+        "document": "Bewertung: Küche&Co Hamburg Wandsbek\nAdresse: Friedrich-Ebert-Damm 145, 22047 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.58925°N, 10.09813°E\nDatum: 17.10.2025\nBewertung: 5/5 Sterne\nRezension: Erstkontakt war unkompliziert und einfach. Und das, sowohl das persönliche und direkte zog sich durch die gesamte Planung. Die Planung an sich hat locker ohne Vor- und Nachbereitung von Michael eingerechnet, insgesamt schon fast einen ganzen Arbeitstag ausgefüllt.\n\nMichael hat uns noch vor dem Treffen um einen Grundriss gebeten und um Rahmenbedingungen, must haves und should haves und unsere Preisvorstellung.\n\nAls wir dann zum konzeptionieren vorbeikamen, war Michael exzellent vorbereitet. Er hatte den Grundriss schon im Vorweg in CAD eingearbeitet mit Esszimmer, Wohnzimmer und Küche. Zudem hatte er einen ersten Entwurf entlang unserer Vorstellung gebastelt. Damit hatten wir von Anfang an eine produktive und sehr fundierte Grundlage, an der wir uns entlang hangeln konnten. Und dann auch noch hochauflösend anzeigen, auf riesigem Bildschirm. Dadurch hatten wir auch immer einen Eindruck davon, wie die Räume: Esszimmer, Küche und Wohnzimmer dann miteinander harmonieren.\n\nWir konnten nicht anders. Wir haben verglichen. Und wir haben erlebt, wie viel schlechter es geht. Wie man im Termin sitzt und der Küchenplaner den Grundriss das erste mal in die Hand nimmt und nicht verstehen und interpretieren kann. Die erste unproduktive halbe Stunde waren wir nur damit beschäftigt dabei zuzusehen, wie er sich durch den Grundriss kämpfte und es immerhin dahin schaffte, die Außenmaße der Küche alleine zu bestimmen. Wie das Programm nicht gut funktionierte, weil das gesamte Computer-System Schrott ist. Der kleine Bildschirm und die Ansicht war weit weg von dem, was wir bei Michael gesehen haben.\nUnd dann war am Ende die Küche sogar noch preislich fast 3k teurer.\n\nWir haben jetzt bei Michael unterschrieben, hier haben wir uns einfach viel wohler gefühlt. Wir sind sehr gespannt und freuen uns schon sehr auf unsere Küche.\n\nJetzt muss nur noch das Haus gebaut werden.\n\nDanke, auch für die Pizza, Michael!",
+        "metadata": {
+          "date_ts": 1760734264,
+          "date_iso": "2025-10-17T20:51:04.464408Z",
+          "country": "DE",
+          "name": "Küche&Co Hamburg Wandsbek",
+          "source": "google_reviews",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lat": 53.5892501,
+          "lon": 10.098133,
+          "rating": 5,
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xcfa419a2c54e43c1",
+          "address": "Friedrich-Ebert-Damm 145, 22047 Hamburg, Deutschland"
+        },
+        "score": 0.4195
+      },
+      {
+        "id": "reviews_d0da9172",
+        "collection": "reviews",
+        "document": "Bewertung: Agentenzentrale\nAdresse: Kurstraße 12, 14776 Brandenburg an der Havel, Deutschland\nLand: DE\nKoordinaten: 52.40849°N, 12.55935°E\nDatum: 06.08.2024\nBewertung: 5/5 Sterne\nRezension: Immer diese Raucher... Tja, trotzdem coole Kneipe.\nDetails: Ambiente: 5/5",
+        "metadata": {
+          "source": "google_reviews",
+          "date_ts": 1722982504,
+          "lon": 12.5593482,
+          "rating": 5,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "name": "Agentenzentrale",
+          "date_iso": "2024-08-06T22:15:04.022412Z",
+          "country": "DE",
+          "lat": 52.4084919,
+          "address": "Kurstraße 12, 14776 Brandenburg an der Havel, Deutschland",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x84bdea332059f859"
+        },
+        "score": 0.4081
+      },
+      {
+        "id": "saved_places_1870a9fa",
+        "collection": "saved_places",
+        "document": "Gespeicherter Ort: Restaurant - Hamburger Elbspeicher\nAdresse: Große Elbstraße 39, 22767 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.54413°N, 9.94893°E\nGespeichert am: 21.12.2015",
+        "metadata": {
+          "date_ts": 1450736788,
+          "lat": 53.5441329,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "source": "google_saved",
+          "date_iso": "2015-12-21T22:26:28Z",
+          "country": "DE",
+          "address": "Große Elbstraße 39, 22767 Hamburg, Deutschland",
+          "name": "Restaurant - Hamburger Elbspeicher",
+          "lon": 9.9489279,
+          "maps_url": "http://maps.google.com/?cid=3622756943393943016"
+        },
+        "score": 0.4685
+      },
+      {
+        "id": "saved_places_3b54811c",
+        "collection": "saved_places",
+        "document": "Gespeicherter Ort: Fressnapf Hamburg-Eppendorf\nAdresse: Osterfeldstraße 30-40, 22529 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.59930°N, 9.97457°E\nGespeichert am: 15.07.2016",
+        "metadata": {
+          "address": "Osterfeldstraße 30-40, 22529 Hamburg, Deutschland",
+          "date_ts": 1468561112,
+          "lon": 9.9745667,
+          "name": "Fressnapf Hamburg-Eppendorf",
+          "maps_url": "http://maps.google.com/?cid=983891924551189920",
+          "country": "DE",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_iso": "2016-07-15T05:38:32Z",
+          "source": "google_saved",
+          "lat": 53.5992964
+        },
+        "score": 0.4602
+      },
+      {
+        "id": "saved_places_aa9a7043",
+        "collection": "saved_places",
+        "document": "Gespeicherter Ort: Café Schöne Aussichten (CSA)\nAdresse: Gorch-Fock-Wall 4, 20354 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.55851°N, 9.98578°E\nGespeichert am: 24.02.2016",
+        "metadata": {
+          "maps_url": "http://maps.google.com/?cid=4804333904125703281",
+          "lat": 53.5585098,
+          "name": "Café Schöne Aussichten (CSA)",
+          "date_iso": "2016-02-24T17:17:44Z",
+          "address": "Gorch-Fock-Wall 4, 20354 Hamburg, Deutschland",
+          "lon": 9.9857835,
+          "date_ts": 1456334264,
+          "country": "DE",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "source": "google_saved"
+        },
+        "score": 0.456
+      }
+    ],
+    "system_prompt": "⚠️ WICHTIG - AKTUELLES DATUM: 11.03.2026 (Mittwoch)\n\nZeitliche Berechnungen IMMER von diesem Datum aus:\n- \"letztes Wochenende\" = Samstag 07.03.2026 + Sonntag 08.03.2026\n- \"diese Woche\" = 09.03.2026 bis 15.03.2026\n- \"gestern\" = 10.03.2026\n- \"vorgestern\" = 09.03.2026\n- \"letztes Jahr\" = 2025\n- \"dieses Jahr\" = 2026\n\nDu bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.\nDu hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.\n\n🎯 WICHTIGSTE REGEL für \"Wo war ich?\"-Fragen:\n1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)\n2. Extrahiere aus den Foto-Metadaten das \"Stadtname:\"-Feld oder \"Ort:\"-Feld. Das \"Stadtname:\"-Feld ist der EXAKTE STADTNAME — nutze immer diesen (z.B. \"Ahrensburg\", nicht \"Hamburg-Ost\")\n3. Liste ALLE unterschiedlichen Städte/Orte auf, die in den Quellen auftauchen — auch wenn nur ein Foto aus diesem Ort stammt\n4. Nenne die Orte als erste Information in deiner Antwort\n5. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)\n\nBEISPIEL:\nUser: \"Wo war ich im August 2022 mit Nora?\"\n→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.\n→ Tool: search_photos(personen=[\"Nora\"], von_datum=\"2022-08-01\", bis_datum=\"2022-08-31\")\n→ Observation: [Foto vom 15.08.2022, cluster=\"München-Schwabing\", GPS: 48.16°N 11.58°E]\n→ Antwort: \"Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]].\"\n\nReAct (Reasoning and Acting) Ansatz:\n- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:\n  * Welche Informationen fehlen mir noch (Datum, Ort, Personen)?\n  * Beispiel: \"Wie ging es Sarah, als ich mit Nora in München war?\"\n    -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=[\"Nora\"], orte=[\"München\"]).\n    -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.\n\n- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.\n\nWeitere Regeln:\n1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere NIEMALS Fakten.\n2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).\n3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.\n4. Antworte auf Deutsch. Falls nach \"Gefühlen\" oder \"Stimmung\" gefragt wird, nutze `search_messages`.\n5. Bei Ortsfragen: nutze das \"Ort:\"-Feld oder \"Cluster/Ort:\"-Feld aus den Quellen. Das \"Ort:\"-Feld ist immer der tatsächliche Ortsname (z.B. \"Ahrensburg\"), nutze es bevorzugt.\n6. Falls keine passenden Daten für den gefragten Zeitraum gefunden wurden: Sage klar \"Ich habe dazu keine Einträge in deinen Daten.\" NIEMALS Orte, Zeiten oder Namen erfinden die nicht in den Quellen stehen.\n7. Falls nach einem heutigen Termin gefragt wird und keine aktuellen Quellen vorhanden sind: Gib an was die zuletzt gefundenen relevanten Daten zeigen und erkläre, dass für heute keine Einträge vorliegen.\n\nANTWORTSTIL:\n- Präzise und kurz (3-4 Sätze für einfache Fragen)\n- Exakte Ortsangaben ZUERST (z.B. \"Du warst in München\", nicht \"Es gibt Fotos aus einer Stadt\")\n- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)",
+    "parsed_query": {}
+  },
+  "golden": {
+    "answer": "In Hamburg hast du die Zahnärzte Dorotheenstraße mit 1 Stern bewertet (März 2025) — als Privatpatient hattest du dich dort nicht gut aufgehoben gefühlt, und die Praxis versuchte eine Abmahnung wegen deiner negativen Rezension.",
+    "required_facts": [
+      "Hamburg",
+      "1 Stern",
+      "Dorotheenstraße"
+    ],
+    "forbidden_facts": [],
+    "set_by": "prompt-engineer",
+    "set_at": "2026-03-11T21:51:12"
+  }
+}

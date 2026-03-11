@@ -1,0 +1,223 @@
+{
+  "test_id": "q_20260311_215110_a2c2d3",
+  "query": "Wann war ich in Wismar und mit wem?",
+  "snapshot": {
+    "captured_at": "2026-03-11T21:51:10",
+    "sources": [
+      {
+        "id": "photos_a1790e39",
+        "collection": "photos",
+        "document": "Foto: 20250530_182007.jpg\nDatum: 30.05.2025 um 16:20 Uhr\nOrt: Stepenitztal, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.87545°N, 11.04348°E\nPersonen: Nora\nBildbeschreibung: Hier ist eine Beschreibung des Bildes in 2-4 Sätzen:\n\nAuf dem Bild befinden sich eine ältere Frau und ein kleines Mädchen. Die Frau sitzt auf dem Boden, während das Mädchen davor kniet und sie berührt. Sie befinden sich wahrscheinlich im Eingangsbereich eines Hauses, da man eine Terrasse mit Blick auf eine grüne Wiese und einige Haushaltsgegenstände wie Eierkartons und Holzbretter sieht. Die Stimmung wirkt entspannt und die Tageszeit ist vermutlich Nachmittag aufgrund des hellen Lichts.",
+        "metadata": {
+          "persons": "Nora,Tuddi",
+          "date_ts": 1748622007,
+          "lat": 53.8754453,
+          "has_sarah": false,
+          "date_iso": "2025-05-30T16:20:07+00:00",
+          "source": "google_photos",
+          "place_name": "Stepenitztal, Mecklenburg-Vorpommern, Deutschland",
+          "has_tuddi": true,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "cluster": "",
+          "filename": "20250530_182007.jpg",
+          "lon": 11.0434815,
+          "has_joshua": false,
+          "has_nora": true,
+          "alt": 60.0
+        },
+        "score": 0.2899
+      },
+      {
+        "id": "photos_c3c88be3",
+        "collection": "photos",
+        "document": "Foto: 20251107_092944.jpg\nDatum: 07.11.2025 um 08:29 Uhr\nPersonen: Sarah, Nora",
+        "metadata": {
+          "has_joshua": false,
+          "has_nora": true,
+          "date_ts": 1762504184,
+          "lon": 0.0,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "source": "google_photos",
+          "persons": "Nora,Sarah",
+          "has_sarah": true,
+          "lat": 0.0,
+          "place_name": "",
+          "alt": 0.0,
+          "filename": "20251107_092944.jpg",
+          "cluster": "unbekannt",
+          "date_iso": "2025-11-07T08:29:44+00:00"
+        },
+        "score": 0.2889
+      },
+      {
+        "id": "photos_d1db8354",
+        "collection": "photos",
+        "document": "Foto: 20251004_185908.jpg\nDatum: 04.10.2025 um 16:59 Uhr\nOrt: Stepenitztal, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.87517°N, 11.04386°E\nPersonen: Nora",
+        "metadata": {
+          "lat": 53.875169799999995,
+          "date_ts": 1759597148,
+          "date_iso": "2025-10-04T16:59:08+00:00",
+          "alt": 56.0,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lon": 11.0438606,
+          "has_joshua": false,
+          "cluster": "Wismar",
+          "filename": "20251004_185908.jpg",
+          "has_sarah": false,
+          "has_nora": true,
+          "place_name": "Stepenitztal, Mecklenburg-Vorpommern, Deutschland",
+          "persons": "Nora",
+          "source": "google_photos"
+        },
+        "score": 0.2817
+      },
+      {
+        "id": "photos_4d115997",
+        "collection": "photos",
+        "document": "Foto: 20250530_182012.jpg\nDatum: 30.05.2025 um 16:20 Uhr\nOrt: Stepenitztal, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.87545°N, 11.04348°E\nPersonen: Nora\nBildbeschreibung: Hier ist eine Beschreibung des Bildes in 2-4 Sätzen:\n\nAuf dem Bild sitzen eine Frau und ein kleines Mädchen. Die Frau, vermutlich die Mutter, sitzt auf dem Boden und das Mädchen sitzt auf ihrem Schoß. Sie befinden sich anscheinend auf einer Terrasse oder dem Vorsprung eines Hauses, da man einen Blick auf eine grüne Wiese und eine rote Fliesenfläche sieht. Die Frau trägt bequeme Kleidung und Crocs, während das Mädchen ein süßes Kleidchen trägt. Es scheint ein entspannter Moment im Freien zu sein, möglicherweise an einem Nachmittag.",
+        "metadata": {
+          "filename": "20250530_182012.jpg",
+          "place_name": "Stepenitztal, Mecklenburg-Vorpommern, Deutschland",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lon": 11.0434815,
+          "lat": 53.8754453,
+          "date_ts": 1748622012,
+          "cluster": "",
+          "source": "google_photos",
+          "has_joshua": false,
+          "has_nora": true,
+          "alt": 60.0,
+          "date_iso": "2025-05-30T16:20:12+00:00",
+          "persons": "Nora",
+          "has_sarah": false
+        },
+        "score": 0.2805
+      },
+      {
+        "id": "photos_c5f0dcf3",
+        "collection": "photos",
+        "document": "Foto: 20250202_081505.jpg\nDatum: 02.02.2025 um 07:15 Uhr\nOrt: Stepenitztal, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.87537°N, 11.04358°E\nPersonen: Nora",
+        "metadata": {
+          "date_iso": "2025-02-02T07:15:05+00:00",
+          "has_joshua": false,
+          "source": "google_photos",
+          "lon": 11.0435813,
+          "alt": 56.0,
+          "has_nora": true,
+          "date_ts": 1738480505,
+          "lat": 53.8753689,
+          "has_sarah": false,
+          "filename": "20250202_081505.jpg",
+          "cluster": "",
+          "place_name": "Stepenitztal, Mecklenburg-Vorpommern, Deutschland",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "persons": "Nora"
+        },
+        "score": 0.2765
+      },
+      {
+        "id": "photos_51993f85",
+        "collection": "photos",
+        "document": "Foto: 20250202_160319.jpg\nDatum: 02.02.2025 um 15:03 Uhr\nOrt: Stepenitztal, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.87519°N, 11.04351°E\nPersonen: Nora, Joshua Bacher",
+        "metadata": {
+          "lon": 11.0435134,
+          "has_nora": true,
+          "has_josh": true,
+          "has_sarah": false,
+          "date_ts": 1738508599,
+          "cluster": "",
+          "alt": 61.0,
+          "source": "google_photos",
+          "place_name": "Stepenitztal, Mecklenburg-Vorpommern, Deutschland",
+          "persons": "Josh,Joshua Bacher,Nora",
+          "has_joshua": true,
+          "lat": 53.875189,
+          "filename": "20250202_160319.jpg",
+          "date_iso": "2025-02-02T15:03:19+00:00",
+          "user_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "score": 0.2755
+      },
+      {
+        "id": "messages_ab997a0e",
+        "collection": "messages",
+        "document": "Ja, dieser.",
+        "metadata": {
+          "timestamp": "2026-03-11T10:56:39",
+          "is_from_me": true,
+          "source": "whatsapp",
+          "has_media": false,
+          "chat_id": "491798924094@c.us",
+          "sender": "Ich",
+          "chat_name": "Marius Mew",
+          "type": "chat"
+        },
+        "score": 0.4531
+      },
+      {
+        "id": "messages_b394d0b3",
+        "collection": "messages",
+        "document": "Äh, hing hier was an der Tür?",
+        "metadata": {
+          "has_media": false,
+          "sender": "Sarah",
+          "source": "whatsapp",
+          "type": "chat",
+          "chat_id": "491786838260@c.us",
+          "timestamp": "2026-03-11T16:11:22",
+          "is_from_me": false,
+          "chat_name": "Sarah Ohnesorge"
+        },
+        "score": 0.4289
+      },
+      {
+        "id": "messages_16e9a9d1",
+        "collection": "messages",
+        "document": "Dieser oder?",
+        "metadata": {
+          "has_media": false,
+          "timestamp": "2026-03-11T10:56:33",
+          "type": "chat",
+          "chat_name": "Marius Mew",
+          "source": "whatsapp",
+          "chat_id": "491632939138@c.us",
+          "sender": "Marius",
+          "is_from_me": false
+        },
+        "score": 0.4206
+      },
+      {
+        "id": "messages_4112386f",
+        "collection": "messages",
+        "document": "🦕 Basierend auf den vorliegenden Informationen war Sarah vom 29. August 2025 bis zum 30. August 2025 mit dir und Nora in München bzw. Bruck [[2], [3]].\n\nFür den Zeitraum vom 31. August 2025 bis zum 1. September 2025, als du und Nora in München, Planegg und Augsburg wart [[4], [5], [6], Ergebnis der Tool-Suche 1 (Fotos von Nora in Planegg, Augsburg, München)], gibt es keine Fotos, die Sarah an diesen Orten zeigen.\n\nIn den Nachrichten von Sarah vom 31. August 2025 und 1. September 2025 wird ihr genauer Aufenthaltsort nicht explizit genannt. Sie fragt dich am 31. August 2025, ob Jon bei Barbara ist und ob ihr wieder bei Wolfi seid und wie die Party war [[1]]. Am 1. September 2025 fragt sie dich nach Nora und dem \"Zauberredder\" (Kita/Kindergarten) und kommuniziert weiter bezüglich eurer Reise [[2], [3]]. Dies deutet darauf hin, dass sie zu diesem Zeitpunkt nicht mit euch in München war, sondern an einem anderen Ort, möglicherweise zu Hause, und sich um andere Angelegenheiten kümmerte.",
+        "metadata": {
+          "source": "whatsapp",
+          "sender": "Ich",
+          "timestamp": "2026-03-09T20:41:39",
+          "is_from_me": true,
+          "chat_name": "Joshua Bacher",
+          "has_media": false,
+          "type": "chat",
+          "chat_id": "491798924094@c.us"
+        },
+        "score": 0.4008
+      }
+    ],
+    "system_prompt": "⚠️ WICHTIG - AKTUELLES DATUM: 11.03.2026 (Mittwoch)\n\nZeitliche Berechnungen IMMER von diesem Datum aus:\n- \"letztes Wochenende\" = Samstag 07.03.2026 + Sonntag 08.03.2026\n- \"diese Woche\" = 09.03.2026 bis 15.03.2026\n- \"gestern\" = 10.03.2026\n- \"vorgestern\" = 09.03.2026\n- \"letztes Jahr\" = 2025\n- \"dieses Jahr\" = 2026\n\nDu bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.\nDu hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.\n\n🎯 WICHTIGSTE REGEL für \"Wo war ich?\"-Fragen:\n1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)\n2. Extrahiere aus den Foto-Metadaten das \"Stadtname:\"-Feld oder \"Ort:\"-Feld. Das \"Stadtname:\"-Feld ist der EXAKTE STADTNAME — nutze immer diesen (z.B. \"Ahrensburg\", nicht \"Hamburg-Ost\")\n3. Liste ALLE unterschiedlichen Städte/Orte auf, die in den Quellen auftauchen — auch wenn nur ein Foto aus diesem Ort stammt\n4. Nenne die Orte als erste Information in deiner Antwort\n5. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)\n\nBEISPIEL:\nUser: \"Wo war ich im August 2022 mit Nora?\"\n→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.\n→ Tool: search_photos(personen=[\"Nora\"], von_datum=\"2022-08-01\", bis_datum=\"2022-08-31\")\n→ Observation: [Foto vom 15.08.2022, cluster=\"München-Schwabing\", GPS: 48.16°N 11.58°E]\n→ Antwort: \"Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]].\"\n\nReAct (Reasoning and Acting) Ansatz:\n- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:\n  * Welche Informationen fehlen mir noch (Datum, Ort, Personen)?\n  * Beispiel: \"Wie ging es Sarah, als ich mit Nora in München war?\"\n    -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=[\"Nora\"], orte=[\"München\"]).\n    -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.\n\n- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.\n\nWeitere Regeln:\n1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere NIEMALS Fakten.\n2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).\n3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.\n4. Antworte auf Deutsch. Falls nach \"Gefühlen\" oder \"Stimmung\" gefragt wird, nutze `search_messages`.\n5. Bei Ortsfragen: nutze das \"Ort:\"-Feld oder \"Cluster/Ort:\"-Feld aus den Quellen. Das \"Ort:\"-Feld ist immer der tatsächliche Ortsname (z.B. \"Ahrensburg\"), nutze es bevorzugt.\n6. Falls keine passenden Daten für den gefragten Zeitraum gefunden wurden: Sage klar \"Ich habe dazu keine Einträge in deinen Daten.\" NIEMALS Orte, Zeiten oder Namen erfinden die nicht in den Quellen stehen.\n7. Falls nach einem heutigen Termin gefragt wird und keine aktuellen Quellen vorhanden sind: Gib an was die zuletzt gefundenen relevanten Daten zeigen und erkläre, dass für heute keine Einträge vorliegen.\n\nANTWORTSTIL:\n- Präzise und kurz (3-4 Sätze für einfache Fragen)\n- Exakte Ortsangaben ZUERST (z.B. \"Du warst in München\", nicht \"Es gibt Fotos aus einer Stadt\")\n- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)",
+    "parsed_query": {}
+  },
+  "golden": {
+    "answer": "Du warst im Mai 2025 in Wismar, zusammen mit Nora. Es gibt Fotos aus Wismar vom 3. bis 11. Mai 2025.",
+    "required_facts": [
+      "Wismar",
+      "Nora",
+      "Mai 2025"
+    ],
+    "forbidden_facts": [
+      "Sarah",
+      "Tom"
+    ],
+    "set_by": "prompt-engineer",
+    "set_at": "2026-03-11T21:51:10"
+  }
+}

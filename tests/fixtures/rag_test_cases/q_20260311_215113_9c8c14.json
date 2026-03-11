@@ -1,0 +1,199 @@
+{
+  "test_id": "q_20260311_215113_9c8c14",
+  "query": "Welche Restaurants oder Cafés in Hamburg habe ich gespeichert und worüber wurde in Nachrichten gesprochen?",
+  "snapshot": {
+    "captured_at": "2026-03-11T21:51:13",
+    "sources": [
+      {
+        "id": "saved_places_1870a9fa",
+        "collection": "saved_places",
+        "document": "Gespeicherter Ort: Restaurant - Hamburger Elbspeicher\nAdresse: Große Elbstraße 39, 22767 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.54413°N, 9.94893°E\nGespeichert am: 21.12.2015",
+        "metadata": {
+          "country": "DE",
+          "maps_url": "http://maps.google.com/?cid=3622756943393943016",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "source": "google_saved",
+          "name": "Restaurant - Hamburger Elbspeicher",
+          "lat": 53.5441329,
+          "address": "Große Elbstraße 39, 22767 Hamburg, Deutschland",
+          "date_iso": "2015-12-21T22:26:28Z",
+          "lon": 9.9489279,
+          "date_ts": 1450736788
+        },
+        "score": 0.4546
+      },
+      {
+        "id": "saved_places_48841945",
+        "collection": "saved_places",
+        "document": "Gespeicherter Ort: Pizza Social Club\nAdresse: Mühlenkamp 29, 22303 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.58127°N, 10.01145°E\nGespeichert am: 04.01.2017",
+        "metadata": {
+          "address": "Mühlenkamp 29, 22303 Hamburg, Deutschland",
+          "date_iso": "2017-01-04T14:50:12Z",
+          "source": "google_saved",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_ts": 1483541412,
+          "lat": 53.5812685,
+          "lon": 10.011448,
+          "maps_url": "http://maps.google.com/?cid=14720075960368684919",
+          "name": "Pizza Social Club",
+          "country": "DE"
+        },
+        "score": 0.4329
+      },
+      {
+        "id": "saved_places_aa9a7043",
+        "collection": "saved_places",
+        "document": "Gespeicherter Ort: Café Schöne Aussichten (CSA)\nAdresse: Gorch-Fock-Wall 4, 20354 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.55851°N, 9.98578°E\nGespeichert am: 24.02.2016",
+        "metadata": {
+          "name": "Café Schöne Aussichten (CSA)",
+          "lat": 53.5585098,
+          "country": "DE",
+          "source": "google_saved",
+          "date_ts": 1456334264,
+          "date_iso": "2016-02-24T17:17:44Z",
+          "address": "Gorch-Fock-Wall 4, 20354 Hamburg, Deutschland",
+          "lon": 9.9857835,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "maps_url": "http://maps.google.com/?cid=4804333904125703281"
+        },
+        "score": 0.4247
+      },
+      {
+        "id": "saved_places_d4015e64",
+        "collection": "saved_places",
+        "document": "Gespeicherter Ort: Wald Bar\nAdresse: Großneumarkt 45, 20459 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.54974°N, 9.98007°E\nGespeichert am: 26.10.2016",
+        "metadata": {
+          "lat": 53.5497404,
+          "lon": 9.9800696,
+          "country": "DE",
+          "source": "google_saved",
+          "address": "Großneumarkt 45, 20459 Hamburg, Deutschland",
+          "maps_url": "http://maps.google.com/?cid=772621040722368882",
+          "date_ts": 1477495262,
+          "date_iso": "2016-10-26T15:21:02Z",
+          "name": "Wald Bar",
+          "user_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "score": 0.3864
+      },
+      {
+        "id": "saved_places_3b54811c",
+        "collection": "saved_places",
+        "document": "Gespeicherter Ort: Fressnapf Hamburg-Eppendorf\nAdresse: Osterfeldstraße 30-40, 22529 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.59930°N, 9.97457°E\nGespeichert am: 15.07.2016",
+        "metadata": {
+          "maps_url": "http://maps.google.com/?cid=983891924551189920",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "source": "google_saved",
+          "date_iso": "2016-07-15T05:38:32Z",
+          "lon": 9.9745667,
+          "lat": 53.5992964,
+          "date_ts": 1468561112,
+          "country": "DE",
+          "address": "Osterfeldstraße 30-40, 22529 Hamburg, Deutschland",
+          "name": "Fressnapf Hamburg-Eppendorf"
+        },
+        "score": 0.3857
+      },
+      {
+        "id": "saved_places_ffb877b1",
+        "collection": "saved_places",
+        "document": "Gespeicherter Ort: MAZZA Hamburg Eimsbüttel\nAdresse: Moorkamp 5, 20357 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.57001°N, 9.96656°E\nGespeichert am: 10.08.2015",
+        "metadata": {
+          "date_ts": 1439225183,
+          "lon": 9.966565,
+          "lat": 53.5700136,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_iso": "2015-08-10T16:46:23Z",
+          "country": "DE",
+          "name": "MAZZA Hamburg Eimsbüttel",
+          "maps_url": "http://maps.google.com/?cid=5286893228086869553",
+          "source": "google_saved",
+          "address": "Moorkamp 5, 20357 Hamburg, Deutschland"
+        },
+        "score": 0.3797
+      },
+      {
+        "id": "messages_32925b9c",
+        "collection": "messages",
+        "document": "Würdest  Du mit mir in den golden döner gehen hier in der Manhagener? Dann kann ich lecker Seitan Döner essen.....",
+        "metadata": {
+          "chat_name": "Marius Mew",
+          "type": "chat",
+          "sender": "Ich",
+          "chat_id": "491798924094@c.us",
+          "is_from_me": true,
+          "has_media": false,
+          "source": "whatsapp",
+          "timestamp": "2026-03-11T10:55:11"
+        },
+        "score": 0.4201
+      },
+      {
+        "id": "messages_e054e52f",
+        "collection": "messages",
+        "document": "Mach ich!",
+        "metadata": {
+          "sender": "Ich",
+          "chat_id": "491798924094@c.us",
+          "has_media": false,
+          "type": "chat",
+          "source": "whatsapp",
+          "is_from_me": true,
+          "timestamp": "2026-03-09T23:20:17",
+          "chat_name": "Sarah Ohnesorge"
+        },
+        "score": 0.4091
+      },
+      {
+        "id": "messages_ad202a0a",
+        "collection": "messages",
+        "document": "Döner finde ich besser",
+        "metadata": {
+          "has_media": false,
+          "timestamp": "2026-03-11T10:54:29",
+          "chat_name": "Marius Mew",
+          "type": "chat",
+          "source": "whatsapp",
+          "sender": "Marius",
+          "is_from_me": false,
+          "chat_id": "491632939138@c.us"
+        },
+        "score": 0.3624
+      },
+      {
+        "id": "messages_64328476",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[12.09.19 16:13] Josh: Ich mache heute früher Schluss\n[12.09.19 16:13] Josh: Fahre jetzt heim\n[12.09.19 18:41] Sarah Ohnesorge: So Bock auf Thunfisch und jetzt lese ich gerade, dass ich den nicht mehr essen sollte 😩\n[12.09.19 18:44] Josh: Oh was?????\n[12.09.19 18:45] Sarah Ohnesorge: ☹\n[12.09.19 18:46] Sarah Ohnesorge: So macht das aber keinen Spaß.\n[13.09.19 08:20] Sarah Ohnesorge: Hoffentlich geht's Dir schnell besser!\n[13.09.19 08:31] Sarah Ohnesorge: Hi meine Liebe! Wir kommen am Wochenende vom 11.10. nach Hamburg - quasi auf der Durchreise von Berlin Richtung Nordsee 😊 seid ihr an dem WE in der Stadt? Wir würden euch so gerne sehen! Ich wünsch dir einen guten Start in die Woche 😘\n[13.09.19 08:32] Sarah Ohnesorge: Katrin fragt, ob wir an dem Samstagabend Zeit haben. Bitte schau das heute nach, ja? Sie müssen planen.\n[13.09.19 09:04] Josh: Müsste passen",
+        "metadata": {
+          "chat_name": "Sarah Ohnesorge",
+          "source": "whatsapp",
+          "migration_source": "txt_import",
+          "persons": "Sarah Ohnesorge,Josh",
+          "lon": 0.0,
+          "date_ts": 1568297580,
+          "migration_date": "2026-03-09T23:05:47.139577",
+          "lat": 0.0,
+          "date_iso": "12.09.19 16:13",
+          "chat_id": "491786838260@c.us",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "primary_sender": "Josh",
+          "mentioned_persons": "Josh,Sar,Sarah Ohnesorge",
+          "timestamp": "2019-09-12T16:13:00"
+        },
+        "score": 0.3566
+      }
+    ],
+    "system_prompt": "⚠️ WICHTIG - AKTUELLES DATUM: 11.03.2026 (Mittwoch)\n\nZeitliche Berechnungen IMMER von diesem Datum aus:\n- \"letztes Wochenende\" = Samstag 07.03.2026 + Sonntag 08.03.2026\n- \"diese Woche\" = 09.03.2026 bis 15.03.2026\n- \"gestern\" = 10.03.2026\n- \"vorgestern\" = 09.03.2026\n- \"letztes Jahr\" = 2025\n- \"dieses Jahr\" = 2026\n\nDu bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.\nDu hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.\n\n🎯 WICHTIGSTE REGEL für \"Wo war ich?\"-Fragen:\n1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)\n2. Extrahiere aus den Foto-Metadaten das \"Stadtname:\"-Feld oder \"Ort:\"-Feld. Das \"Stadtname:\"-Feld ist der EXAKTE STADTNAME — nutze immer diesen (z.B. \"Ahrensburg\", nicht \"Hamburg-Ost\")\n3. Liste ALLE unterschiedlichen Städte/Orte auf, die in den Quellen auftauchen — auch wenn nur ein Foto aus diesem Ort stammt\n4. Nenne die Orte als erste Information in deiner Antwort\n5. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)\n\nBEISPIEL:\nUser: \"Wo war ich im August 2022 mit Nora?\"\n→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.\n→ Tool: search_photos(personen=[\"Nora\"], von_datum=\"2022-08-01\", bis_datum=\"2022-08-31\")\n→ Observation: [Foto vom 15.08.2022, cluster=\"München-Schwabing\", GPS: 48.16°N 11.58°E]\n→ Antwort: \"Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]].\"\n\nReAct (Reasoning and Acting) Ansatz:\n- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:\n  * Welche Informationen fehlen mir noch (Datum, Ort, Personen)?\n  * Beispiel: \"Wie ging es Sarah, als ich mit Nora in München war?\"\n    -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=[\"Nora\"], orte=[\"München\"]).\n    -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.\n\n- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.\n\nWeitere Regeln:\n1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere NIEMALS Fakten.\n2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).\n3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.\n4. Antworte auf Deutsch. Falls nach \"Gefühlen\" oder \"Stimmung\" gefragt wird, nutze `search_messages`.\n5. Bei Ortsfragen: nutze das \"Ort:\"-Feld oder \"Cluster/Ort:\"-Feld aus den Quellen. Das \"Ort:\"-Feld ist immer der tatsächliche Ortsname (z.B. \"Ahrensburg\"), nutze es bevorzugt.\n6. Falls keine passenden Daten für den gefragten Zeitraum gefunden wurden: Sage klar \"Ich habe dazu keine Einträge in deinen Daten.\" NIEMALS Orte, Zeiten oder Namen erfinden die nicht in den Quellen stehen.\n7. Falls nach einem heutigen Termin gefragt wird und keine aktuellen Quellen vorhanden sind: Gib an was die zuletzt gefundenen relevanten Daten zeigen und erkläre, dass für heute keine Einträge vorliegen.\n\nANTWORTSTIL:\n- Präzise und kurz (3-4 Sätze für einfache Fragen)\n- Exakte Ortsangaben ZUERST (z.B. \"Du warst in München\", nicht \"Es gibt Fotos aus einer Stadt\")\n- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)",
+    "parsed_query": {}
+  },
+  "golden": {
+    "answer": "In Hamburg hast du u.a. gespeichert: Pizza Social Club (Mühlenkamp), Ky Lan (Dorotheenstraße), Goldbeker, Schramme 10, The Vegan Eagle (5 Sterne Bewertung). In Nachrichten wurde Hamburg als Wohnort und für Ausgehtipps erwähnt.",
+    "required_facts": [
+      "Hamburg",
+      "Pizza Social Club"
+    ],
+    "forbidden_facts": [],
+    "set_by": "prompt-engineer",
+    "set_at": "2026-03-11T21:51:13"
+  }
+}

@@ -1,0 +1,208 @@
+{
+  "test_id": "q_20260311_215113_361ed9",
+  "query": "Was weiß ich über meine Reise nach Sardinien — Bewertungen und gespeicherte Orte?",
+  "snapshot": {
+    "captured_at": "2026-03-11T21:51:13",
+    "sources": [
+      {
+        "id": "reviews_06dd2149",
+        "collection": "reviews",
+        "document": "Bewertung: Villaggio - Camping La Mandragola\nAdresse: Viale dei Pini, 08029 Siniscola NU, Italien\nLand: IT\nKoordinaten: 40.57989°N, 9.77521°E\nDatum: 08.10.2022\nBewertung: 5/5 Sterne\nRezension: Schöner Campingplatz mit direktem Strandzugang, der dazu auch hübsch ist, mit toller malerischer Umgebung. Sanitäranlagen sind gepflegt, die Ortschaft direkt nebenan. Umgebung lädt zu Ausflügen ein. Wir haben uns sehr wohl gefühlt.",
+        "metadata": {
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x1f03e99eabc493ef",
+          "date_ts": 1665262752,
+          "lon": 9.7752056,
+          "country": "IT",
+          "name": "Villaggio - Camping La Mandragola",
+          "address": "Viale dei Pini, 08029 Siniscola NU, Italien",
+          "date_iso": "2022-10-08T20:59:12.368750Z",
+          "source": "google_reviews",
+          "rating": 5,
+          "lat": 40.5798931,
+          "user_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "score": 0.383
+      },
+      {
+        "id": "reviews_adc4bb88",
+        "collection": "reviews",
+        "document": "Bewertung: International Camping Valledoria\nAdresse: Via La Ciaccia, 39, 07039 Valledoria SS, Italien\nLand: IT\nKoordinaten: 40.92310°N, 8.79563°E\nDatum: 29.03.2023\nBewertung: 5/5 Sterne\nRezension: Gepflegte Sanitäranlagen, super freundliches Personal und schöne Plätze zum stehen. Der Strand war toll.\n\nIch hatte ein Problem mit dem laden meiner 2. Batterie. Einer der Mitarbeiter dort nahm meine leere Batterie mit und brachte sie voll geladen zurück. Sehr freundlicher und hilfreicher Umgang. Das hat mich sehr beeindruckt.\n\nGerne wieder!",
+        "metadata": {
+          "lon": 8.7956326,
+          "country": "IT",
+          "name": "International Camping Valledoria",
+          "source": "google_reviews",
+          "rating": 5,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lat": 40.9230991,
+          "date_ts": 1680092460,
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x3130322f1061f858",
+          "date_iso": "2023-03-29T12:21:00.386843Z",
+          "address": "Via La Ciaccia, 39, 07039 Valledoria SS, Italien"
+        },
+        "score": 0.368
+      },
+      {
+        "id": "reviews_fecf1566",
+        "collection": "reviews",
+        "document": "Bewertung: Camping Village Is Arenas\nAdresse: località Is Arenas, 09070 Narbolia OR, Italien\nLand: IT\nKoordinaten: 40.07022°N, 8.48942°E\nDatum: 08.10.2022\nBewertung: 3/5 Sterne\nRezension: Sanitäranlagen waren so mittel. Keine Klobürste auf der Toilette zu haben war nicht so toll. Den Müll nur zu bestimmten Zeiten zu erreichen war für uns doof. Wir sind mit vollem Müll vom Campingplatz gefahren, da der schon geschlossen war. Der Platz war nicht so unseres, hatten definitiv einige schönere Aufenthalte in unseren bisherigen vier Wochen auf Sardinien.",
+        "metadata": {
+          "date_ts": 1665263044,
+          "country": "IT",
+          "address": "località Is Arenas, 09070 Narbolia OR, Italien",
+          "lat": 40.0702192,
+          "date_iso": "2022-10-08T21:04:04.993208Z",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lon": 8.4894219,
+          "name": "Camping Village Is Arenas",
+          "rating": 3,
+          "source": "google_reviews",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x737e67d83aaa2e80"
+        },
+        "score": 0.3462
+      },
+      {
+        "id": "reviews_b5368e95",
+        "collection": "reviews",
+        "document": "Bewertung: Camping Park - Orbitur Mira\nAdresse: Estrada do Lago do Mar, 3070-378 Praia de Mira, Portugal\nLand: PT\nKoordinaten: 40.44502°N, -8.80201°E\nDatum: 10.07.2015\nBewertung: 5/5 Sterne\nRezension: Very friendly staff, a clean and silent place, very close to the beach and to Mira. It was great here, loved it.",
+        "metadata": {
+          "name": "Camping Park - Orbitur Mira",
+          "lon": -8.8020082,
+          "date_ts": 1436567568,
+          "source": "google_reviews",
+          "date_iso": "2015-07-10T22:32:48.871Z",
+          "address": "Estrada do Lago do Mar, 3070-378 Praia de Mira, Portugal",
+          "lat": 40.4450207,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "rating": 5,
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x92f505da30a8e2dc",
+          "country": "PT"
+        },
+        "score": 0.3211
+      },
+      {
+        "id": "reviews_910090a3",
+        "collection": "reviews",
+        "document": "Bewertung: Salitre Hostel\nAdresse: R. do Salitre 134, 1250-204 Lisboa, Portugal\nLand: PT\nKoordinaten: 38.71994°N, -9.15197°E\nDatum: 10.07.2015\nBewertung: 2/5 Sterne\nRezension: Staff is very friendly. I didn't like the black mould at the window.. :/",
+        "metadata": {
+          "country": "PT",
+          "date_iso": "2015-07-10T22:41:52.945Z",
+          "lat": 38.7199426,
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xb76e6214e01850a1",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_ts": 1436568112,
+          "lon": -9.151967,
+          "address": "R. do Salitre 134, 1250-204 Lisboa, Portugal",
+          "source": "google_reviews",
+          "name": "Salitre Hostel",
+          "rating": 2
+        },
+        "score": 0.3185
+      },
+      {
+        "id": "reviews_7f4dc378",
+        "collection": "reviews",
+        "document": "Bewertung: World Music Hostel\nAdresse: R. do Infante Dom Henrique 22, 4050-296 Porto, Portugal\nLand: PT\nKoordinaten: 41.14138°N, -8.61394°E\nDatum: 10.07.2015\nBewertung: 5/5 Sterne\nRezension: Fantastic hostel, I will do it again. Staff is very friendly. Rooms and restrooms are clean, and the hostel is super central.",
+        "metadata": {
+          "address": "R. do Infante Dom Henrique 22, 4050-296 Porto, Portugal",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x9f762562fef3e89d",
+          "date_iso": "2015-07-10T22:08:34.173Z",
+          "date_ts": 1436566114,
+          "country": "PT",
+          "name": "World Music Hostel",
+          "source": "google_reviews",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "rating": 5,
+          "lon": -8.6139448,
+          "lat": 41.1413838
+        },
+        "score": 0.3161
+      },
+      {
+        "id": "saved_places_868a80ed",
+        "collection": "saved_places",
+        "document": "Gespeicherter Ort: Hotel Landhaus zum Grünen Jäger\nAdresse: Itzenbütteler Waldweg 35, 21266 Jesteburg, Deutschland\nLand: DE\nKoordinaten: 53.32628°N, 9.93848°E\nGespeichert am: 09.07.2017",
+        "metadata": {
+          "address": "Itzenbütteler Waldweg 35, 21266 Jesteburg, Deutschland",
+          "source": "google_saved",
+          "lat": 53.3262775,
+          "lon": 9.9384751,
+          "date_ts": 1499624413,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "name": "Hotel Landhaus zum Grünen Jäger",
+          "date_iso": "2017-07-09T18:20:13Z",
+          "country": "DE",
+          "maps_url": "http://maps.google.com/?cid=9598988666613724568"
+        },
+        "score": 0.295
+      },
+      {
+        "id": "saved_places_9ffca83d",
+        "collection": "saved_places",
+        "document": "Gespeicherter Ort: SARDINIA WIND KITE SCHOOL\nAdresse: Via per campeggio, 07020 Palau Provincia della Gallura Nord-Est Sardegna, Italien\nKoordinaten: 41.19382°N, 9.31854°E\nGespeichert am: 14.04.2017",
+        "metadata": {
+          "maps_url": "http://maps.google.com/?cid=10915518122912197882",
+          "lon": 9.3185439,
+          "country": "",
+          "address": "Via per campeggio, 07020 Palau Provincia della Gallura Nord-Est Sardegna, Italien",
+          "date_iso": "2017-04-14T16:43:36Z",
+          "name": "SARDINIA WIND KITE SCHOOL",
+          "date_ts": 1492188216,
+          "source": "google_saved",
+          "lat": 41.1938243,
+          "user_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "score": 0.2862
+      },
+      {
+        "id": "saved_places_c5d35cf9",
+        "collection": "saved_places",
+        "document": "Gespeicherter Ort: Meinsbur Boutique Hotel & Restaurant\nAdresse: Gartenstraße 2, 21227 Bendestorf, Deutschland\nLand: DE\nKoordinaten: 53.34141°N, 9.96715°E\nGespeichert am: 09.07.2017",
+        "metadata": {
+          "maps_url": "http://maps.google.com/?cid=17982759270278551035",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lat": 53.3414144,
+          "name": "Meinsbur Boutique Hotel & Restaurant",
+          "source": "google_saved",
+          "date_ts": 1499623882,
+          "country": "DE",
+          "address": "Gartenstraße 2, 21227 Bendestorf, Deutschland",
+          "lon": 9.9671486,
+          "date_iso": "2017-07-09T18:11:22Z"
+        },
+        "score": 0.278
+      },
+      {
+        "id": "saved_places_1d1e390c",
+        "collection": "saved_places",
+        "document": "Gespeicherter Ort: Gudmindrup Lyng\nAdresse: 4573 Odsherred Kommune, Dänemark\nKoordinaten: 55.90694°N, 11.52566°E\nGespeichert am: 03.08.2016",
+        "metadata": {
+          "date_iso": "2016-08-03T09:10:08Z",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "maps_url": "http://maps.google.com/?cid=5673380266197308631",
+          "country": "",
+          "address": "4573 Odsherred Kommune, Dänemark",
+          "date_ts": 1470215408,
+          "lon": 11.5256557,
+          "name": "Gudmindrup Lyng",
+          "lat": 55.9069351,
+          "source": "google_saved"
+        },
+        "score": 0.2592
+      }
+    ],
+    "system_prompt": "⚠️ WICHTIG - AKTUELLES DATUM: 11.03.2026 (Mittwoch)\n\nZeitliche Berechnungen IMMER von diesem Datum aus:\n- \"letztes Wochenende\" = Samstag 07.03.2026 + Sonntag 08.03.2026\n- \"diese Woche\" = 09.03.2026 bis 15.03.2026\n- \"gestern\" = 10.03.2026\n- \"vorgestern\" = 09.03.2026\n- \"letztes Jahr\" = 2025\n- \"dieses Jahr\" = 2026\n\nDu bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.\nDu hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.\n\n🎯 WICHTIGSTE REGEL für \"Wo war ich?\"-Fragen:\n1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)\n2. Extrahiere aus den Foto-Metadaten das \"Stadtname:\"-Feld oder \"Ort:\"-Feld. Das \"Stadtname:\"-Feld ist der EXAKTE STADTNAME — nutze immer diesen (z.B. \"Ahrensburg\", nicht \"Hamburg-Ost\")\n3. Liste ALLE unterschiedlichen Städte/Orte auf, die in den Quellen auftauchen — auch wenn nur ein Foto aus diesem Ort stammt\n4. Nenne die Orte als erste Information in deiner Antwort\n5. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)\n\nBEISPIEL:\nUser: \"Wo war ich im August 2022 mit Nora?\"\n→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.\n→ Tool: search_photos(personen=[\"Nora\"], von_datum=\"2022-08-01\", bis_datum=\"2022-08-31\")\n→ Observation: [Foto vom 15.08.2022, cluster=\"München-Schwabing\", GPS: 48.16°N 11.58°E]\n→ Antwort: \"Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]].\"\n\nReAct (Reasoning and Acting) Ansatz:\n- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:\n  * Welche Informationen fehlen mir noch (Datum, Ort, Personen)?\n  * Beispiel: \"Wie ging es Sarah, als ich mit Nora in München war?\"\n    -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=[\"Nora\"], orte=[\"München\"]).\n    -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.\n\n- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.\n\nWeitere Regeln:\n1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere NIEMALS Fakten.\n2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).\n3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.\n4. Antworte auf Deutsch. Falls nach \"Gefühlen\" oder \"Stimmung\" gefragt wird, nutze `search_messages`.\n5. Bei Ortsfragen: nutze das \"Ort:\"-Feld oder \"Cluster/Ort:\"-Feld aus den Quellen. Das \"Ort:\"-Feld ist immer der tatsächliche Ortsname (z.B. \"Ahrensburg\"), nutze es bevorzugt.\n6. Falls keine passenden Daten für den gefragten Zeitraum gefunden wurden: Sage klar \"Ich habe dazu keine Einträge in deinen Daten.\" NIEMALS Orte, Zeiten oder Namen erfinden die nicht in den Quellen stehen.\n7. Falls nach einem heutigen Termin gefragt wird und keine aktuellen Quellen vorhanden sind: Gib an was die zuletzt gefundenen relevanten Daten zeigen und erkläre, dass für heute keine Einträge vorliegen.\n\nANTWORTSTIL:\n- Präzise und kurz (3-4 Sätze für einfache Fragen)\n- Exakte Ortsangaben ZUERST (z.B. \"Du warst in München\", nicht \"Es gibt Fotos aus einer Stadt\")\n- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)",
+    "parsed_query": {}
+  },
+  "golden": {
+    "answer": "Du hast in Sardinien den Agriturismo B&B Monte Majore mit 5 Sternen bewertet ('Ein absolutes Highlight') und den Villaggio Camping La Mandragola in Siniscola. Mehrere Campingplätze und Unterkünfte sind auch als gespeicherte Orte vorhanden.",
+    "required_facts": [
+      "Sardinien",
+      "Monte Majore",
+      "5 Sterne"
+    ],
+    "forbidden_facts": [],
+    "set_by": "prompt-engineer",
+    "set_at": "2026-03-11T21:51:13"
+  }
+}
