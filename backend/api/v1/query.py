@@ -35,8 +35,8 @@ class V1QueryRequest(BaseModel):
     min_score: float = Field(default=0.2, ge=0.0, le=1.0)
     date_from: str | None = None
     date_to: str | None = None
-    use_thinking_mode: bool = Field(default=False, description="Aktiviert Researcher → Challenger → Decider Pipeline")
-    thinking_max_iterations: int = Field(default=3, ge=1, le=3, description="Max. Iterationen im Thinking Mode")
+    use_thinking_mode: bool = Field(default=True, description="Aktiviert Researcher → Challenger → Decider Pipeline")
+    thinking_max_iterations: int = Field(default=10, ge=1, le=10, description="Max. Iterationen im Thinking Mode")
 
 
 class V1SourceItem(BaseModel):

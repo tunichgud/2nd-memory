@@ -39,6 +39,8 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
+from backend.rag.constants import MAX_THINKING_ITERATIONS  # noqa: E402
+
 FIXTURES_DIR = BASE_DIR / "tests" / "fixtures" / "rag_test_cases"
 REPORTS_DIR  = BASE_DIR / "reports"
 
@@ -153,7 +155,7 @@ def _run_case(case: dict, provider: str | None, model: str | None) -> dict:
 
 
 def _run_case_thinking(case: dict, provider: str | None, model: str | None,
-                       max_iterations: int = 3) -> dict:
+                       max_iterations: int = MAX_THINKING_ITERATIONS) -> dict:
     """
     Führt einen Benchmark-Test mit dem Thinking Mode (Researcher → Challenger → Decider) aus.
     Verwendet synchrone Wrapper um die async Thinking-Mode Pipeline.
@@ -329,7 +331,7 @@ def run_benchmark(model_specs: list[str], only_case: str | None = None,
         for i, case in enumerate(cases, 1):
             print(f"  [{i}/{len(cases)}] {case['test_id']} – {case['query'][:60]}...")
             if use_thinking_mode:
-                r = _run_case_thinking(case, provider, model, max_iterations=3)
+                r = _run_case_thinking(case, provider, model, max_iterations=MAX_THINKING_ITERATIONS)
             else:
                 r = _run_case(case, provider, model)
             verdict_icon = {"PASS": "✅", "PARTIAL": "🟡", "FAIL": "❌", "ERROR": "💥"}.get(r["verdict"], "?")
