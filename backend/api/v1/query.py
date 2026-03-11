@@ -35,6 +35,8 @@ class V1QueryRequest(BaseModel):
     min_score: float = Field(default=0.2, ge=0.0, le=1.0)
     date_from: str | None = None
     date_to: str | None = None
+    use_thinking_mode: bool = Field(default=False, description="Aktiviert Researcher → Challenger → Decider Pipeline")
+    thinking_max_iterations: int = Field(default=3, ge=1, le=3, description="Max. Iterationen im Thinking Mode")
 
 
 class V1SourceItem(BaseModel):
@@ -159,6 +161,8 @@ async def query_stream_v1(
                 date_to=req.date_to,
                 use_chain_of_thought=True,
                 show_thoughts=True,  # TODO: Make configurable via User Settings
+                use_thinking_mode=req.use_thinking_mode,
+                thinking_max_iterations=req.thinking_max_iterations,
             ):
                 yield chunk
         except Exception as e:

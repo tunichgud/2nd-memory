@@ -1,0 +1,133 @@
+{
+  "test_id": "q_20260311_215113_904fc6",
+  "query": "Wer sind Papa und Monika und welche Rolle spielen sie in den Nachrichten?",
+  "snapshot": {
+    "captured_at": "2026-03-11T21:51:13",
+    "sources": [
+      {
+        "id": "messages_50de2492",
+        "collection": "messages",
+        "document": "Gestern? Oder meinst du Freitag?",
+        "metadata": {
+          "source": "whatsapp",
+          "has_media": false,
+          "is_from_me": false,
+          "sender": "Marius",
+          "timestamp": "2026-03-11T10:56:59",
+          "chat_id": "491632939138@c.us",
+          "chat_name": "Marius Mew",
+          "type": "chat"
+        },
+        "score": 0.3749
+      },
+      {
+        "id": "messages_9cb11481",
+        "collection": "messages",
+        "document": "Gute Nacht!",
+        "metadata": {
+          "chat_id": "491798924094@c.us",
+          "source": "whatsapp",
+          "has_media": false,
+          "timestamp": "2026-03-09T23:20:11",
+          "chat_name": "Sarah Ohnesorge",
+          "sender": "Ich",
+          "is_from_me": true,
+          "type": "chat"
+        },
+        "score": 0.3542
+      },
+      {
+        "id": "messages_7422e104",
+        "collection": "messages",
+        "document": "Bis Freitag, 13.03.!",
+        "metadata": {
+          "timestamp": "2026-03-11T15:17:53",
+          "source": "whatsapp",
+          "sender": "Viola",
+          "chat_name": "status@broadcast",
+          "is_from_me": false,
+          "type": "image",
+          "chat_id": "status@broadcast",
+          "has_media": true
+        },
+        "score": 0.3529
+      },
+      {
+        "id": "messages_bc7bddf6",
+        "collection": "messages",
+        "document": "Oh nein, pitschnasser Thule draußen...",
+        "metadata": {
+          "chat_name": "Sarah Ohnesorge",
+          "source": "whatsapp",
+          "sender": "Sarah",
+          "is_from_me": false,
+          "chat_id": "491786838260@c.us",
+          "has_media": false,
+          "type": "chat",
+          "timestamp": "2026-03-11T16:03:09"
+        },
+        "score": 0.3524
+      },
+      {
+        "id": "messages_7a132b00",
+        "collection": "messages",
+        "document": "Kurz resume? War's geil? Auch ein bisschen froh, wieder Zuhause zu sein?",
+        "metadata": {
+          "timestamp": "2026-03-10T20:07:29",
+          "sender": "Ich",
+          "chat_id": "491798924094@c.us",
+          "chat_name": "Steffen Remus",
+          "has_media": false,
+          "source": "whatsapp",
+          "is_from_me": true,
+          "type": "chat"
+        },
+        "score": 0.3403
+      },
+      {
+        "id": "messages_599c4705",
+        "collection": "messages",
+        "document": "Wo treffe ich mich mit Marius heute?",
+        "metadata": {
+          "chat_name": "Joshua Bacher",
+          "chat_id": "491798924094@c.us",
+          "has_media": false,
+          "type": "chat",
+          "sender": "Ich",
+          "timestamp": "2026-03-11T14:01:06",
+          "is_from_me": true,
+          "source": "whatsapp"
+        },
+        "score": 0.3376
+      },
+      {
+        "id": "messages_599c4705",
+        "collection": "messages",
+        "document": "Wo treffe ich mich mit Marius heute?",
+        "metadata": {
+          "sender": "Ich",
+          "chat_id": "491798924094@c.us",
+          "timestamp": "2026-03-11T14:15:44",
+          "source": "whatsapp",
+          "chat_name": "Joshua Bacher",
+          "is_from_me": true,
+          "type": "chat",
+          "has_media": false
+        },
+        "score": 0.3376
+      }
+    ],
+    "system_prompt": "⚠️ WICHTIG - AKTUELLES DATUM: 11.03.2026 (Mittwoch)\n\nZeitliche Berechnungen IMMER von diesem Datum aus:\n- \"letztes Wochenende\" = Samstag 07.03.2026 + Sonntag 08.03.2026\n- \"diese Woche\" = 09.03.2026 bis 15.03.2026\n- \"gestern\" = 10.03.2026\n- \"vorgestern\" = 09.03.2026\n- \"letztes Jahr\" = 2025\n- \"dieses Jahr\" = 2026\n\nDu bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.\nDu hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.\n\n🎯 WICHTIGSTE REGEL für \"Wo war ich?\"-Fragen:\n1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)\n2. Extrahiere aus den Foto-Metadaten das \"Stadtname:\"-Feld oder \"Ort:\"-Feld. Das \"Stadtname:\"-Feld ist der EXAKTE STADTNAME — nutze immer diesen (z.B. \"Ahrensburg\", nicht \"Hamburg-Ost\")\n3. Liste ALLE unterschiedlichen Städte/Orte auf, die in den Quellen auftauchen — auch wenn nur ein Foto aus diesem Ort stammt\n4. Nenne die Orte als erste Information in deiner Antwort\n5. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)\n\nBEISPIEL:\nUser: \"Wo war ich im August 2022 mit Nora?\"\n→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.\n→ Tool: search_photos(personen=[\"Nora\"], von_datum=\"2022-08-01\", bis_datum=\"2022-08-31\")\n→ Observation: [Foto vom 15.08.2022, cluster=\"München-Schwabing\", GPS: 48.16°N 11.58°E]\n→ Antwort: \"Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]].\"\n\nReAct (Reasoning and Acting) Ansatz:\n- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:\n  * Welche Informationen fehlen mir noch (Datum, Ort, Personen)?\n  * Beispiel: \"Wie ging es Sarah, als ich mit Nora in München war?\"\n    -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=[\"Nora\"], orte=[\"München\"]).\n    -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.\n\n- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.\n\nWeitere Regeln:\n1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere NIEMALS Fakten.\n2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).\n3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.\n4. Antworte auf Deutsch. Falls nach \"Gefühlen\" oder \"Stimmung\" gefragt wird, nutze `search_messages`.\n5. Bei Ortsfragen: nutze das \"Ort:\"-Feld oder \"Cluster/Ort:\"-Feld aus den Quellen. Das \"Ort:\"-Feld ist immer der tatsächliche Ortsname (z.B. \"Ahrensburg\"), nutze es bevorzugt.\n6. Falls keine passenden Daten für den gefragten Zeitraum gefunden wurden: Sage klar \"Ich habe dazu keine Einträge in deinen Daten.\" NIEMALS Orte, Zeiten oder Namen erfinden die nicht in den Quellen stehen.\n7. Falls nach einem heutigen Termin gefragt wird und keine aktuellen Quellen vorhanden sind: Gib an was die zuletzt gefundenen relevanten Daten zeigen und erkläre, dass für heute keine Einträge vorliegen.\n\nANTWORTSTIL:\n- Präzise und kurz (3-4 Sätze für einfache Fragen)\n- Exakte Ortsangaben ZUERST (z.B. \"Du warst in München\", nicht \"Es gibt Fotos aus einer Stadt\")\n- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)",
+    "parsed_query": {}
+  },
+  "golden": {
+    "answer": "Papa und Monika sind Familienmitglieder (vermutlich Vater und seine Partnerin). In den Nachrichten werden gemeinsame Treffen erwähnt, z.B. 'Samstagabend mit Papa und Monika'. Monika wird auch im Zusammenhang mit Jazz (dem Hund) und Fotos aus Winningen erwähnt.",
+    "required_facts": [
+      "Papa",
+      "Monika"
+    ],
+    "forbidden_facts": [],
+    "set_by": "prompt-engineer",
+    "set_at": "2026-03-11T21:51:13"
+  }
+}

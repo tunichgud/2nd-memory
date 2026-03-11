@@ -1,0 +1,208 @@
+{
+  "test_id": "q_20260311_205602_a9dcfb",
+  "query": "In welchen Ländern war ich auf Reisen und wo habe ich schlechte Erfahrungen gemacht?",
+  "snapshot": {
+    "captured_at": "2026-03-11T20:56:02",
+    "sources": [
+      {
+        "id": "reviews_6810e840",
+        "collection": "reviews",
+        "document": "Bewertung: Frau Krause\nAdresse: Simildenstraße 8, 04277 Leipzig, Deutschland\nLand: DE\nKoordinaten: 51.30787°N, 12.37214°E\nDatum: 10.03.2020\nBewertung: 5/5 Sterne",
+        "metadata": {
+          "date_ts": 1583855000,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "name": "Frau Krause",
+          "rating": 5,
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xfc28b2ba5296789e",
+          "address": "Simildenstraße 8, 04277 Leipzig, Deutschland",
+          "lon": 12.372141,
+          "country": "DE",
+          "date_iso": "2020-03-10T15:43:20.616237Z",
+          "lat": 51.307872,
+          "source": "google_reviews"
+        },
+        "score": 0.2785
+      },
+      {
+        "id": "reviews_09b7c54a",
+        "collection": "reviews",
+        "document": "Bewertung: Restaurante O Silva\nAdresse: R. Direita de Cima 41, 9600-221 Ribeira Grande, Portugal\nLand: PT\nKoordinaten: 37.81305°N, -25.53411°E\nDatum: 07.10.2018\nBewertung: 4/5 Sterne",
+        "metadata": {
+          "name": "Restaurante O Silva",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "address": "R. Direita de Cima 41, 9600-221 Ribeira Grande, Portugal",
+          "date_ts": 1538913520,
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x564309367dbc70b1",
+          "lat": 37.8130502,
+          "lon": -25.534111,
+          "rating": 4,
+          "country": "PT",
+          "date_iso": "2018-10-07T11:58:40.186775Z",
+          "source": "google_reviews"
+        },
+        "score": 0.276
+      },
+      {
+        "id": "reviews_d04ae4ca",
+        "collection": "reviews",
+        "document": "Bewertung: HMV Hanseatische Materialverwaltung\nAdresse: Stockmeyerstraße 41, 20457 Hamburg, Deutschland\nKoordinaten: 53.54217°N, 10.00957°E\nDatum: 16.05.2025\nBewertung: 5/5 Sterne",
+        "metadata": {
+          "country": "",
+          "date_ts": 1747434160,
+          "rating": 5,
+          "date_iso": "2025-05-16T22:22:40.026423Z",
+          "lat": 53.5421669,
+          "name": "HMV Hanseatische Materialverwaltung",
+          "source": "google_reviews",
+          "lon": 10.0095749,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x34420249c123c994",
+          "address": "Stockmeyerstraße 41, 20457 Hamburg, Deutschland"
+        },
+        "score": 0.2737
+      },
+      {
+        "id": "reviews_9d8fd963",
+        "collection": "reviews",
+        "document": "Bewertung: Agriturismo B&B Monte Majore\nAdresse: SP88, 09010 Villamassargia CA, Italien\nLand: IT\nKoordinaten: 39.27295°N, 8.73582°E\nDatum: 25.07.2024\nBewertung: 5/5 Sterne\nRezension: Ein absolutes Highlight in unserem Urlaub bildete der Aufenthalt bei Alessandro, seiner Familie und seinen Bekannten. Super freundlicher Empfang, gutes Essen und ein stets gut gelaunter und aufmerksamer Alessandro.  Das Spanferkel-Essen mit anschließendem Gesang war episch!\n\nDanke dafür Alessandro!\nDetails: Art der Reise: Urlaub, Reisegruppe: Freunde, Service: 5/5, Standort: 5/5",
+        "metadata": {
+          "source": "google_reviews",
+          "address": "SP88, 09010 Villamassargia CA, Italien",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xaa7fed4201e808c1",
+          "name": "Agriturismo B&B Monte Majore",
+          "date_iso": "2024-07-25T18:35:59.252145Z",
+          "rating": 5,
+          "country": "IT",
+          "lat": 39.2729526,
+          "date_ts": 1721932559,
+          "lon": 8.7358184
+        },
+        "score": 0.2697
+      },
+      {
+        "id": "reviews_d0da9172",
+        "collection": "reviews",
+        "document": "Bewertung: Agentenzentrale\nAdresse: Kurstraße 12, 14776 Brandenburg an der Havel, Deutschland\nLand: DE\nKoordinaten: 52.40849°N, 12.55935°E\nDatum: 06.08.2024\nBewertung: 5/5 Sterne\nRezension: Immer diese Raucher... Tja, trotzdem coole Kneipe.\nDetails: Ambiente: 5/5",
+        "metadata": {
+          "date_iso": "2024-08-06T22:15:04.022412Z",
+          "country": "DE",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "name": "Agentenzentrale",
+          "address": "Kurstraße 12, 14776 Brandenburg an der Havel, Deutschland",
+          "source": "google_reviews",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x84bdea332059f859",
+          "lat": 52.4084919,
+          "rating": 5,
+          "lon": 12.5593482,
+          "date_ts": 1722982504
+        },
+        "score": 0.2669
+      },
+      {
+        "id": "reviews_7f4dc378",
+        "collection": "reviews",
+        "document": "Bewertung: World Music Hostel\nAdresse: R. do Infante Dom Henrique 22, 4050-296 Porto, Portugal\nLand: PT\nKoordinaten: 41.14138°N, -8.61394°E\nDatum: 10.07.2015\nBewertung: 5/5 Sterne\nRezension: Fantastic hostel, I will do it again. Staff is very friendly. Rooms and restrooms are clean, and the hostel is super central.",
+        "metadata": {
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lat": 41.1413838,
+          "source": "google_reviews",
+          "date_ts": 1436566114,
+          "date_iso": "2015-07-10T22:08:34.173Z",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x9f762562fef3e89d",
+          "country": "PT",
+          "rating": 5,
+          "address": "R. do Infante Dom Henrique 22, 4050-296 Porto, Portugal",
+          "lon": -8.6139448,
+          "name": "World Music Hostel"
+        },
+        "score": 0.262
+      },
+      {
+        "id": "saved_places_5cab6ca4",
+        "collection": "saved_places",
+        "document": "Gespeichert am: 17.08.2016",
+        "metadata": {
+          "name": "Ort_66",
+          "date_iso": "2016-08-17T10:56:20Z",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "maps_url": "http://maps.google.com/?q=Todesgade+6,+2200+K%C3%B8benhavn,+D%C3%A4nemark&ftid=0x465253a9dbf4b9a5:0xac8bddba92ea7e6a",
+          "address": "",
+          "lat": 0,
+          "source": "google_saved",
+          "date_ts": 1471431380,
+          "lon": 0,
+          "country": ""
+        },
+        "score": 0.236
+      },
+      {
+        "id": "saved_places_4dd2dbc7",
+        "collection": "saved_places",
+        "document": "Gespeichert am: 19.10.2016",
+        "metadata": {
+          "country": "",
+          "lat": 0,
+          "name": "Ort_59",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lon": 0,
+          "address": "",
+          "source": "google_saved",
+          "date_ts": 1476894139,
+          "date_iso": "2016-10-19T16:22:19Z",
+          "maps_url": "http://maps.google.com/?q=Jenfelder+Allee+80,+22043+Hamburg&ftid=0x47b18b99563fc025:0xa4a2e2a6cd905197"
+        },
+        "score": 0.2346
+      },
+      {
+        "id": "saved_places_0bb866cf",
+        "collection": "saved_places",
+        "document": "Gespeicherter Ort: Oasis Backpackers Hostel Lisbon -Coliving & Coworking\nAdresse: R. de Santa Catarina 24, 1200-402 Lisboa, Portugal\nLand: PT\nKoordinaten: 38.70985°N, -9.14866°E\nGespeichert am: 23.06.2015",
+        "metadata": {
+          "country": "PT",
+          "date_ts": 1435059820,
+          "maps_url": "http://maps.google.com/?cid=16036204445140857258",
+          "lon": -9.148656,
+          "date_iso": "2015-06-23T11:43:40Z",
+          "source": "google_saved",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "address": "R. de Santa Catarina 24, 1200-402 Lisboa, Portugal",
+          "lat": 38.7098473,
+          "name": "Oasis Backpackers Hostel Lisbon -Coliving & Coworking"
+        },
+        "score": 0.2338
+      },
+      {
+        "id": "saved_places_721be679",
+        "collection": "saved_places",
+        "document": "Gespeichert am: 24.12.2016",
+        "metadata": {
+          "maps_url": "http://maps.google.com/?q=Cmo+Huerta+de+las+Parras,+60,+04638+Moj%C3%A1car,+Almer%C3%ADa,+Spanien&ftid=0xd7ad7ce5279decf:0x77902f3f50b8062d",
+          "source": "google_saved",
+          "date_iso": "2016-12-24T20:54:36Z",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lon": 0,
+          "name": "Ort_51",
+          "country": "",
+          "date_ts": 1482612876,
+          "address": "",
+          "lat": 0
+        },
+        "score": 0.2315
+      }
+    ],
+    "system_prompt": "⚠️ WICHTIG - AKTUELLES DATUM: 11.03.2026 (Mittwoch)\n\nZeitliche Berechnungen IMMER von diesem Datum aus:\n- \"letztes Wochenende\" = Samstag 07.03.2026 + Sonntag 08.03.2026\n- \"diese Woche\" = 09.03.2026 bis 15.03.2026\n- \"gestern\" = 10.03.2026\n- \"vorgestern\" = 09.03.2026\n- \"letztes Jahr\" = 2025\n- \"dieses Jahr\" = 2026\n\nDu bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.\nDu hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.\n\n🎯 WICHTIGSTE REGEL für \"Wo war ich?\"-Fragen:\n1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)\n2. Extrahiere aus den Foto-Metadaten das \"Stadtname:\"-Feld oder \"Ort:\"-Feld. Das \"Stadtname:\"-Feld ist der EXAKTE STADTNAME — nutze immer diesen (z.B. \"Ahrensburg\", nicht \"Hamburg-Ost\")\n3. Liste ALLE unterschiedlichen Städte/Orte auf, die in den Quellen auftauchen — auch wenn nur ein Foto aus diesem Ort stammt\n4. Nenne die Orte als erste Information in deiner Antwort\n5. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)\n\nBEISPIEL:\nUser: \"Wo war ich im August 2022 mit Nora?\"\n→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.\n→ Tool: search_photos(personen=[\"Nora\"], von_datum=\"2022-08-01\", bis_datum=\"2022-08-31\")\n→ Observation: [Foto vom 15.08.2022, cluster=\"München-Schwabing\", GPS: 48.16°N 11.58°E]\n→ Antwort: \"Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]].\"\n\nReAct (Reasoning and Acting) Ansatz:\n- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:\n  * Welche Informationen fehlen mir noch (Datum, Ort, Personen)?\n  * Beispiel: \"Wie ging es Sarah, als ich mit Nora in München war?\"\n    -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=[\"Nora\"], orte=[\"München\"]).\n    -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.\n\n- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.\n\nWeitere Regeln:\n1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere NIEMALS Fakten.\n2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).\n3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.\n4. Antworte auf Deutsch. Falls nach \"Gefühlen\" oder \"Stimmung\" gefragt wird, nutze `search_messages`.\n5. Bei Ortsfragen: nutze das \"Ort:\"-Feld oder \"Cluster/Ort:\"-Feld aus den Quellen. Das \"Ort:\"-Feld ist immer der tatsächliche Ortsname (z.B. \"Ahrensburg\"), nutze es bevorzugt.\n6. Falls keine passenden Daten für den gefragten Zeitraum gefunden wurden: Sage klar \"Ich habe dazu keine Einträge in deinen Daten.\" NIEMALS Orte, Zeiten oder Namen erfinden die nicht in den Quellen stehen.\n7. Falls nach einem heutigen Termin gefragt wird und keine aktuellen Quellen vorhanden sind: Gib an was die zuletzt gefundenen relevanten Daten zeigen und erkläre, dass für heute keine Einträge vorliegen.\n\nANTWORTSTIL:\n- Präzise und kurz (3-4 Sätze für einfache Fragen)\n- Exakte Ortsangaben ZUERST (z.B. \"Du warst in München\", nicht \"Es gibt Fotos aus einer Stadt\")\n- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)",
+    "parsed_query": {}
+  },
+  "golden": {
+    "answer": "Du warst in Deutschland, Italien, Portugal, Spanien, Vietnam und auf den Azoren. Schlechte Erfahrungen: Salitre Hostel Lissabon (2 Sterne, Schimmel), A Cabana Esposende Portugal (1 Stern), ElementFish Kite Camp Portugal (2 Sterne), sowie mehrere 1-Stern-Bewertungen in Hamburg.",
+    "required_facts": [
+      "Portugal",
+      "Lissabon",
+      "1 Stern"
+    ],
+    "forbidden_facts": [],
+    "set_by": "prompt-engineer",
+    "set_at": "2026-03-11T20:56:02"
+  }
+}

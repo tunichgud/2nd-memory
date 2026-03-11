@@ -1,0 +1,206 @@
+{
+  "test_id": "q_20260311_205600_85cca1",
+  "query": "Welche Restaurants in Ahrensburg habe ich bewertet und war ich dort auch mit jemandem auf Fotos?",
+  "snapshot": {
+    "captured_at": "2026-03-11T20:56:00",
+    "sources": [
+      {
+        "id": "reviews_c3ca0983",
+        "collection": "reviews",
+        "document": "Bewertung: MẬU - Vietnamese Cuisine\nAdresse: Martinistraße 14, 20251 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.59277°N, 9.98677°E\nDatum: 25.01.2019\nBewertung: 5/5 Sterne\nRezension: Krass lecker. Frisches Fleisch. Frische Gewürze. Freundliche Bedienung. Selbst Frühlingsrollen werden hier zum Erlebnis. Ernsthaft. Bisher seit meinem Vietnam Urlaub das beste vietnamesische Restaurant das ich hier in Deutschland besucht habe.",
+        "metadata": {
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xfeeff4e49b6212be",
+          "country": "DE",
+          "lat": 53.5927729,
+          "date_ts": 1548457280,
+          "lon": 9.9867684,
+          "rating": 5,
+          "source": "google_reviews",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "name": "MẬU - Vietnamese Cuisine",
+          "date_iso": "2019-01-25T23:01:20.819563Z",
+          "address": "Martinistraße 14, 20251 Hamburg, Deutschland"
+        },
+        "score": 0.4527
+      },
+      {
+        "id": "reviews_ddee93cd",
+        "collection": "reviews",
+        "document": "Bewertung: The Vegan Eagle | Das Vegane Restaurant im Norden Hamburgs\nAdresse: Wischhöfen 4, 22415 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.64452°N, 10.01229°E\nDatum: 14.02.2025\nBewertung: 5/5 Sterne\nRezension: Essen, Service, Ambiente, alles war großartig.\nDetails: Servicetyp: Verzehr im Restaurant, Art der Mahlzeit: Abendessen, Preis pro Person: 40–50 €, Essen: 5/5, Service: 5/5, Ambiente: 5/5, Empfehlung für Vegetarier: Sehr empfehlenswert",
+        "metadata": {
+          "country": "DE",
+          "lat": 53.6445235,
+          "address": "Wischhöfen 4, 22415 Hamburg, Deutschland",
+          "date_ts": 1739571269,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_iso": "2025-02-14T22:14:29.410420Z",
+          "name": "The Vegan Eagle | Das Vegane Restaurant im Norden Hamburgs",
+          "lon": 10.0122901,
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x494a469441de529b",
+          "source": "google_reviews",
+          "rating": 5
+        },
+        "score": 0.39
+      },
+      {
+        "id": "reviews_23530055",
+        "collection": "reviews",
+        "document": "Bewertung: Shri Lifestyle Dining\nAdresse: L23, Centec Tower, 72 74 Nguyễn Thị Minh Khai, Phường 6, Quận 3, Thành phố Hồ Chí Minh 700000, Vietnam\nLand: VN\nKoordinaten: 10.78270°N, 106.69744°E\nDatum: 23.12.2016\nBewertung: 5/5 Sterne\nRezension: Love it",
+        "metadata": {
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xcbcada261d5a95a3",
+          "name": "Shri Lifestyle Dining",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "country": "VN",
+          "lat": 10.7827046,
+          "source": "google_reviews",
+          "date_ts": 1482518601,
+          "date_iso": "2016-12-23T18:43:21.869Z",
+          "address": "L23, Centec Tower, 72 74 Nguyễn Thị Minh Khai, Phường 6, Quận 3, Thành phố Hồ Chí Minh 700000, Vietnam",
+          "lon": 106.6974352,
+          "rating": 5
+        },
+        "score": 0.3652
+      },
+      {
+        "id": "reviews_ee1cb10c",
+        "collection": "reviews",
+        "document": "Bewertung: Barley & Malt Craft Beer Bar\nAdresse: Deichstraße 36, 20459 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.54597°N, 9.98692°E\nDatum: 07.06.2017\nBewertung: 5/5 Sterne\nRezension: Perfekte Kneipe für mich.\n\nDie Essenskarte ist übersichtlich. Dafür sind die Gerichte wirklich ein Traum. Die Kneipe ist schlicht gehalten. Es gibt leckeres Craft-Beer. Das Personal ist super freundlich. Ich bin hier wirklich gerne.\n\nGeheimtipp: Das Irish Stew ist wirklich grossartig.",
+        "metadata": {
+          "date_iso": "2017-06-07T21:29:13.674Z",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lon": 9.9869239,
+          "name": "Barley & Malt Craft Beer Bar",
+          "rating": 5,
+          "address": "Deichstraße 36, 20459 Hamburg, Deutschland",
+          "lat": 53.545975,
+          "country": "DE",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xe39c3ab295acdd16",
+          "source": "google_reviews",
+          "date_ts": 1496870953
+        },
+        "score": 0.3592
+      },
+      {
+        "id": "reviews_1229930b",
+        "collection": "reviews",
+        "document": "Bewertung: Ristorante Pizzeria da Barone\nAdresse: Große Str. 9C, 22926 Ahrensburg, Deutschland\nLand: DE\nKoordinaten: 53.67575°N, 10.24077°E\nDatum: 23.04.2025\nBewertung: 2/5 Sterne\nRezension: Hat uns nicht überzeugt. Frisch schmeckte er nicht, der Fisch.\nDetails: Servicetyp: Verzehr im Restaurant, Art der Mahlzeit: Mittagessen, Preis pro Person: 10–20 €, Essen: 2/5, Service: 4/5, Ambiente: 3/5",
+        "metadata": {
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lat": 53.67575,
+          "name": "Ristorante Pizzeria da Barone",
+          "address": "Große Str. 9C, 22926 Ahrensburg, Deutschland",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xdcd332e682225daf",
+          "rating": 2,
+          "source": "google_reviews",
+          "date_ts": 1745427178,
+          "country": "DE",
+          "date_iso": "2025-04-23T16:52:58.203996Z",
+          "lon": 10.24077
+        },
+        "score": 0.3536
+      },
+      {
+        "id": "photos_58e45d15",
+        "collection": "photos",
+        "document": "Foto: 20250323_155843.jpg\nDatum: 23.03.2025 um 14:58 Uhr\nOrt: Ahrensburg, Schleswig-Holstein, Deutschland\nKoordinaten: 53.66318°N, 10.22031°E\nPersonen: Joshua Bacher\nBildbeschreibung: Hier ist eine Beschreibung des Bildes in 2-4 Sätzen:\n\nDas Bild zeigt einen Mann mit Bart und Brille, der einen beigefarbenen Hut trägt. Er steht vermutlich in einem Innenraum, da sich im Hintergrund ein Fenster mit Blick auf eine verschneite Landschaft befindet. Der Mann schaut direkt in die Kamera und scheint freundlich zu lächeln. Die Tageszeit ist wahrscheinlich tagsüber, da das Licht hell und natürlich wirkt.",
+        "metadata": {
+          "lat": 53.6631808,
+          "cluster": "",
+          "source": "google_photos",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "filename": "20250323_155843.jpg",
+          "has_sarah": false,
+          "has_josh": true,
+          "date_iso": "2025-03-23T14:58:43+00:00",
+          "alt": 90.0,
+          "has_nora": false,
+          "place_name": "Ahrensburg, Schleswig-Holstein, Deutschland",
+          "lon": 10.2203115,
+          "has_joshua": true,
+          "date_ts": 1742741923,
+          "persons": "Josh,Joshua Bacher"
+        },
+        "score": 0.4572
+      },
+      {
+        "id": "photos_e7fa6120",
+        "collection": "photos",
+        "document": "Foto: 20250330_163746.jpg\nDatum: 30.03.2025 um 14:37 Uhr\nOrt: Ahrensburg, Schleswig-Holstein, Deutschland\nKoordinaten: 53.66398°N, 10.23380°E\nPersonen: Nora, Joshua Bacher\nBildbeschreibung: Hier ist eine Beschreibung des Bildes in 2-4 Sätzen:\n\nDas Bild zeigt eine Szene im Haus, wahrscheinlich im Wohnzimmer, mit einer älteren Frau, die ein kleines Mädchen in einem roten Kleid umarmt. Im Hintergrund sitzt ein Mann auf einer Treppe. Im Vordergrund steht ein Spielzeugkocher, und das Arrangement deutet auf eine entspannte und häusliche Atmosphäre hin. Es scheint Tageslicht zu sein, vermutlich am Nachmittag.",
+        "metadata": {
+          "lon": 10.2338011,
+          "cluster": "",
+          "date_iso": "2025-03-30T14:37:46+00:00",
+          "has_nora": true,
+          "date_ts": 1743345466,
+          "lat": 53.6639754,
+          "has_joshua": true,
+          "source": "google_photos",
+          "has_sarah": false,
+          "filename": "20250330_163746.jpg",
+          "alt": 84.0,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "persons": "Joshua Bacher,Nora",
+          "place_name": "Ahrensburg, Schleswig-Holstein, Deutschland"
+        },
+        "score": 0.4554
+      },
+      {
+        "id": "photos_7b6ddf02",
+        "collection": "photos",
+        "document": "Foto: 20250315_151050.jpg\nDatum: 15.03.2025 um 14:10 Uhr\nOrt: Ahrensburg, Schleswig-Holstein, Deutschland\nKoordinaten: 53.66281°N, 10.23103°E\nPersonen: Nora\nBildbeschreibung: Hier ist eine Beschreibung des Bildes in 2-4 Sätzen:\n\nAuf dem Bild sind drei Personen zu sehen: eine erwachsene Frau mit einem Rechen und zwei Kinder. Die Frau und die Kinder scheinen Blätter zusammenzurechen und zu einem Haufen zu transportieren, vermutlich um Laub zu entfernen. Das Foto wurde im Freien aufgenommen, vermutlich in einem Garten oder Park, was durch die Bäume und das Rasen im Hintergrund erkennbar ist. Die Stimmung ist fröhlich und das Bild deutet auf einen sonnigen Tag hin.",
+        "metadata": {
+          "lat": 53.6628057,
+          "persons": "Nora",
+          "has_sarah": false,
+          "cluster": "",
+          "lon": 10.2310268,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "filename": "20250315_151050.jpg",
+          "date_iso": "2025-03-15T14:10:50+00:00",
+          "alt": 96.0,
+          "source": "google_photos",
+          "place_name": "Ahrensburg, Schleswig-Holstein, Deutschland",
+          "date_ts": 1742047850,
+          "has_joshua": false,
+          "has_nora": true
+        },
+        "score": 0.454
+      },
+      {
+        "id": "photos_6ac90031",
+        "collection": "photos",
+        "document": "Foto: 20250528_075035.jpg\nDatum: 28.05.2025 um 05:50 Uhr\nOrt: Ahrensburg, Schleswig-Holstein, Deutschland\nKoordinaten: 53.66408°N, 10.23357°E\nPersonen: Nora\nBildbeschreibung: Hier ist eine Beschreibung des Bildes in 2-4 Sätzen:\n\nDas Bild zeigt ein junges Mädchen mit blonden Haaren, das barfuß auf einem Gehweg steht und mit den Armen in die Luft gestreckt zu lächeln scheint. Sie trägt eine blau-weiß gemusterte Jacke und grüne Sonnenbrillen. Die Umgebung deutet auf einen Außenbereich hin, möglicherweise einen Garten oder eine Einfahrt mit Büschen im Hintergrund und einem geparkten Auto. Die Stimmung wirkt fröhlich und es scheint Tageslicht zu sein, wahrscheinlich am Vormittag oder Nachmittag.",
+        "metadata": {
+          "cluster": "",
+          "has_joshua": false,
+          "filename": "20250528_075035.jpg",
+          "lon": 10.2335737,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "alt": 93.0,
+          "date_iso": "2025-05-28T05:50:35+00:00",
+          "place_name": "Ahrensburg, Schleswig-Holstein, Deutschland",
+          "has_sarah": false,
+          "lat": 53.6640764,
+          "date_ts": 1748411435,
+          "persons": "Nora",
+          "source": "google_photos",
+          "has_nora": true
+        },
+        "score": 0.4484
+      }
+    ],
+    "system_prompt": "⚠️ WICHTIG - AKTUELLES DATUM: 11.03.2026 (Mittwoch)\n\nZeitliche Berechnungen IMMER von diesem Datum aus:\n- \"letztes Wochenende\" = Samstag 07.03.2026 + Sonntag 08.03.2026\n- \"diese Woche\" = 09.03.2026 bis 15.03.2026\n- \"gestern\" = 10.03.2026\n- \"vorgestern\" = 09.03.2026\n- \"letztes Jahr\" = 2025\n- \"dieses Jahr\" = 2026\n\nDu bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.\nDu hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.\n\n🎯 WICHTIGSTE REGEL für \"Wo war ich?\"-Fragen:\n1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)\n2. Extrahiere aus den Foto-Metadaten das \"Stadtname:\"-Feld oder \"Ort:\"-Feld. Das \"Stadtname:\"-Feld ist der EXAKTE STADTNAME — nutze immer diesen (z.B. \"Ahrensburg\", nicht \"Hamburg-Ost\")\n3. Liste ALLE unterschiedlichen Städte/Orte auf, die in den Quellen auftauchen — auch wenn nur ein Foto aus diesem Ort stammt\n4. Nenne die Orte als erste Information in deiner Antwort\n5. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)\n\nBEISPIEL:\nUser: \"Wo war ich im August 2022 mit Nora?\"\n→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.\n→ Tool: search_photos(personen=[\"Nora\"], von_datum=\"2022-08-01\", bis_datum=\"2022-08-31\")\n→ Observation: [Foto vom 15.08.2022, cluster=\"München-Schwabing\", GPS: 48.16°N 11.58°E]\n→ Antwort: \"Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]].\"\n\nReAct (Reasoning and Acting) Ansatz:\n- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:\n  * Welche Informationen fehlen mir noch (Datum, Ort, Personen)?\n  * Beispiel: \"Wie ging es Sarah, als ich mit Nora in München war?\"\n    -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=[\"Nora\"], orte=[\"München\"]).\n    -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.\n\n- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.\n\nWeitere Regeln:\n1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere NIEMALS Fakten.\n2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).\n3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.\n4. Antworte auf Deutsch. Falls nach \"Gefühlen\" oder \"Stimmung\" gefragt wird, nutze `search_messages`.\n5. Bei Ortsfragen: nutze das \"Ort:\"-Feld oder \"Cluster/Ort:\"-Feld aus den Quellen. Das \"Ort:\"-Feld ist immer der tatsächliche Ortsname (z.B. \"Ahrensburg\"), nutze es bevorzugt.\n6. Falls keine passenden Daten für den gefragten Zeitraum gefunden wurden: Sage klar \"Ich habe dazu keine Einträge in deinen Daten.\" NIEMALS Orte, Zeiten oder Namen erfinden die nicht in den Quellen stehen.\n7. Falls nach einem heutigen Termin gefragt wird und keine aktuellen Quellen vorhanden sind: Gib an was die zuletzt gefundenen relevanten Daten zeigen und erkläre, dass für heute keine Einträge vorliegen.\n\nANTWORTSTIL:\n- Präzise und kurz (3-4 Sätze für einfache Fragen)\n- Exakte Ortsangaben ZUERST (z.B. \"Du warst in München\", nicht \"Es gibt Fotos aus einer Stadt\")\n- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)",
+    "parsed_query": {}
+  },
+  "golden": {
+    "answer": "In Ahrensburg wurde das Ristorante Pizzeria da Barone (2/5 Sterne, April 2025) und das Caligo Coffee (5/5 Sterne, August 2024) bewertet. In Ahrensburg gibt es viele Fotos, u.a. mit Nora und Sarah.",
+    "required_facts": [
+      "Ahrensburg",
+      "da Barone",
+      "Caligo Coffee"
+    ],
+    "forbidden_facts": [],
+    "set_by": "prompt-engineer",
+    "set_at": "2026-03-11T20:56:00"
+  }
+}

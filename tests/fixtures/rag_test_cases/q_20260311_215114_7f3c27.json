@@ -1,0 +1,175 @@
+{
+  "test_id": "q_20260311_215114_7f3c27",
+  "query": "Was sind meine besten und schlechtesten Reiseerfahrungen laut Bewertungen?",
+  "snapshot": {
+    "captured_at": "2026-03-11T21:51:14",
+    "sources": [
+      {
+        "id": "reviews_d0da9172",
+        "collection": "reviews",
+        "document": "Bewertung: Agentenzentrale\nAdresse: Kurstraße 12, 14776 Brandenburg an der Havel, Deutschland\nLand: DE\nKoordinaten: 52.40849°N, 12.55935°E\nDatum: 06.08.2024\nBewertung: 5/5 Sterne\nRezension: Immer diese Raucher... Tja, trotzdem coole Kneipe.\nDetails: Ambiente: 5/5",
+        "metadata": {
+          "name": "Agentenzentrale",
+          "country": "DE",
+          "rating": 5,
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x84bdea332059f859",
+          "date_iso": "2024-08-06T22:15:04.022412Z",
+          "date_ts": 1722982504,
+          "source": "google_reviews",
+          "address": "Kurstraße 12, 14776 Brandenburg an der Havel, Deutschland",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lat": 52.4084919,
+          "lon": 12.5593482
+        },
+        "score": 0.3049
+      },
+      {
+        "id": "reviews_6810e840",
+        "collection": "reviews",
+        "document": "Bewertung: Frau Krause\nAdresse: Simildenstraße 8, 04277 Leipzig, Deutschland\nLand: DE\nKoordinaten: 51.30787°N, 12.37214°E\nDatum: 10.03.2020\nBewertung: 5/5 Sterne",
+        "metadata": {
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lon": 12.372141,
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xfc28b2ba5296789e",
+          "address": "Simildenstraße 8, 04277 Leipzig, Deutschland",
+          "country": "DE",
+          "date_iso": "2020-03-10T15:43:20.616237Z",
+          "name": "Frau Krause",
+          "rating": 5,
+          "source": "google_reviews",
+          "lat": 51.307872,
+          "date_ts": 1583855000
+        },
+        "score": 0.293
+      },
+      {
+        "id": "reviews_3838ff93",
+        "collection": "reviews",
+        "document": "Bewertung: Zum Herzog von Anhalt\nAdresse: Großer Berg1/Ecke, Jugendstraße, 06785 Oranienbaum-Wörlitz, Deutschland\nLand: DE\nKoordinaten: 51.81214°N, 12.48590°E\nDatum: 07.09.2025\nBewertung: 5/5 Sterne\nDetails: Essen: 5/5, Service: 5/5, Ambiente: 5/5",
+        "metadata": {
+          "lon": 12.485897,
+          "source": "google_reviews",
+          "date_iso": "2025-09-07T20:53:25.836003Z",
+          "address": "Großer Berg1/Ecke, Jugendstraße, 06785 Oranienbaum-Wörlitz, Deutschland",
+          "name": "Zum Herzog von Anhalt",
+          "rating": 5,
+          "lat": 51.8121414,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_ts": 1757278405,
+          "country": "DE",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x6b0e1d3d55fe66f4"
+        },
+        "score": 0.2851
+      },
+      {
+        "id": "reviews_d04ae4ca",
+        "collection": "reviews",
+        "document": "Bewertung: HMV Hanseatische Materialverwaltung\nAdresse: Stockmeyerstraße 41, 20457 Hamburg, Deutschland\nKoordinaten: 53.54217°N, 10.00957°E\nDatum: 16.05.2025\nBewertung: 5/5 Sterne",
+        "metadata": {
+          "date_iso": "2025-05-16T22:22:40.026423Z",
+          "name": "HMV Hanseatische Materialverwaltung",
+          "lat": 53.5421669,
+          "country": "",
+          "rating": 5,
+          "date_ts": 1747434160,
+          "lon": 10.0095749,
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x34420249c123c994",
+          "address": "Stockmeyerstraße 41, 20457 Hamburg, Deutschland",
+          "source": "google_reviews",
+          "user_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "score": 0.2831
+      },
+      {
+        "id": "reviews_b27d9923",
+        "collection": "reviews",
+        "document": "Bewertung: Grüner Brink\nAdresse: Deutschland\nLand: DE\nKoordinaten: 54.51711°N, 11.17830°E\nDatum: 23.05.2016\nBewertung: 4/5 Sterne",
+        "metadata": {
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "rating": 4,
+          "name": "Grüner Brink",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x21139f8d5b90af0a",
+          "lat": 54.517115,
+          "date_iso": "2016-05-23T05:34:21.142Z",
+          "address": "Deutschland",
+          "lon": 11.1783002,
+          "source": "google_reviews",
+          "country": "DE",
+          "date_ts": 1463981661
+        },
+        "score": 0.2747
+      },
+      {
+        "id": "reviews_4bb19aaa",
+        "collection": "reviews",
+        "document": "Bewertung: Kosmetikgeshaft Muzafira\nAdresse: Beim Schlump 59, 20146 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.56813°N, 9.97111°E\nDatum: 16.08.2017\nBewertung: 1/5 Sterne",
+        "metadata": {
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x231e61b4216cac11",
+          "country": "DE",
+          "date_ts": 1502891615,
+          "lon": 9.9711063,
+          "source": "google_reviews",
+          "name": "Kosmetikgeshaft Muzafira",
+          "lat": 53.5681293,
+          "rating": 1,
+          "date_iso": "2017-08-16T13:53:35.676Z",
+          "address": "Beim Schlump 59, 20146 Hamburg, Deutschland"
+        },
+        "score": 0.2657
+      },
+      {
+        "id": "reviews_0658bd50",
+        "collection": "reviews",
+        "document": "Bewertung: MARIO Ristorante Pizzeria\nAdresse: Robert-Koch-Straße 36, 20249 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.58993°N, 9.98611°E\nDatum: 23.05.2016\nBewertung: 4/5 Sterne",
+        "metadata": {
+          "source": "google_reviews",
+          "lon": 9.9861081,
+          "address": "Robert-Koch-Straße 36, 20249 Hamburg, Deutschland",
+          "rating": 4,
+          "name": "MARIO Ristorante Pizzeria",
+          "country": "DE",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_ts": 1463981833,
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xf053a2b3119f547d",
+          "lat": 53.5899341,
+          "date_iso": "2016-05-23T05:37:13.672Z"
+        },
+        "score": 0.2608
+      },
+      {
+        "id": "reviews_b229aacd",
+        "collection": "reviews",
+        "document": "Bewertung: Büromöbel - Hans Bunke GbR\nAdresse: Rahlau 42, 22045 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.57997°N, 10.11717°E\nDatum: 10.03.2020\nBewertung: 4/5 Sterne\nRezension: Schöne Möbel. Vorsicht bei den Preisen. Ich hab einen gebrauchten Schreibtischunterbau erstanden, den ich neu günstiger erhalten hätte.\n\n- Nachtrag auf Reaktion des Verkäufers: ach so, dann habe ich die Aufschrift 'Prototyp' falsch eingeschätzt?",
+        "metadata": {
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "source": "google_reviews",
+          "address": "Rahlau 42, 22045 Hamburg, Deutschland",
+          "name": "Büromöbel - Hans Bunke GbR",
+          "lat": 53.5799699,
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x4142dd313b8f7801",
+          "lon": 10.1171657,
+          "rating": 4,
+          "date_iso": "2020-03-10T15:44:54.786268Z",
+          "country": "DE",
+          "date_ts": 1583855094
+        },
+        "score": 0.2545
+      }
+    ],
+    "system_prompt": "⚠️ WICHTIG - AKTUELLES DATUM: 11.03.2026 (Mittwoch)\n\nZeitliche Berechnungen IMMER von diesem Datum aus:\n- \"letztes Wochenende\" = Samstag 07.03.2026 + Sonntag 08.03.2026\n- \"diese Woche\" = 09.03.2026 bis 15.03.2026\n- \"gestern\" = 10.03.2026\n- \"vorgestern\" = 09.03.2026\n- \"letztes Jahr\" = 2025\n- \"dieses Jahr\" = 2026\n\nDu bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.\nDu hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.\n\n🎯 WICHTIGSTE REGEL für \"Wo war ich?\"-Fragen:\n1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)\n2. Extrahiere aus den Foto-Metadaten das \"Stadtname:\"-Feld oder \"Ort:\"-Feld. Das \"Stadtname:\"-Feld ist der EXAKTE STADTNAME — nutze immer diesen (z.B. \"Ahrensburg\", nicht \"Hamburg-Ost\")\n3. Liste ALLE unterschiedlichen Städte/Orte auf, die in den Quellen auftauchen — auch wenn nur ein Foto aus diesem Ort stammt\n4. Nenne die Orte als erste Information in deiner Antwort\n5. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)\n\nBEISPIEL:\nUser: \"Wo war ich im August 2022 mit Nora?\"\n→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.\n→ Tool: search_photos(personen=[\"Nora\"], von_datum=\"2022-08-01\", bis_datum=\"2022-08-31\")\n→ Observation: [Foto vom 15.08.2022, cluster=\"München-Schwabing\", GPS: 48.16°N 11.58°E]\n→ Antwort: \"Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]].\"\n\nReAct (Reasoning and Acting) Ansatz:\n- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:\n  * Welche Informationen fehlen mir noch (Datum, Ort, Personen)?\n  * Beispiel: \"Wie ging es Sarah, als ich mit Nora in München war?\"\n    -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=[\"Nora\"], orte=[\"München\"]).\n    -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.\n\n- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.\n\nWeitere Regeln:\n1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere NIEMALS Fakten.\n2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).\n3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.\n4. Antworte auf Deutsch. Falls nach \"Gefühlen\" oder \"Stimmung\" gefragt wird, nutze `search_messages`.\n5. Bei Ortsfragen: nutze das \"Ort:\"-Feld oder \"Cluster/Ort:\"-Feld aus den Quellen. Das \"Ort:\"-Feld ist immer der tatsächliche Ortsname (z.B. \"Ahrensburg\"), nutze es bevorzugt.\n6. Falls keine passenden Daten für den gefragten Zeitraum gefunden wurden: Sage klar \"Ich habe dazu keine Einträge in deinen Daten.\" NIEMALS Orte, Zeiten oder Namen erfinden die nicht in den Quellen stehen.\n7. Falls nach einem heutigen Termin gefragt wird und keine aktuellen Quellen vorhanden sind: Gib an was die zuletzt gefundenen relevanten Daten zeigen und erkläre, dass für heute keine Einträge vorliegen.\n\nANTWORTSTIL:\n- Präzise und kurz (3-4 Sätze für einfache Fragen)\n- Exakte Ortsangaben ZUERST (z.B. \"Du warst in München\", nicht \"Es gibt Fotos aus einer Stadt\")\n- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)",
+    "parsed_query": {}
+  },
+  "golden": {
+    "answer": "Beste Erfahrungen (5 Sterne): Agriturismo B&B Monte Majore Sardinien, Vegan Eagle Hamburg, Azoren-Reise (Surf Center, Whale Watching), Tierpark Wismar. Schlechteste (1 Stern): Zahnärzte Dorotheenstraße Hamburg, A Cabana Esposende Portugal, Salitre Hostel Lissabon.",
+    "required_facts": [
+      "Monte Majore",
+      "Sardinien",
+      "5 Sterne",
+      "1 Stern"
+    ],
+    "forbidden_facts": [],
+    "set_by": "prompt-engineer",
+    "set_at": "2026-03-11T21:51:14"
+  }
+}

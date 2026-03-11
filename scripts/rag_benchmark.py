@@ -152,6 +152,96 @@ def _run_case(case: dict, provider: str | None, model: str | None) -> dict:
     }
 
 
+def _run_case_thinking(case: dict, provider: str | None, model: str | None,
+                       max_iterations: int = 3) -> dict:
+    """
+    Führt einen Benchmark-Test mit dem Thinking Mode (Researcher → Challenger → Decider) aus.
+    Verwendet synchrone Wrapper um die async Thinking-Mode Pipeline.
+    """
+    import asyncio
+    from backend.rag.retriever_v2 import _format_sources_for_llm
+    from backend.rag.evaluator import evaluate
+    from backend.rag.thinking_mode import thinking_mode_stream
+    import json as _json
+
+    query          = case["query"]
+    sources        = case["snapshot"].get("sources", [])
+    golden         = case["golden"]["answer"]
+    required_facts = case["golden"].get("required_facts", [])
+    forbidden_facts= case["golden"].get("forbidden_facts", [])
+
+    context = _format_sources_for_llm(sources, use_compression=len(sources) > 10)
+
+    t0 = time.time()
+    answer = ""
+    dialog_events = []
+    error = None
+
+    async def _run_thinking():
+        nonlocal answer, dialog_events
+        async for event_str in thinking_mode_stream(
+            query=query,
+            context=context,
+            max_iterations=max_iterations,
+        ):
+            try:
+                event = _json.loads(event_str.strip())
+                dialog_events.append(event)
+                if event.get("type") == "text":
+                    answer += event.get("content", "")
+            except Exception:
+                pass
+
+    try:
+        with model_override(provider, model):
+            asyncio.run(_run_thinking())
+        latency_ms = int((time.time() - t0) * 1000)
+    except Exception as exc:
+        answer     = ""
+        latency_ms = int((time.time() - t0) * 1000)
+        error      = str(exc)
+
+    if error:
+        return {
+            "test_id":     case["test_id"],
+            "query":       query,
+            "verdict":     "ERROR",
+            "score":       0.0,
+            "latency_ms":  latency_ms,
+            "error":       error,
+            "mode":        "thinking",
+        }
+
+    result = evaluate(
+        query=query,
+        golden_answer=golden,
+        generated_answer=answer,
+        method="combined",
+        required_facts=required_facts,
+        forbidden_facts=forbidden_facts,
+    )
+
+    # Zähle Iterationen aus Dialog-Events
+    iterations_done = len([e for e in dialog_events if e.get("type") == "researcher"])
+
+    return {
+        "test_id":        case["test_id"],
+        "query":          query,
+        "answer":         answer,
+        "golden":         golden,
+        "verdict":        result["verdict"],
+        "score":          result.get("score", 0.0),
+        "embedding_sim":  result.get("embedding_similarity"),
+        "missing_facts":  result.get("missing_facts", []),
+        "wrong_facts":    result.get("wrong_facts", []),
+        "reasoning":      result.get("judge_reasoning", ""),
+        "latency_ms":     latency_ms,
+        "mode":           "thinking",
+        "iterations":     iterations_done,
+        "dialog_events":  len(dialog_events),
+    }
+
+
 def _summarize(results: list[dict], model_label: str) -> dict:
     if not results:
         return {"model": model_label, "tested": 0, "overall_score": 0.0}
@@ -197,7 +287,8 @@ def _print_table(summaries: list[dict]) -> None:
     print("\nScore: 1.0=PASS  0.5=PARTIAL  0.0=FAIL  (gewichteter Durchschnitt)\n")
 
 
-def run_benchmark(model_specs: list[str], only_case: str | None = None) -> None:
+def run_benchmark(model_specs: list[str], only_case: str | None = None,
+                  use_thinking_mode: bool = False) -> None:
     cases = _load_test_cases(only_case)
     if not cases:
         print(f"❌ Keine Test-Cases in {FIXTURES_DIR}")
@@ -207,16 +298,26 @@ def run_benchmark(model_specs: list[str], only_case: str | None = None) -> None:
         print("     python scripts/export_test_cases.py")
         return
 
-    print(f"📋 {len(cases)} Test-Case(s) geladen")
+    mode_label = "THINKING MODE" if use_thinking_mode else "STANDARD MODE"
+    print(f"📋 {len(cases)} Test-Case(s) geladen  [{mode_label}]")
 
-    # Modell-Specs parsen: "ollama:phi4" oder nur "phi4" (→ provider=None)
+    # Modell-Specs parsen: "ollama:phi4", "gemini:gemini-2.0-flash" oder nur "phi4"/"qwen3:8b"
+    # Bekannte Provider-Namen — alles andere ist Ollama-Modellname (z.B. "qwen3:8b")
+    KNOWN_PROVIDERS = {"ollama", "openai", "anthropic", "gemini"}
     parsed_models = []
     for spec in model_specs:
         if ":" in spec:
-            provider, model = spec.split(":", 1)
+            prefix, rest = spec.split(":", 1)
+            if prefix.lower() in KNOWN_PROVIDERS:
+                provider, model = prefix.lower(), rest
+            else:
+                # Kein bekannter Provider → ganzer String ist Ollama-Modellname (z.B. "qwen3:8b")
+                provider, model = None, spec
         else:
             provider, model = None, spec if spec != "default" else None
         label = f"{provider}:{model}" if provider else (model or "config-default")
+        if use_thinking_mode:
+            label += " [thinking]"
         parsed_models.append((label, provider, model))
 
     REPORTS_DIR.mkdir(exist_ok=True)
@@ -227,9 +328,13 @@ def run_benchmark(model_specs: list[str], only_case: str | None = None) -> None:
         results = []
         for i, case in enumerate(cases, 1):
             print(f"  [{i}/{len(cases)}] {case['test_id']} – {case['query'][:60]}...")
-            r = _run_case(case, provider, model)
+            if use_thinking_mode:
+                r = _run_case_thinking(case, provider, model, max_iterations=3)
+            else:
+                r = _run_case(case, provider, model)
             verdict_icon = {"PASS": "✅", "PARTIAL": "🟡", "FAIL": "❌", "ERROR": "💥"}.get(r["verdict"], "?")
-            print(f"         {verdict_icon} {r['verdict']}  score={r['score']:.2f}  {r['latency_ms']}ms")
+            extra = f" iter={r.get('iterations', '-')}" if use_thinking_mode else ""
+            print(f"         {verdict_icon} {r['verdict']}  score={r['score']:.2f}  {r['latency_ms']}ms{extra}")
             if r.get("wrong_facts"):
                 print(f"         wrong: {r['wrong_facts']}")
             if r.get("missing_facts"):
@@ -243,13 +348,15 @@ def run_benchmark(model_specs: list[str], only_case: str | None = None) -> None:
 
     # Report speichern
     ts = time.strftime("%Y%m%d_%H%M%S")
-    report_path = REPORTS_DIR / f"benchmark_{ts}.json"
+    suffix = "_thinking" if use_thinking_mode else ""
+    report_path = REPORTS_DIR / f"benchmark_{ts}{suffix}.json"
     report = {
-        "timestamp":   ts,
-        "test_cases":  len(cases),
-        "models":      len(parsed_models),
-        "winner":      max(all_summaries, key=lambda s: s["overall_score"])["model"] if all_summaries else None,
-        "summaries":   [{k: v for k, v in s.items() if k != "details"} for s in all_summaries],
+        "timestamp":    ts,
+        "mode":         "thinking" if use_thinking_mode else "standard",
+        "test_cases":   len(cases),
+        "models":       len(parsed_models),
+        "winner":       max(all_summaries, key=lambda s: s["overall_score"])["model"] if all_summaries else None,
+        "summaries":    [{k: v for k, v in s.items() if k != "details"} for s in all_summaries],
         "full_results": all_summaries,
     }
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -268,6 +375,12 @@ if __name__ == "__main__":
         default=None,
         help="Nur diesen Test-Case ausführen (query_id)"
     )
+    parser.add_argument(
+        "--thinking-mode",
+        action="store_true",
+        default=False,
+        help="Verwendet Thinking Mode (Researcher → Challenger → Decider) statt Standard-RAG"
+    )
     args = parser.parse_args()
     specs = [m.strip() for m in args.models.split(",") if m.strip()]
-    run_benchmark(specs, only_case=args.case)
+    run_benchmark(specs, only_case=args.case, use_thinking_mode=args.thinking_mode)

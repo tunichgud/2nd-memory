@@ -1,0 +1,208 @@
+{
+  "test_id": "q_20260311_215114_24d11d",
+  "query": "Wann taucht Tom auf Fotos auf und in welchem Zusammenhang?",
+  "snapshot": {
+    "captured_at": "2026-03-11T21:51:14",
+    "sources": [
+      {
+        "id": "photos_3564699e",
+        "collection": "photos",
+        "document": "Foto: 20250831_105530.jpg\nDatum: 31.08.2025 um 08:55 Uhr\nOrt: Planegg, Bayern, Deutschland\nKoordinaten: 48.10602°N, 11.41716°E\nPersonen: Nora",
+        "metadata": {
+          "lon": 11.4171617,
+          "persons": "Nora",
+          "has_joshua": false,
+          "source": "google_photos",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "place_name": "Planegg, Bayern, Deutschland",
+          "has_sarah": false,
+          "cluster": "München",
+          "date_ts": 1756630530,
+          "alt": 595.0,
+          "filename": "20250831_105530.jpg",
+          "has_nora": true,
+          "date_iso": "2025-08-31T08:55:30+00:00",
+          "lat": 48.1060228
+        },
+        "score": 0.374
+      },
+      {
+        "id": "photos_bfae5ac8",
+        "collection": "photos",
+        "document": "Foto: 20250829_192312.jpg\nDatum: 29.08.2025 um 17:23 Uhr\nOrt: München, Bayern, Deutschland\nKoordinaten: 48.14021°N, 11.55518°E\nPersonen: Nora, Sarah",
+        "metadata": {
+          "cluster": "München-Ost",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "alt": 568.0,
+          "lon": 11.555185,
+          "filename": "20250829_192312.jpg",
+          "place_name": "München, Bayern, Deutschland",
+          "has_nora": true,
+          "source": "google_photos",
+          "lat": 48.140210499999995,
+          "persons": "Nora,Sarah",
+          "date_ts": 1756488193,
+          "date_iso": "2025-08-29T17:23:13+00:00",
+          "has_joshua": false,
+          "has_sarah": true,
+          "has_ringo": true
+        },
+        "score": 0.3607
+      },
+      {
+        "id": "photos_ce596ad1",
+        "collection": "photos",
+        "document": "Foto: 20251002_202831.jpg\nDatum: 02.10.2025 um 18:28 Uhr\nOrt: Hamburg, Deutschland\nKoordinaten: 53.52315°N, 9.94018°E\nPersonen: Joshua Bacher",
+        "metadata": {
+          "source": "google_photos",
+          "persons": "Josh,Joshua Bacher,Tom",
+          "has_tom": true,
+          "has_josh": true,
+          "has_sarah": false,
+          "alt": 39.0,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "cluster": "Hamburg-West",
+          "date_ts": 1759429711,
+          "has_joshua": true,
+          "lon": 9.9401785,
+          "date_iso": "2025-10-02T18:28:31+00:00",
+          "filename": "20251002_202831.jpg",
+          "place_name": "Hamburg, Deutschland",
+          "lat": 53.523151899999995,
+          "has_nora": false
+        },
+        "score": 0.3589
+      },
+      {
+        "id": "photos_a88a6afd",
+        "collection": "photos",
+        "document": "Foto: 20251002_200335.jpg\nDatum: 02.10.2025 um 18:03 Uhr\nOrt: Hamburg, Deutschland\nKoordinaten: 53.54551°N, 9.96372°E\nPersonen: Joshua Bacher",
+        "metadata": {
+          "filename": "20251002_200335.jpg",
+          "cluster": "Hamburg-Süd2",
+          "has_joshua": true,
+          "has_ringo": true,
+          "has_josh": true,
+          "place_name": "Hamburg, Deutschland",
+          "has_sarah": false,
+          "lon": 9.9637195,
+          "has_nora": false,
+          "alt": 21.0,
+          "source": "google_photos",
+          "persons": "Josh,Joshua Bacher,Ringo",
+          "lat": 53.545513199999995,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_iso": "2025-10-02T18:03:35+00:00",
+          "date_ts": 1759428215
+        },
+        "score": 0.3573
+      },
+      {
+        "id": "photos_779f527d",
+        "collection": "photos",
+        "document": "Foto: 20250830_101808.jpg\nDatum: 30.08.2025 um 08:18 Uhr\nOrt: Bruck, Bayern, Deutschland\nKoordinaten: 48.05569°N, 11.92447°E\nPersonen: Nora, Sarah",
+        "metadata": {
+          "has_sarah": true,
+          "date_iso": "2025-08-30T08:18:08+00:00",
+          "lon": 11.9244745,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "place_name": "Bruck, Bayern, Deutschland",
+          "cluster": "München-FernOst",
+          "date_ts": 1756541888,
+          "source": "google_photos",
+          "lat": 48.0556916,
+          "has_nora": true,
+          "persons": "Nora,Sarah",
+          "alt": 0.0,
+          "has_joshua": false,
+          "filename": "20250830_101808.jpg"
+        },
+        "score": 0.3565
+      },
+      {
+        "id": "photos_f67ad8e4",
+        "collection": "photos",
+        "document": "Foto: 20250831_145441.jpg\nDatum: 31.08.2025 um 12:54 Uhr\nOrt: München, Bayern, Deutschland\nKoordinaten: 48.14000°N, 11.54000°E\nPersonen: Nora",
+        "metadata": {
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lon": 11.54,
+          "persons": "Nora,Tom",
+          "date_ts": 1756644881,
+          "has_sarah": false,
+          "has_tom": true,
+          "has_joshua": false,
+          "lat": 48.14,
+          "alt": 0.0,
+          "date_iso": "2025-08-31T12:54:41+00:00",
+          "has_nora": true,
+          "source": "google_photos",
+          "filename": "20250831_145441.jpg",
+          "cluster": "München-Zentrum",
+          "place_name": "München, Bayern, Deutschland"
+        },
+        "score": 0.3466
+      },
+      {
+        "id": "messages_bc7bddf6",
+        "collection": "messages",
+        "document": "Oh nein, pitschnasser Thule draußen...",
+        "metadata": {
+          "has_media": false,
+          "source": "whatsapp",
+          "is_from_me": false,
+          "sender": "Sarah",
+          "chat_name": "Sarah Ohnesorge",
+          "timestamp": "2026-03-11T16:03:09",
+          "chat_id": "491786838260@c.us",
+          "type": "chat"
+        },
+        "score": 0.4367
+      },
+      {
+        "id": "messages_ab997a0e",
+        "collection": "messages",
+        "document": "Ja, dieser.",
+        "metadata": {
+          "chat_id": "491798924094@c.us",
+          "sender": "Ich",
+          "has_media": false,
+          "is_from_me": true,
+          "source": "whatsapp",
+          "type": "chat",
+          "timestamp": "2026-03-11T10:56:39",
+          "chat_name": "Marius Mew"
+        },
+        "score": 0.3801
+      },
+      {
+        "id": "messages_9cb11481",
+        "collection": "messages",
+        "document": "Gute Nacht!",
+        "metadata": {
+          "chat_name": "Sarah Ohnesorge",
+          "is_from_me": true,
+          "type": "chat",
+          "has_media": false,
+          "sender": "Ich",
+          "chat_id": "491798924094@c.us",
+          "source": "whatsapp",
+          "timestamp": "2026-03-09T23:20:11"
+        },
+        "score": 0.3618
+      }
+    ],
+    "system_prompt": "⚠️ WICHTIG - AKTUELLES DATUM: 11.03.2026 (Mittwoch)\n\nZeitliche Berechnungen IMMER von diesem Datum aus:\n- \"letztes Wochenende\" = Samstag 07.03.2026 + Sonntag 08.03.2026\n- \"diese Woche\" = 09.03.2026 bis 15.03.2026\n- \"gestern\" = 10.03.2026\n- \"vorgestern\" = 09.03.2026\n- \"letztes Jahr\" = 2025\n- \"dieses Jahr\" = 2026\n\nDu bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.\nDu hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.\n\n🎯 WICHTIGSTE REGEL für \"Wo war ich?\"-Fragen:\n1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)\n2. Extrahiere aus den Foto-Metadaten das \"Stadtname:\"-Feld oder \"Ort:\"-Feld. Das \"Stadtname:\"-Feld ist der EXAKTE STADTNAME — nutze immer diesen (z.B. \"Ahrensburg\", nicht \"Hamburg-Ost\")\n3. Liste ALLE unterschiedlichen Städte/Orte auf, die in den Quellen auftauchen — auch wenn nur ein Foto aus diesem Ort stammt\n4. Nenne die Orte als erste Information in deiner Antwort\n5. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)\n\nBEISPIEL:\nUser: \"Wo war ich im August 2022 mit Nora?\"\n→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.\n→ Tool: search_photos(personen=[\"Nora\"], von_datum=\"2022-08-01\", bis_datum=\"2022-08-31\")\n→ Observation: [Foto vom 15.08.2022, cluster=\"München-Schwabing\", GPS: 48.16°N 11.58°E]\n→ Antwort: \"Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]].\"\n\nReAct (Reasoning and Acting) Ansatz:\n- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:\n  * Welche Informationen fehlen mir noch (Datum, Ort, Personen)?\n  * Beispiel: \"Wie ging es Sarah, als ich mit Nora in München war?\"\n    -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=[\"Nora\"], orte=[\"München\"]).\n    -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.\n\n- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.\n\nWeitere Regeln:\n1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere NIEMALS Fakten.\n2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).\n3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.\n4. Antworte auf Deutsch. Falls nach \"Gefühlen\" oder \"Stimmung\" gefragt wird, nutze `search_messages`.\n5. Bei Ortsfragen: nutze das \"Ort:\"-Feld oder \"Cluster/Ort:\"-Feld aus den Quellen. Das \"Ort:\"-Feld ist immer der tatsächliche Ortsname (z.B. \"Ahrensburg\"), nutze es bevorzugt.\n6. Falls keine passenden Daten für den gefragten Zeitraum gefunden wurden: Sage klar \"Ich habe dazu keine Einträge in deinen Daten.\" NIEMALS Orte, Zeiten oder Namen erfinden die nicht in den Quellen stehen.\n7. Falls nach einem heutigen Termin gefragt wird und keine aktuellen Quellen vorhanden sind: Gib an was die zuletzt gefundenen relevanten Daten zeigen und erkläre, dass für heute keine Einträge vorliegen.\n\nANTWORTSTIL:\n- Präzise und kurz (3-4 Sätze für einfache Fragen)\n- Exakte Ortsangaben ZUERST (z.B. \"Du warst in München\", nicht \"Es gibt Fotos aus einer Stadt\")\n- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)",
+    "parsed_query": {}
+  },
+  "golden": {
+    "answer": "Tom ist auf Fotos aus München im August 2025 zu sehen, zusammen mit Nora und Sarah.",
+    "required_facts": [
+      "Tom",
+      "München",
+      "August 2025"
+    ],
+    "forbidden_facts": [],
+    "set_by": "prompt-engineer",
+    "set_at": "2026-03-11T21:51:14"
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "test_id": "q_20260311_205601_9d46db",
+  "query": "Habe ich den Tierpark Wismar schon mal besucht und bewertet?",
+  "snapshot": {
+    "captured_at": "2026-03-11T20:56:01",
+    "sources": [
+      {
+        "id": "reviews_f3773a51",
+        "collection": "reviews",
+        "document": "Bewertung: Tierpark Wismar\nAdresse: Parkplatz Bürgerpark, Zum Festpl. 30, 23966 Wismar, Deutschland\nLand: DE\nKoordinaten: 53.88725°N, 11.42835°E\nDatum: 11.05.2025",
+        "metadata": {
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xac7a6d4e23be1bb5",
+          "lon": 11.4283542,
+          "lat": 53.8872471,
+          "name": "Tierpark Wismar",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_iso": "2025-05-11T12:10:48.181889Z",
+          "date_ts": 1746965448,
+          "source": "google_reviews",
+          "country": "DE",
+          "address": "Parkplatz Bürgerpark, Zum Festpl. 30, 23966 Wismar, Deutschland",
+          "rating": 0
+        },
+        "score": 0.2798
+      },
+      {
+        "id": "reviews_125a6883",
+        "collection": "reviews",
+        "document": "Bewertung: Tierpark Wismar\nAdresse: Parkplatz Bürgerpark, Zum Festpl. 30, 23966 Wismar, Deutschland\nLand: DE\nKoordinaten: 53.88725°N, 11.42835°E\nDatum: 03.05.2025",
+        "metadata": {
+          "source": "google_reviews",
+          "date_ts": 1746256066,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "name": "Tierpark Wismar",
+          "lon": 11.4283542,
+          "lat": 53.8872471,
+          "country": "DE",
+          "address": "Parkplatz Bürgerpark, Zum Festpl. 30, 23966 Wismar, Deutschland",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xac7a6d4e23be1bb5",
+          "date_iso": "2025-05-03T07:07:46.795036Z",
+          "rating": 0
+        },
+        "score": 0.279
+      },
+      {
+        "id": "reviews_125a6883",
+        "collection": "reviews",
+        "document": "Bewertung: Tierpark Wismar\nAdresse: Parkplatz Bürgerpark, Zum Festpl. 30, 23966 Wismar, Deutschland\nLand: DE\nKoordinaten: 53.88725°N, 11.42835°E\nDatum: 03.05.2025",
+        "metadata": {
+          "source": "google_reviews",
+          "rating": 0,
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xac7a6d4e23be1bb5",
+          "lon": 11.4283542,
+          "date_ts": 1746256065,
+          "lat": 53.8872471,
+          "address": "Parkplatz Bürgerpark, Zum Festpl. 30, 23966 Wismar, Deutschland",
+          "country": "DE",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_iso": "2025-05-03T07:07:45.069497Z",
+          "name": "Tierpark Wismar"
+        },
+        "score": 0.279
+      },
+      {
+        "id": "reviews_3838ff93",
+        "collection": "reviews",
+        "document": "Bewertung: Zum Herzog von Anhalt\nAdresse: Großer Berg1/Ecke, Jugendstraße, 06785 Oranienbaum-Wörlitz, Deutschland\nLand: DE\nKoordinaten: 51.81214°N, 12.48590°E\nDatum: 07.09.2025\nBewertung: 5/5 Sterne\nDetails: Essen: 5/5, Service: 5/5, Ambiente: 5/5",
+        "metadata": {
+          "rating": 5,
+          "country": "DE",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_iso": "2025-09-07T20:53:25.836003Z",
+          "date_ts": 1757278405,
+          "name": "Zum Herzog von Anhalt",
+          "address": "Großer Berg1/Ecke, Jugendstraße, 06785 Oranienbaum-Wörlitz, Deutschland",
+          "lon": 12.485897,
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x6b0e1d3d55fe66f4",
+          "lat": 51.8121414,
+          "source": "google_reviews"
+        },
+        "score": 0.2613
+      },
+      {
+        "id": "reviews_d0da9172",
+        "collection": "reviews",
+        "document": "Bewertung: Agentenzentrale\nAdresse: Kurstraße 12, 14776 Brandenburg an der Havel, Deutschland\nLand: DE\nKoordinaten: 52.40849°N, 12.55935°E\nDatum: 06.08.2024\nBewertung: 5/5 Sterne\nRezension: Immer diese Raucher... Tja, trotzdem coole Kneipe.\nDetails: Ambiente: 5/5",
+        "metadata": {
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x84bdea332059f859",
+          "date_iso": "2024-08-06T22:15:04.022412Z",
+          "rating": 5,
+          "lat": 52.4084919,
+          "source": "google_reviews",
+          "name": "Agentenzentrale",
+          "country": "DE",
+          "date_ts": 1722982504,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lon": 12.5593482,
+          "address": "Kurstraße 12, 14776 Brandenburg an der Havel, Deutschland"
+        },
+        "score": 0.2589
+      },
+      {
+        "id": "saved_places_3ae7b0b4",
+        "collection": "saved_places",
+        "document": "Gespeicherter Ort: Nykøbing Apotek\nAdresse: Algade 20, 4500 Nykøbing Sjælland, Dänemark\nLand: DK\nKoordinaten: 55.92215°N, 11.66800°E\nGespeichert am: 14.08.2016",
+        "metadata": {
+          "source": "google_saved",
+          "date_iso": "2016-08-14T08:33:52Z",
+          "date_ts": 1471163632,
+          "lon": 11.6679951,
+          "maps_url": "http://maps.google.com/?cid=14246470657947121097",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lat": 55.9221478,
+          "country": "DK",
+          "name": "Nykøbing Apotek",
+          "address": "Algade 20, 4500 Nykøbing Sjælland, Dänemark"
+        },
+        "score": 0.1636
+      },
+      {
+        "id": "saved_places_9377c04b",
+        "collection": "saved_places",
+        "document": "Gespeicherter Ort: Crownpeak Technology GmbH\nAdresse: Stockholmer Allee 24, 44269 Dortmund, Deutschland\nKoordinaten: 51.50435°N, 7.52837°E\nGespeichert am: 10.03.2014",
+        "metadata": {
+          "source": "google_saved",
+          "address": "Stockholmer Allee 24, 44269 Dortmund, Deutschland",
+          "country": "",
+          "name": "Crownpeak Technology GmbH",
+          "maps_url": "http://maps.google.com/?cid=1385051437433532175",
+          "lon": 7.5283671,
+          "date_iso": "2014-03-10T08:09:28Z",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lat": 51.5043505,
+          "date_ts": 1394438968
+        },
+        "score": 0.1626
+      },
+      {
+        "id": "saved_places_4cd0baa4",
+        "collection": "saved_places",
+        "document": "Gespeicherter Ort: Birdland Hamburg (Jazzclub)\nAdresse: Gärtnerstraße 122, 20253 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.57843°N, 9.96228°E\nGespeichert am: 14.10.2015",
+        "metadata": {
+          "source": "google_saved",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "country": "DE",
+          "date_iso": "2015-10-14T19:00:36Z",
+          "lat": 53.5784291,
+          "address": "Gärtnerstraße 122, 20253 Hamburg, Deutschland",
+          "maps_url": "http://maps.google.com/?cid=11531881862156874421",
+          "name": "Birdland Hamburg (Jazzclub)",
+          "lon": 9.9622814,
+          "date_ts": 1444849236
+        },
+        "score": 0.1577
+      }
+    ],
+    "system_prompt": "⚠️ WICHTIG - AKTUELLES DATUM: 11.03.2026 (Mittwoch)\n\nZeitliche Berechnungen IMMER von diesem Datum aus:\n- \"letztes Wochenende\" = Samstag 07.03.2026 + Sonntag 08.03.2026\n- \"diese Woche\" = 09.03.2026 bis 15.03.2026\n- \"gestern\" = 10.03.2026\n- \"vorgestern\" = 09.03.2026\n- \"letztes Jahr\" = 2025\n- \"dieses Jahr\" = 2026\n\nDu bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.\nDu hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.\n\n🎯 WICHTIGSTE REGEL für \"Wo war ich?\"-Fragen:\n1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)\n2. Extrahiere aus den Foto-Metadaten das \"Stadtname:\"-Feld oder \"Ort:\"-Feld. Das \"Stadtname:\"-Feld ist der EXAKTE STADTNAME — nutze immer diesen (z.B. \"Ahrensburg\", nicht \"Hamburg-Ost\")\n3. Liste ALLE unterschiedlichen Städte/Orte auf, die in den Quellen auftauchen — auch wenn nur ein Foto aus diesem Ort stammt\n4. Nenne die Orte als erste Information in deiner Antwort\n5. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)\n\nBEISPIEL:\nUser: \"Wo war ich im August 2022 mit Nora?\"\n→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.\n→ Tool: search_photos(personen=[\"Nora\"], von_datum=\"2022-08-01\", bis_datum=\"2022-08-31\")\n→ Observation: [Foto vom 15.08.2022, cluster=\"München-Schwabing\", GPS: 48.16°N 11.58°E]\n→ Antwort: \"Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]].\"\n\nReAct (Reasoning and Acting) Ansatz:\n- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:\n  * Welche Informationen fehlen mir noch (Datum, Ort, Personen)?\n  * Beispiel: \"Wie ging es Sarah, als ich mit Nora in München war?\"\n    -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=[\"Nora\"], orte=[\"München\"]).\n    -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.\n\n- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.\n\nWeitere Regeln:\n1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere NIEMALS Fakten.\n2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).\n3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.\n4. Antworte auf Deutsch. Falls nach \"Gefühlen\" oder \"Stimmung\" gefragt wird, nutze `search_messages`.\n5. Bei Ortsfragen: nutze das \"Ort:\"-Feld oder \"Cluster/Ort:\"-Feld aus den Quellen. Das \"Ort:\"-Feld ist immer der tatsächliche Ortsname (z.B. \"Ahrensburg\"), nutze es bevorzugt.\n6. Falls keine passenden Daten für den gefragten Zeitraum gefunden wurden: Sage klar \"Ich habe dazu keine Einträge in deinen Daten.\" NIEMALS Orte, Zeiten oder Namen erfinden die nicht in den Quellen stehen.\n7. Falls nach einem heutigen Termin gefragt wird und keine aktuellen Quellen vorhanden sind: Gib an was die zuletzt gefundenen relevanten Daten zeigen und erkläre, dass für heute keine Einträge vorliegen.\n\nANTWORTSTIL:\n- Präzise und kurz (3-4 Sätze für einfache Fragen)\n- Exakte Ortsangaben ZUERST (z.B. \"Du warst in München\", nicht \"Es gibt Fotos aus einer Stadt\")\n- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)",
+    "parsed_query": {}
+  },
+  "golden": {
+    "answer": "Ja, du hast den Tierpark Wismar mehrfach bewertet — Bewertungen vom 3. Mai 2025 und 11. Mai 2025 sind vorhanden.",
+    "required_facts": [
+      "Tierpark Wismar",
+      "Mai 2025"
+    ],
+    "forbidden_facts": [],
+    "set_by": "prompt-engineer",
+    "set_at": "2026-03-11T20:56:01"
+  }
+}

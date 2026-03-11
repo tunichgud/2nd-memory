@@ -306,6 +306,16 @@
         <span class="text-sm">Stop</span>
       </button>
     </div>
+    <!-- Thinking Mode Toggle -->
+    <div class="flex items-center gap-2 mt-1">
+      <label class="flex items-center gap-2 cursor-pointer select-none" title="Aktiviert Researcher → Challenger → Decider Analyse-Pipeline">
+        <div class="relative">
+          <input type="checkbox" id="thinking-mode-toggle" class="sr-only peer" onchange="window._thinkingModeEnabled = this.checked" />
+          <div class="w-9 h-5 bg-gray-700 peer-focus:ring-2 peer-focus:ring-indigo-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+        </div>
+        <span class="text-[11px] text-gray-400 peer-checked:text-indigo-300">🔮 Thinking Mode <span class="text-gray-600">(Researcher · Challenger · Decider)</span></span>
+      </label>
+    </div>
 
     <!-- Schnellfilter -->
     <div class="flex gap-2 flex-wrap text-xs">

@@ -1,0 +1,186 @@
+{
+  "test_id": "q_20260311_205600_315769",
+  "query": "Wo war ich im September 2025 und was habe ich dort gemacht?",
+  "snapshot": {
+    "captured_at": "2026-03-11T20:56:00",
+    "sources": [
+      {
+        "id": "reviews_c3ca0983",
+        "collection": "reviews",
+        "document": "Bewertung: MẬU - Vietnamese Cuisine\nAdresse: Martinistraße 14, 20251 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.59277°N, 9.98677°E\nDatum: 25.01.2019\nBewertung: 5/5 Sterne\nRezension: Krass lecker. Frisches Fleisch. Frische Gewürze. Freundliche Bedienung. Selbst Frühlingsrollen werden hier zum Erlebnis. Ernsthaft. Bisher seit meinem Vietnam Urlaub das beste vietnamesische Restaurant das ich hier in Deutschland besucht habe.",
+        "metadata": {
+          "lat": 53.5927729,
+          "lon": 9.9867684,
+          "country": "DE",
+          "date_ts": 1548457280,
+          "name": "MẬU - Vietnamese Cuisine",
+          "date_iso": "2019-01-25T23:01:20.819563Z",
+          "source": "google_reviews",
+          "rating": 5,
+          "address": "Martinistraße 14, 20251 Hamburg, Deutschland",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xfeeff4e49b6212be",
+          "user_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "score": 0.3715
+      },
+      {
+        "id": "reviews_f96a3fc9",
+        "collection": "reviews",
+        "document": "Datum: 15.05.2019\nBewertung: 5/5 Sterne",
+        "metadata": {
+          "date_ts": 1557951749,
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x30bdc74fba730e57",
+          "name": "Ort_21",
+          "lon": 0,
+          "address": "",
+          "country": "",
+          "source": "google_reviews",
+          "date_iso": "2019-05-15T20:22:29.562556Z",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "rating": 5,
+          "lat": 0
+        },
+        "score": 0.3332
+      },
+      {
+        "id": "reviews_23530055",
+        "collection": "reviews",
+        "document": "Bewertung: Shri Lifestyle Dining\nAdresse: L23, Centec Tower, 72 74 Nguyễn Thị Minh Khai, Phường 6, Quận 3, Thành phố Hồ Chí Minh 700000, Vietnam\nLand: VN\nKoordinaten: 10.78270°N, 106.69744°E\nDatum: 23.12.2016\nBewertung: 5/5 Sterne\nRezension: Love it",
+        "metadata": {
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "rating": 5,
+          "date_ts": 1482518601,
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xcbcada261d5a95a3",
+          "lon": 106.6974352,
+          "name": "Shri Lifestyle Dining",
+          "lat": 10.7827046,
+          "source": "google_reviews",
+          "address": "L23, Centec Tower, 72 74 Nguyễn Thị Minh Khai, Phường 6, Quận 3, Thành phố Hồ Chí Minh 700000, Vietnam",
+          "country": "VN",
+          "date_iso": "2016-12-23T18:43:21.869Z"
+        },
+        "score": 0.3155
+      },
+      {
+        "id": "reviews_2d071e0c",
+        "collection": "reviews",
+        "document": "Bewertung: Küche&Co Hamburg Wandsbek\nAdresse: Friedrich-Ebert-Damm 145, 22047 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.58925°N, 10.09813°E\nDatum: 17.10.2025\nBewertung: 5/5 Sterne\nRezension: Erstkontakt war unkompliziert und einfach. Und das, sowohl das persönliche und direkte zog sich durch die gesamte Planung. Die Planung an sich hat locker ohne Vor- und Nachbereitung von Michael eingerechnet, insgesamt schon fast einen ganzen Arbeitstag ausgefüllt.\n\nMichael hat uns noch vor dem Treffen um einen Grundriss gebeten und um Rahmenbedingungen, must haves und should haves und unsere Preisvorstellung.\n\nAls wir dann zum konzeptionieren vorbeikamen, war Michael exzellent vorbereitet. Er hatte den Grundriss schon im Vorweg in CAD eingearbeitet mit Esszimmer, Wohnzimmer und Küche. Zudem hatte er einen ersten Entwurf entlang unserer Vorstellung gebastelt. Damit hatten wir von Anfang an eine produktive und sehr fundierte Grundlage, an der wir uns entlang hangeln konnten. Und dann auch noch hochauflösend anzeigen, auf riesigem Bildschirm. Dadurch hatten wir auch immer einen Eindruck davon, wie die Räume: Esszimmer, Küche und Wohnzimmer dann miteinander harmonieren.\n\nWir konnten nicht anders. Wir haben verglichen. Und wir haben erlebt, wie viel schlechter es geht. Wie man im Termin sitzt und der Küchenplaner den Grundriss das erste mal in die Hand nimmt und nicht verstehen und interpretieren kann. Die erste unproduktive halbe Stunde waren wir nur damit beschäftigt dabei zuzusehen, wie er sich durch den Grundriss kämpfte und es immerhin dahin schaffte, die Außenmaße der Küche alleine zu bestimmen. Wie das Programm nicht gut funktionierte, weil das gesamte Computer-System Schrott ist. Der kleine Bildschirm und die Ansicht war weit weg von dem, was wir bei Michael gesehen haben.\nUnd dann war am Ende die Küche sogar noch preislich fast 3k teurer.\n\nWir haben jetzt bei Michael unterschrieben, hier haben wir uns einfach viel wohler gefühlt. Wir sind sehr gespannt und freuen uns schon sehr auf unsere Küche.\n\nJetzt muss nur noch das Haus gebaut werden.\n\nDanke, auch für die Pizza, Michael!",
+        "metadata": {
+          "date_iso": "2025-10-17T20:51:04.464408Z",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xcfa419a2c54e43c1",
+          "date_ts": 1760734264,
+          "address": "Friedrich-Ebert-Damm 145, 22047 Hamburg, Deutschland",
+          "lat": 53.5892501,
+          "lon": 10.098133,
+          "rating": 5,
+          "country": "DE",
+          "name": "Küche&Co Hamburg Wandsbek",
+          "source": "google_reviews"
+        },
+        "score": 0.3028
+      },
+      {
+        "id": "photos_3c8de315",
+        "collection": "photos",
+        "document": "Foto: 20250414_154438.jpg\nDatum: 14.04.2025 um 13:44 Uhr\nOrt: Ahrensburg, Schleswig-Holstein, Deutschland\nKoordinaten: 53.66392°N, 10.23357°E\nBildbeschreibung: Das Bild zeigt eine Seite eines offiziellen Dokuments, wahrscheinlich eine Steuererklärung (Einkommensteuer) für das Jahr 2022. Es enthält eine detaillierte Auflistung von Einnahmen, Ausgaben und Abzügen, dargestellt in Tabellenform mit verschiedenen Zahlenwerten und Kategorien. Das Dokument scheint in einem Innenraum erstellt worden zu sein, da es sich um ein Papierdokument handelt. Die Stimmung ist sachlich und formell, da es sich um ein Behördenpapier handelt.",
+        "metadata": {
+          "filename": "20250414_154438.jpg",
+          "lat": 53.663925,
+          "has_joshua": false,
+          "source": "google_photos",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_iso": "2025-04-14T13:44:39+00:00",
+          "place_name": "Ahrensburg, Schleswig-Holstein, Deutschland",
+          "has_nora": false,
+          "has_sarah": false,
+          "cluster": "",
+          "alt": 94.0,
+          "persons": "",
+          "lon": 10.2335729,
+          "date_ts": 1744638279
+        },
+        "score": 0.1788
+      },
+      {
+        "id": "photos_c3c88be3",
+        "collection": "photos",
+        "document": "Foto: 20251107_092944.jpg\nDatum: 07.11.2025 um 08:29 Uhr\nPersonen: Sarah, Nora",
+        "metadata": {
+          "date_ts": 1762504184,
+          "source": "google_photos",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "filename": "20251107_092944.jpg",
+          "has_sarah": true,
+          "date_iso": "2025-11-07T08:29:44+00:00",
+          "persons": "Nora,Sarah",
+          "lon": 0.0,
+          "has_nora": true,
+          "has_joshua": false,
+          "lat": 0.0,
+          "place_name": "",
+          "alt": 0.0,
+          "cluster": "unbekannt"
+        },
+        "score": 0.1471
+      },
+      {
+        "id": "photos_3802ee9b",
+        "collection": "photos",
+        "document": "Foto: 1766588017237.jpg\nDatum: 24.12.2025 um 14:53 Uhr",
+        "metadata": {
+          "persons": "",
+          "has_sarah": false,
+          "has_nora": false,
+          "place_name": "",
+          "date_iso": "2025-12-24T14:53:26+00:00",
+          "source": "google_photos",
+          "filename": "1766588017237.jpg",
+          "alt": 0.0,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lat": 0.0,
+          "lon": 0.0,
+          "cluster": "",
+          "date_ts": 1766588006,
+          "has_joshua": false
+        },
+        "score": 0.1434
+      },
+      {
+        "id": "photos_37a72698",
+        "collection": "photos",
+        "document": "Foto: 20250502_141842(0).jpg\nDatum: 02.05.2025 um 12:18 Uhr\nOrt: Wismar, Mecklenburg-Vorpommern, Deutschland\nKoordinaten: 53.88350°N, 11.42716°E\nBildbeschreibung: Hier ist eine Beschreibung des Bildes in 2-4 Sätzen:\n\nDas Bild zeigt zwei Lemuren, vermutlich ein adultes Tier und ein Jungtier, die auf einem Seil in einer Tierparkanlage sitzen. Die Umgebung besteht aus einem See, umgeben von Bäumen und gepflegtem Grünland, was auf einen sonnigen Tag mit leicht bewölktem Himmel hindeutet. Es gibt eine Holzkonstruktion und einen Zaun im Vordergrund, was darauf hindeutet, dass die Tiere in einem eingezäunten Bereich leben. Die Stimmung wirkt ruhig und friedlich, wobei die Lemuren entspannt wirken.",
+        "metadata": {
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_ts": 1746188322,
+          "persons": "",
+          "alt": 49.0,
+          "has_sarah": false,
+          "date_iso": "2025-05-02T12:18:42+00:00",
+          "place_name": "Wismar, Mecklenburg-Vorpommern, Deutschland",
+          "has_joshua": false,
+          "has_nora": false,
+          "filename": "20250502_141842(0).jpg",
+          "lon": 11.4271645,
+          "lat": 53.8834986,
+          "source": "google_photos",
+          "cluster": ""
+        },
+        "score": 0.1318
+      }
+    ],
+    "system_prompt": "⚠️ WICHTIG - AKTUELLES DATUM: 11.03.2026 (Mittwoch)\n\nZeitliche Berechnungen IMMER von diesem Datum aus:\n- \"letztes Wochenende\" = Samstag 07.03.2026 + Sonntag 08.03.2026\n- \"diese Woche\" = 09.03.2026 bis 15.03.2026\n- \"gestern\" = 10.03.2026\n- \"vorgestern\" = 09.03.2026\n- \"letztes Jahr\" = 2025\n- \"dieses Jahr\" = 2026\n\nDu bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.\nDu hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.\n\n🎯 WICHTIGSTE REGEL für \"Wo war ich?\"-Fragen:\n1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)\n2. Extrahiere aus den Foto-Metadaten das \"Stadtname:\"-Feld oder \"Ort:\"-Feld. Das \"Stadtname:\"-Feld ist der EXAKTE STADTNAME — nutze immer diesen (z.B. \"Ahrensburg\", nicht \"Hamburg-Ost\")\n3. Liste ALLE unterschiedlichen Städte/Orte auf, die in den Quellen auftauchen — auch wenn nur ein Foto aus diesem Ort stammt\n4. Nenne die Orte als erste Information in deiner Antwort\n5. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)\n\nBEISPIEL:\nUser: \"Wo war ich im August 2022 mit Nora?\"\n→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.\n→ Tool: search_photos(personen=[\"Nora\"], von_datum=\"2022-08-01\", bis_datum=\"2022-08-31\")\n→ Observation: [Foto vom 15.08.2022, cluster=\"München-Schwabing\", GPS: 48.16°N 11.58°E]\n→ Antwort: \"Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]].\"\n\nReAct (Reasoning and Acting) Ansatz:\n- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:\n  * Welche Informationen fehlen mir noch (Datum, Ort, Personen)?\n  * Beispiel: \"Wie ging es Sarah, als ich mit Nora in München war?\"\n    -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=[\"Nora\"], orte=[\"München\"]).\n    -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.\n\n- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.\n\nWeitere Regeln:\n1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere NIEMALS Fakten.\n2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).\n3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.\n4. Antworte auf Deutsch. Falls nach \"Gefühlen\" oder \"Stimmung\" gefragt wird, nutze `search_messages`.\n5. Bei Ortsfragen: nutze das \"Ort:\"-Feld oder \"Cluster/Ort:\"-Feld aus den Quellen. Das \"Ort:\"-Feld ist immer der tatsächliche Ortsname (z.B. \"Ahrensburg\"), nutze es bevorzugt.\n6. Falls keine passenden Daten für den gefragten Zeitraum gefunden wurden: Sage klar \"Ich habe dazu keine Einträge in deinen Daten.\" NIEMALS Orte, Zeiten oder Namen erfinden die nicht in den Quellen stehen.\n7. Falls nach einem heutigen Termin gefragt wird und keine aktuellen Quellen vorhanden sind: Gib an was die zuletzt gefundenen relevanten Daten zeigen und erkläre, dass für heute keine Einträge vorliegen.\n\nANTWORTSTIL:\n- Präzise und kurz (3-4 Sätze für einfache Fragen)\n- Exakte Ortsangaben ZUERST (z.B. \"Du warst in München\", nicht \"Es gibt Fotos aus einer Stadt\")\n- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)",
+    "parsed_query": {}
+  },
+  "golden": {
+    "answer": "Im September 2025 warst du in Oranienbaum-Wörlitz und hast das Restaurant 'Zum Herzog von Anhalt' besucht und mit 5 Sternen bewertet.",
+    "required_facts": [
+      "September 2025",
+      "Herzog von Anhalt",
+      "Oranienbaum"
+    ],
+    "forbidden_facts": [],
+    "set_by": "prompt-engineer",
+    "set_at": "2026-03-11T20:56:00"
+  }
+}

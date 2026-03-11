@@ -1,0 +1,36 @@
+# meta.yaml — Metadaten für manuell hochgeladene Fotos
+#
+# VERWENDUNG:
+#   1. Fotos in dieses Verzeichnis (uploads/) kopieren
+#   2. Metadaten hier eintragen (optional — KI beschreibt Fotos automatisch)
+#   3. Script ausführen: python3 scripts/upload_photos.py
+#
+# FELDER pro Foto:
+#   date:        Aufnahmedatum YYYY-MM-DD
+#   persons:     Wer ist auf dem Foto? (Liste)
+#   place:       Ortsname (z.B. "Hamburg", "Winningen")
+#   lat/lon:     GPS-Koordinaten (optional)
+#   description: Manuelle Beschreibung (überschreibt KI-Analyse)
+
+defaults:
+    user_id: "00000000-0000-0000-0000-000000000001"
+
+# Beispiel für Jazz-Fotos — Dateinamen anpassen!
+files:
+    # Jazz_Park_2019.jpg:
+    #     date: "2019-10-31"
+    #     persons: ["Jazz"]
+    #     place: "Hamburg"
+    #     description: "Jazz (Hündin, Labrador-Mix) im Park. Sie ist sehr aktiv und fröhlich."
+
+    # Jazz_Winningen_2014.jpg:
+    #     date: "2014-07-15"
+    #     persons: ["Jazz", "Monika"]
+    #     place: "Winningen"
+    #     description: "Jazz mit Monika in Winningen an der Mosel. Jazz ist jung und gesund."
+
+    # Jazz_letzter_Winter_2021.jpg:
+    #     date: "2021-01-20"
+    #     persons: ["Jazz"]
+    #     place: "Hamburg"
+    #     description: "Jazz in ihren letzten Wochen, ruhig auf ihrem Platz."

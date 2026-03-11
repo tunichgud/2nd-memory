@@ -119,3 +119,86 @@ def get_indexed_ids(collection_name: str) -> set[str]:
     if col.count() == 0:
         return set()
     return set(col.get(include=[])["ids"])
+
+
+def keyword_search(
+    collection_name: str,
+    keywords: list[str],
+    n_results: int = 20,
+    where: dict | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None,
+) -> list[dict]:
+    """Volltext-Keyword-Suche via ChromaDB where_document ($contains).
+
+    Sucht Chunks die ALLE angegebenen Keywords enthalten (AND-Verknüpfung).
+    Gibt eine Liste von Dicts mit 'id', 'document', 'metadata', 'score' zurück.
+    score=1.0 für alle Treffer (kein Ranking — nur Filterung).
+
+    Args:
+        collection_name: Name der Collection (z.B. "messages").
+        keywords: Liste von Strings, die im Dokument vorkommen müssen.
+        n_results: Maximale Anzahl Ergebnisse.
+        where: Optionaler Metadata-Filter (ChromaDB where-Syntax).
+        date_from: Optionales Startdatum YYYY-MM-DD (filtert via timestamp-Metadata).
+        date_to: Optionales Enddatum YYYY-MM-DD.
+    """
+    import time as _time
+
+    col = get_collection(collection_name)
+    if col.count() == 0:
+        return []
+
+    # Build where_document filter (AND über alle keywords)
+    if len(keywords) == 1:
+        where_doc: dict = {"$contains": keywords[0]}
+    else:
+        where_doc = {"$and": [{"$contains": kw} for kw in keywords]}
+
+    # Datum-Filter via metadata (timestamp als ISO-String)
+    meta_filters: list[dict] = []
+    if date_from:
+        meta_filters.append({"timestamp": {"$gte": date_from}})
+    if date_to:
+        # Bis-Datum inklusiv: nutze bis_datum + "T23:59:59"
+        meta_filters.append({"timestamp": {"$lte": date_to + "T23:59:59"}})
+
+    # Kombiniere user-where mit datum-where
+    combined_where: dict | None = None
+    all_filters: list[dict] = []
+    if where:
+        all_filters.append(where)
+    all_filters.extend(meta_filters)
+
+    if len(all_filters) == 1:
+        combined_where = all_filters[0]
+    elif len(all_filters) > 1:
+        combined_where = {"$and": all_filters}
+
+    try:
+        get_kwargs: dict[str, Any] = {
+            "where_document": where_doc,
+            "limit": min(n_results, col.count()),
+            "include": ["documents", "metadatas"],
+        }
+        if combined_where:
+            get_kwargs["where"] = combined_where
+
+        result = col.get(**get_kwargs)
+        docs = result.get("documents") or []
+        metas = result.get("metadatas") or []
+        ids = result.get("ids") or []
+
+        return [
+            {
+                "id": f"{collection_name}_{doc_id}",
+                "collection": collection_name,
+                "document": doc,
+                "metadata": meta,
+                "score": 0.85,  # Keyword-Match: fixer Score höher als typischer Similarity-Score
+            }
+            for doc_id, doc, meta in zip(ids, docs, metas)
+        ]
+    except Exception as exc:
+        logger.warning("keyword_search Fehler: %s", exc)
+        return []

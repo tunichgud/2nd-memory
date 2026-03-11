@@ -1,0 +1,190 @@
+{
+  "test_id": "q_20260311_215114_8c7315",
+  "query": "War ich auf den Azoren und in Sardinien — und welche Reise hat mir besser gefallen?",
+  "snapshot": {
+    "captured_at": "2026-03-11T21:51:14",
+    "sources": [
+      {
+        "id": "reviews_9d8fd963",
+        "collection": "reviews",
+        "document": "Bewertung: Agriturismo B&B Monte Majore\nAdresse: SP88, 09010 Villamassargia CA, Italien\nLand: IT\nKoordinaten: 39.27295°N, 8.73582°E\nDatum: 25.07.2024\nBewertung: 5/5 Sterne\nRezension: Ein absolutes Highlight in unserem Urlaub bildete der Aufenthalt bei Alessandro, seiner Familie und seinen Bekannten. Super freundlicher Empfang, gutes Essen und ein stets gut gelaunter und aufmerksamer Alessandro.  Das Spanferkel-Essen mit anschließendem Gesang war episch!\n\nDanke dafür Alessandro!\nDetails: Art der Reise: Urlaub, Reisegruppe: Freunde, Service: 5/5, Standort: 5/5",
+        "metadata": {
+          "lat": 39.2729526,
+          "date_ts": 1721932559,
+          "country": "IT",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xaa7fed4201e808c1",
+          "rating": 5,
+          "date_iso": "2024-07-25T18:35:59.252145Z",
+          "lon": 8.7358184,
+          "address": "SP88, 09010 Villamassargia CA, Italien",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "source": "google_reviews",
+          "name": "Agriturismo B&B Monte Majore"
+        },
+        "score": 0.2831
+      },
+      {
+        "id": "reviews_0658bd50",
+        "collection": "reviews",
+        "document": "Bewertung: MARIO Ristorante Pizzeria\nAdresse: Robert-Koch-Straße 36, 20249 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.58993°N, 9.98611°E\nDatum: 23.05.2016\nBewertung: 4/5 Sterne",
+        "metadata": {
+          "rating": 4,
+          "country": "DE",
+          "address": "Robert-Koch-Straße 36, 20249 Hamburg, Deutschland",
+          "lat": 53.5899341,
+          "date_ts": 1463981833,
+          "name": "MARIO Ristorante Pizzeria",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xf053a2b3119f547d",
+          "lon": 9.9861081,
+          "source": "google_reviews",
+          "date_iso": "2016-05-23T05:37:13.672Z",
+          "user_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "score": 0.2684
+      },
+      {
+        "id": "reviews_1229930b",
+        "collection": "reviews",
+        "document": "Bewertung: Ristorante Pizzeria da Barone\nAdresse: Große Str. 9C, 22926 Ahrensburg, Deutschland\nLand: DE\nKoordinaten: 53.67575°N, 10.24077°E\nDatum: 23.04.2025\nBewertung: 2/5 Sterne\nRezension: Hat uns nicht überzeugt. Frisch schmeckte er nicht, der Fisch.\nDetails: Servicetyp: Verzehr im Restaurant, Art der Mahlzeit: Mittagessen, Preis pro Person: 10–20 €, Essen: 2/5, Service: 4/5, Ambiente: 3/5",
+        "metadata": {
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0xdcd332e682225daf",
+          "name": "Ristorante Pizzeria da Barone",
+          "date_iso": "2025-04-23T16:52:58.203996Z",
+          "rating": 2,
+          "country": "DE",
+          "address": "Große Str. 9C, 22926 Ahrensburg, Deutschland",
+          "lon": 10.24077,
+          "source": "google_reviews",
+          "date_ts": 1745427178,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lat": 53.67575
+        },
+        "score": 0.2607
+      },
+      {
+        "id": "reviews_d0da9172",
+        "collection": "reviews",
+        "document": "Bewertung: Agentenzentrale\nAdresse: Kurstraße 12, 14776 Brandenburg an der Havel, Deutschland\nLand: DE\nKoordinaten: 52.40849°N, 12.55935°E\nDatum: 06.08.2024\nBewertung: 5/5 Sterne\nRezension: Immer diese Raucher... Tja, trotzdem coole Kneipe.\nDetails: Ambiente: 5/5",
+        "metadata": {
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x84bdea332059f859",
+          "date_ts": 1722982504,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "source": "google_reviews",
+          "address": "Kurstraße 12, 14776 Brandenburg an der Havel, Deutschland",
+          "lon": 12.5593482,
+          "date_iso": "2024-08-06T22:15:04.022412Z",
+          "name": "Agentenzentrale",
+          "lat": 52.4084919,
+          "rating": 5,
+          "country": "DE"
+        },
+        "score": 0.2413
+      },
+      {
+        "id": "reviews_4bb19aaa",
+        "collection": "reviews",
+        "document": "Bewertung: Kosmetikgeshaft Muzafira\nAdresse: Beim Schlump 59, 20146 Hamburg, Deutschland\nLand: DE\nKoordinaten: 53.56813°N, 9.97111°E\nDatum: 16.08.2017\nBewertung: 1/5 Sterne",
+        "metadata": {
+          "address": "Beim Schlump 59, 20146 Hamburg, Deutschland",
+          "rating": 1,
+          "lat": 53.5681293,
+          "country": "DE",
+          "date_iso": "2017-08-16T13:53:35.676Z",
+          "name": "Kosmetikgeshaft Muzafira",
+          "source": "google_reviews",
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x231e61b4216cac11",
+          "date_ts": 1502891615,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lon": 9.9711063
+        },
+        "score": 0.2304
+      },
+      {
+        "id": "reviews_3838ff93",
+        "collection": "reviews",
+        "document": "Bewertung: Zum Herzog von Anhalt\nAdresse: Großer Berg1/Ecke, Jugendstraße, 06785 Oranienbaum-Wörlitz, Deutschland\nLand: DE\nKoordinaten: 51.81214°N, 12.48590°E\nDatum: 07.09.2025\nBewertung: 5/5 Sterne\nDetails: Essen: 5/5, Service: 5/5, Ambiente: 5/5",
+        "metadata": {
+          "rating": 5,
+          "source": "google_reviews",
+          "date_iso": "2025-09-07T20:53:25.836003Z",
+          "lat": 51.8121414,
+          "name": "Zum Herzog von Anhalt",
+          "lon": 12.485897,
+          "maps_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x0:0x6b0e1d3d55fe66f4",
+          "date_ts": 1757278405,
+          "country": "DE",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "address": "Großer Berg1/Ecke, Jugendstraße, 06785 Oranienbaum-Wörlitz, Deutschland"
+        },
+        "score": 0.2295
+      },
+      {
+        "id": "saved_places_868a80ed",
+        "collection": "saved_places",
+        "document": "Gespeicherter Ort: Hotel Landhaus zum Grünen Jäger\nAdresse: Itzenbütteler Waldweg 35, 21266 Jesteburg, Deutschland\nLand: DE\nKoordinaten: 53.32628°N, 9.93848°E\nGespeichert am: 09.07.2017",
+        "metadata": {
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "maps_url": "http://maps.google.com/?cid=9598988666613724568",
+          "lat": 53.3262775,
+          "lon": 9.9384751,
+          "date_iso": "2017-07-09T18:20:13Z",
+          "country": "DE",
+          "address": "Itzenbütteler Waldweg 35, 21266 Jesteburg, Deutschland",
+          "name": "Hotel Landhaus zum Grünen Jäger",
+          "source": "google_saved",
+          "date_ts": 1499624413
+        },
+        "score": 0.2321
+      },
+      {
+        "id": "saved_places_9ffca83d",
+        "collection": "saved_places",
+        "document": "Gespeicherter Ort: SARDINIA WIND KITE SCHOOL\nAdresse: Via per campeggio, 07020 Palau Provincia della Gallura Nord-Est Sardegna, Italien\nKoordinaten: 41.19382°N, 9.31854°E\nGespeichert am: 14.04.2017",
+        "metadata": {
+          "maps_url": "http://maps.google.com/?cid=10915518122912197882",
+          "lat": 41.1938243,
+          "country": "",
+          "address": "Via per campeggio, 07020 Palau Provincia della Gallura Nord-Est Sardegna, Italien",
+          "name": "SARDINIA WIND KITE SCHOOL",
+          "lon": 9.3185439,
+          "source": "google_saved",
+          "date_ts": 1492188216,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_iso": "2017-04-14T16:43:36Z"
+        },
+        "score": 0.2305
+      },
+      {
+        "id": "saved_places_bc229a19",
+        "collection": "saved_places",
+        "document": "Gespeicherter Ort: Stagno di Marceddì\nAdresse: Ponte Marceddì, 09098 Terralba OR, Italien\nLand: IT\nKoordinaten: 39.71247°N, 8.51183°E\nGespeichert am: 26.03.2017",
+        "metadata": {
+          "date_ts": 1490548465,
+          "country": "IT",
+          "lon": 8.5118294,
+          "maps_url": "http://maps.google.com/?cid=10994828982129001157",
+          "address": "Ponte Marceddì, 09098 Terralba OR, Italien",
+          "lat": 39.712469,
+          "name": "Stagno di Marceddì",
+          "source": "google_saved",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_iso": "2017-03-26T17:14:25Z"
+        },
+        "score": 0.2236
+      }
+    ],
+    "system_prompt": "⚠️ WICHTIG - AKTUELLES DATUM: 11.03.2026 (Mittwoch)\n\nZeitliche Berechnungen IMMER von diesem Datum aus:\n- \"letztes Wochenende\" = Samstag 07.03.2026 + Sonntag 08.03.2026\n- \"diese Woche\" = 09.03.2026 bis 15.03.2026\n- \"gestern\" = 10.03.2026\n- \"vorgestern\" = 09.03.2026\n- \"letztes Jahr\" = 2025\n- \"dieses Jahr\" = 2026\n\nDu bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.\nDu hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.\n\n🎯 WICHTIGSTE REGEL für \"Wo war ich?\"-Fragen:\n1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)\n2. Extrahiere aus den Foto-Metadaten das \"Stadtname:\"-Feld oder \"Ort:\"-Feld. Das \"Stadtname:\"-Feld ist der EXAKTE STADTNAME — nutze immer diesen (z.B. \"Ahrensburg\", nicht \"Hamburg-Ost\")\n3. Liste ALLE unterschiedlichen Städte/Orte auf, die in den Quellen auftauchen — auch wenn nur ein Foto aus diesem Ort stammt\n4. Nenne die Orte als erste Information in deiner Antwort\n5. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)\n\nBEISPIEL:\nUser: \"Wo war ich im August 2022 mit Nora?\"\n→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.\n→ Tool: search_photos(personen=[\"Nora\"], von_datum=\"2022-08-01\", bis_datum=\"2022-08-31\")\n→ Observation: [Foto vom 15.08.2022, cluster=\"München-Schwabing\", GPS: 48.16°N 11.58°E]\n→ Antwort: \"Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]].\"\n\nReAct (Reasoning and Acting) Ansatz:\n- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:\n  * Welche Informationen fehlen mir noch (Datum, Ort, Personen)?\n  * Beispiel: \"Wie ging es Sarah, als ich mit Nora in München war?\"\n    -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=[\"Nora\"], orte=[\"München\"]).\n    -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.\n\n- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.\n\nWeitere Regeln:\n1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere NIEMALS Fakten.\n2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).\n3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.\n4. Antworte auf Deutsch. Falls nach \"Gefühlen\" oder \"Stimmung\" gefragt wird, nutze `search_messages`.\n5. Bei Ortsfragen: nutze das \"Ort:\"-Feld oder \"Cluster/Ort:\"-Feld aus den Quellen. Das \"Ort:\"-Feld ist immer der tatsächliche Ortsname (z.B. \"Ahrensburg\"), nutze es bevorzugt.\n6. Falls keine passenden Daten für den gefragten Zeitraum gefunden wurden: Sage klar \"Ich habe dazu keine Einträge in deinen Daten.\" NIEMALS Orte, Zeiten oder Namen erfinden die nicht in den Quellen stehen.\n7. Falls nach einem heutigen Termin gefragt wird und keine aktuellen Quellen vorhanden sind: Gib an was die zuletzt gefundenen relevanten Daten zeigen und erkläre, dass für heute keine Einträge vorliegen.\n\nANTWORTSTIL:\n- Präzise und kurz (3-4 Sätze für einfache Fragen)\n- Exakte Ortsangaben ZUERST (z.B. \"Du warst in München\", nicht \"Es gibt Fotos aus einer Stadt\")\n- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)",
+    "parsed_query": {}
+  },
+  "golden": {
+    "answer": "Du warst auf beiden Reisen. Die Azoren-Reise umfasste Whale Watching und Surfstunden (alle 5 Sterne). In Sardinien warst du auf einem Agriturismo ('Ein absolutes Highlight', 5 Sterne). Beide Reisen waren sehr positiv bewertet.",
+    "required_facts": [
+      "Azoren",
+      "Sardinien",
+      "5 Sterne"
+    ],
+    "forbidden_facts": [],
+    "set_by": "prompt-engineer",
+    "set_at": "2026-03-11T21:51:14"
+  }
+}
