@@ -71,5 +71,5 @@ KEYWORD_MAX_TOKENS_PER_CHUNK: int = 120
 MAX_CHAT_HISTORY: int = 10
 """Maximale Chat-Nachrichten aus der History die ans LLM übergeben werden."""
 
-MAX_THINKING_ITERATIONS: int = 3
+MAX_THINKING_ITERATIONS: int = 10
 """Standard-Iterationslimit für den Thinking Mode (Researcher→Challenger→Decider)."""

@@ -76,6 +76,11 @@ def retrieve(
         date_to=date_to,
     )  # type: ignore[assignment]
 
+    # --- Re-Ranking: Cross-Encoder bewertet (query, chunk)-Paare neu ---
+    # Keyword-Quellen werden NICHT re-ranked (chronologischer Block bleibt unverändert).
+    from backend.rag.reranker import rerank
+    semantic_sources = rerank(query, semantic_sources, top_n=10)
+
     # --- Keyword-Retrieval (optional, nur bei schluesselwoerter) ---
     keyword_sources: list[Source] = []
     if keywords:
