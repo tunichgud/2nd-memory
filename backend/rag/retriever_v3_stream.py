@@ -22,7 +22,7 @@ import logging
 from datetime import datetime
 from typing import AsyncGenerator
 
-from backend.rag.query_analyzer import analyze_query, AnalyzedQuery
+from backend.rag.query_analyzer import analyze_query
 from backend.rag.query_parser import parse_query, ParsedQuery  # LLM-basiertes Temporal Parsing!
 from backend.rag.retriever_v3 import (
     retrieve_v3,
@@ -354,46 +354,3 @@ def _event(event_type: str, content: any) -> str:
         "type": event_type,
         "content": content
     }, ensure_ascii=False)
-
-
-# ============================================================================
-# TODO: Refactor retrieve_v3 zu async Generator für echten Progress
-# ============================================================================
-
-async def retrieve_v3_stream(
-    query: str,
-    user_id: str,
-    analyzed: AnalyzedQuery,
-    collections: list[str],
-    n_per_collection: int = 6,
-) -> AsyncGenerator[dict, None]:
-    """
-    Streaming-Version von retrieve_v3.
-
-    Yields Progress Events während des Retrievals.
-
-    TODO: Implementierung (aktuell Placeholder)
-    """
-    for i, col in enumerate(collections):
-        # Stream Progress
-        yield {
-            "type": "retrieval_progress",
-            "content": {
-                "collection": col,
-                "progress": f"{i+1}/{len(collections)}",
-                "status": "searching"
-            }
-        }
-
-        # TODO: Actual retrieval logic hier
-        # results = await async_query_collection(col, ...)
-
-        yield {
-            "type": "retrieval_progress",
-            "content": {
-                "collection": col,
-                "progress": f"{i+1}/{len(collections)}",
-                "status": "completed",
-                "results_count": 0  # TODO: Real count
-            }
-        }
