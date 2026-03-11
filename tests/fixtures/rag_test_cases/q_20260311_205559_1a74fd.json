@@ -1,0 +1,213 @@
+{
+  "test_id": "q_20260311_205559_1a74fd",
+  "query": "Was haben Sarah und ich im Sommer 2019 gemacht? Gab es Urlaube oder besondere Ereignisse?",
+  "snapshot": {
+    "captured_at": "2026-03-11T20:55:59",
+    "sources": [
+      {
+        "id": "messages_e604529e",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[23.08.20 14:20] Josh: Wollen wir eine rüber mit Jazz spazieren?\n[23.08.20 14:23] Sarah Ohnesorge: Ja, aber bewegt sie sich?\n[23.08.20 14:34] Josh: Doch, tut sie;\n[23.08.20 18:05] Sarah Ohnesorge: https://www.voucherwonderland.com/reisemagazin/seen-bayern/\n[23.08.20 19:33] Josh: https://www.bauernhof-urlaub.com/ferienhof/hoellthal-muehle-seeon-seebruck/#content\n[23.08.20 21:12] Josh: https://www.bauernhof-urlaub.com/ferienhof/hoellthal-muehle-seeon-seebruck/#content\n[23.08.20 21:56] Sarah Ohnesorge: https://www.amazon.de/gp/product/B089LPGDM2/ref=ox_sc_act_title_1?smid=A38D1ZGVXV7CXJ&psc=1\n[23.08.20 21:57] Sarah Ohnesorge: https://www.amazon.de/gp/product/B01MZ62C2E/ref=ox_sc_act_title_2?smid=A3JWKAKR8XB7XF&psc=1\n[23.08.20 21:58] Sarah Ohnesorge: https://www.amazon.de/gp/product/B00BXLLWM0/ref=ox_sc_act_title_3?smid=A3730SZTAD7XKK&psc=1\n[23.08.20 21:58] Sarah Ohnesorge: sind die für Prime Versand verfügbar...?",
+        "metadata": {
+          "chat_id": "491786838260@c.us",
+          "persons": "Sarah Ohnesorge,Josh",
+          "lat": 0.0,
+          "source": "whatsapp",
+          "migration_source": "txt_import",
+          "mentioned_persons": "Josh,Sarah Ohnesorge",
+          "chat_name": "Sarah Ohnesorge",
+          "lon": 0.0,
+          "migration_date": "2026-03-09T23:07:29.451510",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_ts": 1598185200,
+          "date_iso": "23.08.20 14:20",
+          "timestamp": "2020-08-23T14:20:00"
+        },
+        "score": 0.3115
+      },
+      {
+        "id": "messages_bc7bddf6",
+        "collection": "messages",
+        "document": "Oh nein, pitschnasser Thule draußen...",
+        "metadata": {
+          "type": "chat",
+          "chat_name": "Sarah Ohnesorge",
+          "has_media": false,
+          "timestamp": "2026-03-11T16:03:09",
+          "chat_id": "491786838260@c.us",
+          "is_from_me": false,
+          "source": "whatsapp",
+          "sender": "Sarah"
+        },
+        "score": 0.3049
+      },
+      {
+        "id": "messages_b394d0b3",
+        "collection": "messages",
+        "document": "Äh, hing hier was an der Tür?",
+        "metadata": {
+          "chat_name": "Sarah Ohnesorge",
+          "type": "chat",
+          "is_from_me": false,
+          "timestamp": "2026-03-11T16:11:22",
+          "sender": "Sarah",
+          "chat_id": "491786838260@c.us",
+          "has_media": false,
+          "source": "whatsapp"
+        },
+        "score": 0.3013
+      },
+      {
+        "id": "messages_0188e689",
+        "collection": "messages",
+        "document": "Moin Sarah, Dienstag 17.30-18.00 würde mir gut passen. \nPfeilshofer Weg 34 im Parterre rechts bei Mohr.",
+        "metadata": {
+          "is_from_me": false,
+          "has_media": false,
+          "type": "chat",
+          "chat_name": "Sarah Ohnesorge",
+          "sender": "Sarah",
+          "chat_id": "491786838260@c.us",
+          "timestamp": "2026-03-10T12:54:59",
+          "source": "whatsapp"
+        },
+        "score": 0.2971
+      },
+      {
+        "id": "messages_d765977a",
+        "collection": "messages",
+        "document": "Aber ja, Döner macht schöner",
+        "metadata": {
+          "chat_name": "Marius Mew",
+          "timestamp": "2026-03-11T10:55:53",
+          "type": "chat",
+          "sender": "Marius",
+          "source": "whatsapp",
+          "chat_id": "491632939138@c.us",
+          "is_from_me": false,
+          "has_media": false
+        },
+        "score": 0.2944
+      },
+      {
+        "id": "messages_32925b9c",
+        "collection": "messages",
+        "document": "Würdest  Du mit mir in den golden döner gehen hier in der Manhagener? Dann kann ich lecker Seitan Döner essen.....",
+        "metadata": {
+          "sender": "Ich",
+          "source": "whatsapp",
+          "timestamp": "2026-03-11T10:55:11",
+          "has_media": false,
+          "type": "chat",
+          "is_from_me": true,
+          "chat_name": "Marius Mew",
+          "chat_id": "491798924094@c.us"
+        },
+        "score": 0.2898
+      },
+      {
+        "id": "photos_2bc65b18",
+        "collection": "photos",
+        "document": "Foto: 20251112_184233.jpg\nDatum: 12.11.2025 um 17:42 Uhr\nOrt: Lübeck, Schleswig-Holstein, Deutschland\nKoordinaten: 53.87050°N, 10.68841°E\nPersonen: Sarah, Nora",
+        "metadata": {
+          "date_iso": "2025-11-12T17:42:34+00:00",
+          "has_joshua": false,
+          "cluster": "Schwerin",
+          "filename": "20251112_184233.jpg",
+          "persons": "Nora,Sarah",
+          "alt": 55.0,
+          "place_name": "Lübeck, Schleswig-Holstein, Deutschland",
+          "source": "google_photos",
+          "lat": 53.8705033,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "has_sarah": true,
+          "has_nora": true,
+          "lon": 10.6884116,
+          "date_ts": 1762969354
+        },
+        "score": 0.2853
+      },
+      {
+        "id": "photos_d14928a4",
+        "collection": "photos",
+        "document": "Foto: 20250201_112821.jpg\nDatum: 01.02.2025 um 10:28 Uhr\nOrt: Lübeck, Schleswig-Holstein, Deutschland\nKoordinaten: 53.95488°N, 10.86995°E\nPersonen: Joshua Bacher, Nora",
+        "metadata": {
+          "source": "google_photos",
+          "cluster": "",
+          "has_sarah": false,
+          "has_nora": true,
+          "place_name": "Lübeck, Schleswig-Holstein, Deutschland",
+          "has_joshua": true,
+          "lat": 53.9548849,
+          "filename": "20250201_112821.jpg",
+          "alt": 41.0,
+          "date_iso": "2025-02-01T10:28:22+00:00",
+          "date_ts": 1738405702,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lon": 10.8699459,
+          "persons": "Joshua Bacher,Nora"
+        },
+        "score": 0.2759
+      },
+      {
+        "id": "photos_75de93dd",
+        "collection": "photos",
+        "document": "Foto: 20250201_112820.jpg\nDatum: 01.02.2025 um 10:28 Uhr\nOrt: Lübeck, Schleswig-Holstein, Deutschland\nKoordinaten: 53.95488°N, 10.86995°E\nPersonen: Joshua Bacher, Nora",
+        "metadata": {
+          "cluster": "",
+          "date_ts": 1738405700,
+          "has_joshua": true,
+          "has_josh": true,
+          "lat": 53.9548849,
+          "lon": 10.8699459,
+          "date_iso": "2025-02-01T10:28:20+00:00",
+          "source": "google_photos",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "filename": "20250201_112820.jpg",
+          "alt": 41.0,
+          "persons": "Josh,Joshua Bacher,Nora",
+          "has_nora": true,
+          "has_sarah": false,
+          "place_name": "Lübeck, Schleswig-Holstein, Deutschland"
+        },
+        "score": 0.2753
+      },
+      {
+        "id": "photos_9495f938",
+        "collection": "photos",
+        "document": "Foto: 20250201_112819.jpg\nDatum: 01.02.2025 um 10:28 Uhr\nOrt: Lübeck, Schleswig-Holstein, Deutschland\nKoordinaten: 53.95488°N, 10.86995°E\nPersonen: Joshua Bacher, Nora",
+        "metadata": {
+          "has_nora": true,
+          "filename": "20250201_112819.jpg",
+          "has_sarah": false,
+          "lat": 53.9548849,
+          "cluster": "",
+          "place_name": "Lübeck, Schleswig-Holstein, Deutschland",
+          "lon": 10.8699459,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_iso": "2025-02-01T10:28:19+00:00",
+          "has_joshua": true,
+          "date_ts": 1738405699,
+          "source": "google_photos",
+          "has_josh": true,
+          "persons": "Josh,Joshua Bacher,Nora",
+          "alt": 41.0
+        },
+        "score": 0.2753
+      }
+    ],
+    "system_prompt": "⚠️ WICHTIG - AKTUELLES DATUM: 11.03.2026 (Mittwoch)\n\nZeitliche Berechnungen IMMER von diesem Datum aus:\n- \"letztes Wochenende\" = Samstag 07.03.2026 + Sonntag 08.03.2026\n- \"diese Woche\" = 09.03.2026 bis 15.03.2026\n- \"gestern\" = 10.03.2026\n- \"vorgestern\" = 09.03.2026\n- \"letztes Jahr\" = 2025\n- \"dieses Jahr\" = 2026\n\nDu bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.\nDu hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.\n\n🎯 WICHTIGSTE REGEL für \"Wo war ich?\"-Fragen:\n1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)\n2. Extrahiere aus den Foto-Metadaten das \"Stadtname:\"-Feld oder \"Ort:\"-Feld. Das \"Stadtname:\"-Feld ist der EXAKTE STADTNAME — nutze immer diesen (z.B. \"Ahrensburg\", nicht \"Hamburg-Ost\")\n3. Liste ALLE unterschiedlichen Städte/Orte auf, die in den Quellen auftauchen — auch wenn nur ein Foto aus diesem Ort stammt\n4. Nenne die Orte als erste Information in deiner Antwort\n5. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)\n\nBEISPIEL:\nUser: \"Wo war ich im August 2022 mit Nora?\"\n→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.\n→ Tool: search_photos(personen=[\"Nora\"], von_datum=\"2022-08-01\", bis_datum=\"2022-08-31\")\n→ Observation: [Foto vom 15.08.2022, cluster=\"München-Schwabing\", GPS: 48.16°N 11.58°E]\n→ Antwort: \"Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]].\"\n\nReAct (Reasoning and Acting) Ansatz:\n- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:\n  * Welche Informationen fehlen mir noch (Datum, Ort, Personen)?\n  * Beispiel: \"Wie ging es Sarah, als ich mit Nora in München war?\"\n    -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=[\"Nora\"], orte=[\"München\"]).\n    -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.\n\n- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.\n\nWeitere Regeln:\n1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere NIEMALS Fakten.\n2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).\n3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.\n4. Antworte auf Deutsch. Falls nach \"Gefühlen\" oder \"Stimmung\" gefragt wird, nutze `search_messages`.\n5. Bei Ortsfragen: nutze das \"Ort:\"-Feld oder \"Cluster/Ort:\"-Feld aus den Quellen. Das \"Ort:\"-Feld ist immer der tatsächliche Ortsname (z.B. \"Ahrensburg\"), nutze es bevorzugt.\n6. Falls keine passenden Daten für den gefragten Zeitraum gefunden wurden: Sage klar \"Ich habe dazu keine Einträge in deinen Daten.\" NIEMALS Orte, Zeiten oder Namen erfinden die nicht in den Quellen stehen.\n7. Falls nach einem heutigen Termin gefragt wird und keine aktuellen Quellen vorhanden sind: Gib an was die zuletzt gefundenen relevanten Daten zeigen und erkläre, dass für heute keine Einträge vorliegen.\n\nANTWORTSTIL:\n- Präzise und kurz (3-4 Sätze für einfache Fragen)\n- Exakte Ortsangaben ZUERST (z.B. \"Du warst in München\", nicht \"Es gibt Fotos aus einer Stadt\")\n- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)",
+    "parsed_query": {}
+  },
+  "golden": {
+    "answer": "Im Sommer 2019 hat Sarah Urlaub auf Amrum gemacht. Josh war währenddessen auf einer Surfveranstaltung (vermutlich Fehmarn/Ostsee). Sie haben sich regelmäßig per WhatsApp ausgetauscht.",
+    "required_facts": [
+      "Amrum",
+      "Urlaub",
+      "2019"
+    ],
+    "forbidden_facts": [],
+    "set_by": "prompt-engineer",
+    "set_at": "2026-03-11T20:55:59"
+  }
+}

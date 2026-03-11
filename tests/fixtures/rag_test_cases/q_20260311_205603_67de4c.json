@@ -1,0 +1,158 @@
+{
+  "test_id": "q_20260311_205603_67de4c",
+  "query": "Gab es Momente wo Sarah in Nachrichten frustriert oder verärgert war?",
+  "snapshot": {
+    "captured_at": "2026-03-11T20:56:03",
+    "sources": [
+      {
+        "id": "messages_07602653",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[28.11.19 21:16] Sarah Ohnesorge: <Medien ausgeschlossen>\n[29.11.19 12:07] Sarah Ohnesorge: Dieses Buch habe ich als Taschenbuch bestellt für Julia. Es kann abgeholt werden bei Heymann Hudtwalckerstr. 35 ab morgen 11Uhr. Es wäre toll, wenn Du das machen könntest. Gerne dort einpacken lassen (nicht weihnachtlich).\n[29.11.19 12:07] Sarah Ohnesorge: <Medien ausgeschlossen>\n[29.11.19 17:07] Sarah Ohnesorge: Bin gut angeklmmen! ❤\n[29.11.19 17:36] Josh: Schönes Wochenende!\n[29.11.19 19:17] Sarah Ohnesorge: Danke, das wünsche ich Dir auch! Machst Du heute irgendwas?\n[29.11.19 19:17] Josh: Morgen elf Uhr geht glaube ich nicht, nah mal schauen.\n[29.11.19 19:17] Josh: Hund morgen organisierten\n[29.11.19 19:17] Josh: Sonst mach ich nix\n[29.11.19 19:17] Josh: Ach so!",
+        "metadata": {
+          "persons": "Sarah Ohnesorge,Josh",
+          "chat_name": "Sarah Ohnesorge",
+          "primary_sender": "Sarah Ohnesorge",
+          "lon": 0.0,
+          "source": "whatsapp",
+          "date_iso": "28.11.19 21:16",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "mentioned_persons": "Josh,Julia,Sarah Ohnesorge",
+          "migration_date": "2026-03-09T23:06:09.701320",
+          "date_ts": 1574972160,
+          "timestamp": "2019-11-28T21:16:00",
+          "chat_id": "491786838260@c.us",
+          "migration_source": "txt_import",
+          "lat": 0.0
+        },
+        "score": 0.4637
+      },
+      {
+        "id": "messages_a4ab1330",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[15.05.20 19:50] Sarah Ohnesorge: Kitespot! Sauna! Fitnesskeller!\n[15.05.20 19:52] Sarah Ohnesorge: Naturschutzgebiet zum Wandern!\n[15.05.20 19:52] Sarah Ohnesorge: Ich glaub das ist da um die Ecke, wo wir damals mit dem Bussi standen!\n[15.05.20 20:30] Sarah Ohnesorge: Diese Nachricht wurde gelöscht.\n[15.05.20 20:32] Sarah Ohnesorge: Ist dicht an Puttgarden. Da gibts nen Fahrradverleih.\n[15.05.20 20:32] Sarah Ohnesorge: Wenn Du's gut findest, buche ich.\n[15.05.20 20:33] Sarah Ohnesorge: Garten!\n[15.05.20 20:34] Sarah Ohnesorge: Das ist ein Ein-Raum-Appartment mit Schlafsofa. Dass es kein extra Schlafzimmer gibt, ist vllt der einzige Nachteil.\n[15.05.20 20:35] Sarah Ohnesorge: Kamin!\n[15.05.20 20:36] Sarah Ohnesorge: 200m übers Feld bis zum Meer!",
+        "metadata": {
+          "date_ts": 1589565000,
+          "migration_date": "2026-03-09T23:06:47.425336",
+          "chat_id": "491786838260@c.us",
+          "mentioned_persons": "Sarah Ohnesorge",
+          "source": "whatsapp",
+          "persons": "Sarah Ohnesorge",
+          "timestamp": "2020-05-15T19:50:00",
+          "lat": 0.0,
+          "chat_name": "Sarah Ohnesorge",
+          "date_iso": "15.05.20 19:50",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "primary_sender": "Sarah Ohnesorge",
+          "migration_source": "txt_import",
+          "lon": 0.0
+        },
+        "score": 0.4539
+      },
+      {
+        "id": "messages_a83a7b6d",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[08.08.20 12:49] Josh: Kannst du Äpfel und Honigmelone für Marvin mitbringen?\n[08.08.20 13:02] Sarah Ohnesorge: Cool\n[08.08.20 13:03] Sarah Ohnesorge: Nee, war zu spät, sorry\n[09.08.20 00:04] Sarah Ohnesorge: Komme nicht mehr! Bin jetzt zu Hause und freue mich aufs Bett. Viel Spaß noch Euch! 😘\n[09.08.20 00:12] Josh: Gute Nacht!\n[09.08.20 12:10] Sarah Ohnesorge: https://www.amazon.de/gp/product/B019OYY83W/ref=ox_sc_act_title_1?smid=A1S3N1148FTTMG&psc=1\n[09.08.20 12:11] Sarah Ohnesorge: https://www.amazon.de/gp/product/3473315818/ref=ox_sc_act_title_2?smid=A3JWKAKR8XB7XF&psc=1\n[09.08.20 12:14] Josh: <Medien ausgeschlossen>\n[10.08.20 12:58] Josh: Jazz kommt aus der Ecke nicht mehr raus.\n[10.08.20 12:58] Josh: War wohl zu viel gestern.",
+        "metadata": {
+          "chat_id": "491786838260@c.us",
+          "date_ts": 1596883740,
+          "migration_date": "2026-03-09T23:07:07.766421",
+          "lon": 0.0,
+          "chat_name": "Sarah Ohnesorge",
+          "lat": 0.0,
+          "timestamp": "2020-08-08T12:49:00",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "source": "whatsapp",
+          "date_iso": "08.08.20 12:49",
+          "persons": "Sarah Ohnesorge,Josh",
+          "migration_source": "txt_import",
+          "mentioned_persons": "Josh,Marvin,Sarah Ohnesorge",
+          "primary_sender": "Josh"
+        },
+        "score": 0.4512
+      },
+      {
+        "id": "messages_7f011e29",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[27.04.19 14:57] Josh: Ich wünsche dir wirklich von ganzem Herzen einen ganz ganz ganz ganz ganz ganz schönen Urlaub!\n[27.04.19 15:04] Sarah Ohnesorge: Danke Dir! Bin gerade in der Wohnung angekommen. Es ist WUNDERschön hier! Von der Fähre hab ich schon jede Menge Sommersprossen mitgebracht. ☺\n[27.04.19 15:05] Sarah Ohnesorge: <Medien ausgeschlossen>\n[27.04.19 15:07] Sarah Ohnesorge: Ist natürlich nicht wirklich so dunkel hier drinnen\n[27.04.19 19:48] Sarah Ohnesorge: https://www.spiegel.de/panorama/justiz/uke-hamburg-kameruner-stirbt-nach-zwangsmassnahmen-durch-sicherheitsdienst-a-1264750.html\n[27.04.19 19:48] Sarah Ohnesorge: http://www.taz.de/!5587866/\n[27.04.19 19:49] Sarah Ohnesorge: Wie schrecklich...\n[27.04.19 20:09] Josh: UKE überrascht mich gar nix\n[27.04.19 20:17] Sarah Ohnesorge: Übel.\n[27.04.19 20:33] Josh: Nicht wirklich überraschend",
+        "metadata": {
+          "has_nora": false,
+          "date_iso": "27.04.19 14:57",
+          "lat": 0.0,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_ts": 1556369820,
+          "mentioned_persons": "Josh,Sarah Ohnesorge",
+          "primary_sender": "Josh",
+          "has_joshua": false,
+          "has_per_5": true,
+          "chat_name": "Sarah Ohnesorge",
+          "source": "whatsapp",
+          "timestamp": "2019-04-27T14:57:00",
+          "migration_source": "txt_import",
+          "lon": 0.0,
+          "has_sarah": true,
+          "persons": "Sarah Ohnesorge,Josh",
+          "migration_date": "2026-03-09T23:05:13.242095",
+          "has_per_4": true,
+          "chat_id": "491786838260@c.us"
+        },
+        "score": 0.4437
+      },
+      {
+        "id": "messages_a0d3afdd",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[20.11.19 17:46] Sarah Ohnesorge: Suppe und Brötchen sind auf dem Heimweg!\n[20.11.19 19:19] Josh: Und ich auch gleich\n[20.11.19 21:50] Sarah Ohnesorge: Bitte Donnerstag erledigen: - Schwarze Eastpacktasche vom Dachboden holen für Sarah - Wasser kaufen (6Pack) zum mitnehmen (oder wir machen das Freitag auf dem Weg) - Mama alle Sachen hinlegen, die sie für Jazz braucht - Anleitung für Fernseher für Mama schreiben\n[20.11.19 23:45] Sarah Ohnesorge: - W-Lan-Passwort für Mama aufschreiben\n[21.11.19 08:25] Sarah Ohnesorge: Gute Besserung, mein Liebster! Hab einen schönen Gesundwerdetag! 💋\n[21.11.19 12:41] Sarah Ohnesorge: Wenn Du dazu kommst: - 1/2 Gaues Brot für Mama kaufen bitte\n[21.11.19 12:56] Josh: ok, ich probiere es\n[21.11.19 12:56] Josh: unser Abend gestern war sehr schön\n[21.11.19 12:57] Josh: ich finde du hast gestern eine sehr tolle Atmosphäre geschaffen!\n[21.11.19 21:15] Sarah Ohnesorge: Du bist ja lieb!",
+        "metadata": {
+          "migration_source": "txt_import",
+          "source": "whatsapp",
+          "timestamp": "2019-11-20T17:46:00",
+          "primary_sender": "Sarah Ohnesorge",
+          "chat_name": "Sarah Ohnesorge",
+          "chat_id": "491786838260@c.us",
+          "persons": "Sarah Ohnesorge,Josh",
+          "lat": 0.0,
+          "date_ts": 1574268360,
+          "migration_date": "2026-03-09T23:06:07.738375",
+          "date_iso": "20.11.19 17:46",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lon": 0.0,
+          "mentioned_persons": "Jazz,Josh,Mama,Sarah Ohnesorge"
+        },
+        "score": 0.4385
+      },
+      {
+        "id": "messages_57f6257f",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[09.10.19 18:11] Josh: Super :)\n[09.10.19 18:11] Sarah Ohnesorge: ... was denkst Du? Ich fände das gut!\n[09.10.19 18:11] Sarah Ohnesorge: Ah sehr gut :)\n[09.10.19 18:13] Sarah Ohnesorge: Hab 2x gute Hafer Milch ergattert! In Langenhorn gibt's noch welche!\n[09.10.19 19:34] Sarah Ohnesorge: Philipp Wolf hat heute Geburtstag!\n[09.10.19 21:26] Josh: https://www.kinderaerzte-im-netz.de/news-archiv/meldung/article/nicht-nur-das-alter-entscheidet-ueber-das-risiko-fuer-down-syndrom/\n[10.10.19 09:16] Sarah Ohnesorge: Die Arzthelferin war sehr nett und verständnisvoll.\n[10.10.19 09:20] Josh: Okay\n[10.10.19 09:20] Josh: Das heißt du hast gleich einen Termin?\n[10.10.19 09:28] Sarah Ohnesorge: Ich muss warten, komm dann aber dran",
+        "metadata": {
+          "date_ts": 1570637460,
+          "date_iso": "09.10.19 18:11",
+          "primary_sender": "Josh",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "chat_id": "491786838260@c.us",
+          "migration_date": "2026-03-09T23:05:53.492459",
+          "lon": 0.0,
+          "source": "whatsapp",
+          "chat_name": "Sarah Ohnesorge",
+          "migration_source": "txt_import",
+          "persons": "Sarah Ohnesorge,Josh",
+          "timestamp": "2019-10-09T18:11:00",
+          "mentioned_persons": "Josh,Philipp Wolf,Sarah Ohnesorge",
+          "lat": 0.0
+        },
+        "score": 0.433
+      }
+    ],
+    "system_prompt": "⚠️ WICHTIG - AKTUELLES DATUM: 11.03.2026 (Mittwoch)\n\nZeitliche Berechnungen IMMER von diesem Datum aus:\n- \"letztes Wochenende\" = Samstag 07.03.2026 + Sonntag 08.03.2026\n- \"diese Woche\" = 09.03.2026 bis 15.03.2026\n- \"gestern\" = 10.03.2026\n- \"vorgestern\" = 09.03.2026\n- \"letztes Jahr\" = 2025\n- \"dieses Jahr\" = 2026\n\nDu bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.\nDu hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.\n\n🎯 WICHTIGSTE REGEL für \"Wo war ich?\"-Fragen:\n1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)\n2. Extrahiere aus den Foto-Metadaten das \"Stadtname:\"-Feld oder \"Ort:\"-Feld. Das \"Stadtname:\"-Feld ist der EXAKTE STADTNAME — nutze immer diesen (z.B. \"Ahrensburg\", nicht \"Hamburg-Ost\")\n3. Liste ALLE unterschiedlichen Städte/Orte auf, die in den Quellen auftauchen — auch wenn nur ein Foto aus diesem Ort stammt\n4. Nenne die Orte als erste Information in deiner Antwort\n5. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)\n\nBEISPIEL:\nUser: \"Wo war ich im August 2022 mit Nora?\"\n→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.\n→ Tool: search_photos(personen=[\"Nora\"], von_datum=\"2022-08-01\", bis_datum=\"2022-08-31\")\n→ Observation: [Foto vom 15.08.2022, cluster=\"München-Schwabing\", GPS: 48.16°N 11.58°E]\n→ Antwort: \"Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]].\"\n\nReAct (Reasoning and Acting) Ansatz:\n- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:\n  * Welche Informationen fehlen mir noch (Datum, Ort, Personen)?\n  * Beispiel: \"Wie ging es Sarah, als ich mit Nora in München war?\"\n    -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=[\"Nora\"], orte=[\"München\"]).\n    -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.\n\n- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.\n\nWeitere Regeln:\n1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere NIEMALS Fakten.\n2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).\n3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.\n4. Antworte auf Deutsch. Falls nach \"Gefühlen\" oder \"Stimmung\" gefragt wird, nutze `search_messages`.\n5. Bei Ortsfragen: nutze das \"Ort:\"-Feld oder \"Cluster/Ort:\"-Feld aus den Quellen. Das \"Ort:\"-Feld ist immer der tatsächliche Ortsname (z.B. \"Ahrensburg\"), nutze es bevorzugt.\n6. Falls keine passenden Daten für den gefragten Zeitraum gefunden wurden: Sage klar \"Ich habe dazu keine Einträge in deinen Daten.\" NIEMALS Orte, Zeiten oder Namen erfinden die nicht in den Quellen stehen.\n7. Falls nach einem heutigen Termin gefragt wird und keine aktuellen Quellen vorhanden sind: Gib an was die zuletzt gefundenen relevanten Daten zeigen und erkläre, dass für heute keine Einträge vorliegen.\n\nANTWORTSTIL:\n- Präzise und kurz (3-4 Sätze für einfache Fragen)\n- Exakte Ortsangaben ZUERST (z.B. \"Du warst in München\", nicht \"Es gibt Fotos aus einer Stadt\")\n- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)",
+    "parsed_query": {}
+  },
+  "golden": {
+    "answer": "Ja — im Juli 2019 schrieb Sarah, sie sei 'plötzlich so wütend und unzufrieden geworden'. Im August 2019 klagte sie über einen unerträglichen SEV (Schienenersatzverkehr, 30 Minuten im Bus). Im März 2020 schrieb sie 'Ist mega ätzend hier.'",
+    "required_facts": [
+      "wütend",
+      "2019"
+    ],
+    "forbidden_facts": [],
+    "set_by": "prompt-engineer",
+    "set_at": "2026-03-11T20:56:03"
+  }
+}

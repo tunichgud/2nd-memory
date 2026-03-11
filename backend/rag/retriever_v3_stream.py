@@ -50,6 +50,8 @@ async def answer_v3_stream(
     date_to: str | None = None,
     use_chain_of_thought: bool = True,
     show_thoughts: bool = True,
+    use_thinking_mode: bool = False,
+    thinking_max_iterations: int = 3,
 ) -> AsyncGenerator[str, None]:
     """
     RAG v3 mit Real-Time Streaming.
@@ -212,20 +214,34 @@ async def answer_v3_stream(
         })
 
         # ====================================================================
-        # Phase 7: Stream LLM Answer
+        # Phase 7: Stream LLM Answer — Standard ODER Thinking Mode
         # ====================================================================
-        if show_thoughts:
-            yield _event("thought", "Generiere Antwort basierend auf gefundenen Quellen") + "\n\n"
+        if use_thinking_mode:
+            # ── THINKING MODE: Researcher → Challenger → Decider ──────────
+            if show_thoughts:
+                yield _event("thought", "Aktiviere Thinking Mode — Researcher, Challenger und Decider analysieren die Quellen") + "\n\n"
 
-        # Stream Answer via LLM
-        async for event in chat_stream(messages):
-            # chat_stream yields {"type": "text"|"thought"|"tool_call", "content": ...}
-            # We pass it through as-is
-            if event["type"] == "text":
-                yield _event("text", event["content"]) + "\n\n"
-            elif event["type"] in ("thought", "tool_call", "tool_result"):
-                # Forward tool events to frontend
-                yield _event(event["type"], event["content"]) + "\n\n"
+            from backend.rag.thinking_mode import thinking_mode_stream
+            async for thinking_event in thinking_mode_stream(
+                query=query,
+                context=context,
+                max_iterations=thinking_max_iterations,
+            ):
+                yield thinking_event
+        else:
+            # ── STANDARD MODE: Direkter LLM-Call ─────────────────────────
+            if show_thoughts:
+                yield _event("thought", "Generiere Antwort basierend auf gefundenen Quellen") + "\n\n"
+
+            # Stream Answer via LLM
+            async for event in chat_stream(messages):
+                # chat_stream yields {"type": "text"|"thought"|"tool_call", "content": ...}
+                # We pass it through as-is
+                if event["type"] == "text":
+                    yield _event("text", event["content"]) + "\n\n"
+                elif event["type"] in ("thought", "tool_call", "tool_result"):
+                    # Forward tool events to frontend
+                    yield _event(event["type"], event["content"]) + "\n\n"
 
         # ====================================================================
         # Phase 8: Send Sources (Final)

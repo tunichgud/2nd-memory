@@ -1,0 +1,241 @@
+{
+  "test_id": "q_20260311_205602_b742f2",
+  "query": "Haben Monika und Sarah gemeinsam an Ereignissen teilgenommen?",
+  "snapshot": {
+    "captured_at": "2026-03-11T20:56:02",
+    "sources": [
+      {
+        "id": "photos_bfae5ac8",
+        "collection": "photos",
+        "document": "Foto: 20250829_192312.jpg\nDatum: 29.08.2025 um 17:23 Uhr\nOrt: München, Bayern, Deutschland\nKoordinaten: 48.14021°N, 11.55518°E\nPersonen: Nora, Sarah",
+        "metadata": {
+          "alt": 568.0,
+          "place_name": "München, Bayern, Deutschland",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_ts": 1756488193,
+          "lat": 48.140210499999995,
+          "cluster": "München-Ost",
+          "has_ringo": true,
+          "filename": "20250829_192312.jpg",
+          "has_nora": true,
+          "persons": "Nora,Sarah",
+          "source": "google_photos",
+          "date_iso": "2025-08-29T17:23:13+00:00",
+          "has_joshua": false,
+          "lon": 11.555185,
+          "has_sarah": true
+        },
+        "score": 0.3615
+      },
+      {
+        "id": "photos_779f527d",
+        "collection": "photos",
+        "document": "Foto: 20250830_101808.jpg\nDatum: 30.08.2025 um 08:18 Uhr\nOrt: Bruck, Bayern, Deutschland\nKoordinaten: 48.05569°N, 11.92447°E\nPersonen: Nora, Sarah",
+        "metadata": {
+          "persons": "Nora,Sarah",
+          "lat": 48.0556916,
+          "filename": "20250830_101808.jpg",
+          "source": "google_photos",
+          "place_name": "Bruck, Bayern, Deutschland",
+          "date_iso": "2025-08-30T08:18:08+00:00",
+          "alt": 0.0,
+          "lon": 11.9244745,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "has_nora": true,
+          "date_ts": 1756541888,
+          "has_sarah": true,
+          "has_joshua": false,
+          "cluster": "München-FernOst"
+        },
+        "score": 0.3587
+      },
+      {
+        "id": "photos_a7d81c43",
+        "collection": "photos",
+        "document": "Foto: 20250203_091639.jpg\nDatum: 03.02.2025 um 08:16 Uhr\nOrt: Ahrensburg, Schleswig-Holstein, Deutschland\nKoordinaten: 53.66390°N, 10.23404°E\nPersonen: Sarah\nBildbeschreibung: Hier ist eine Beschreibung des Bildes:\n\nDas Bild zeigt eine Frau mittleren Alters mit hochgebundenen Haaren und einer Sportjacke. Sie sitzt an einem Tisch und hält einen Löffel mit einer grünen Substanz, vermutlich Essen, in der Hand. Die Umgebung scheint ein helles, gemütliches Zimmer zu sein, möglicherweise ein Esszimmer oder eine Küche, erkennbar an den Dekorationen und Möbeln im Hintergrund. Die Stimmung wirkt entspannt und alltäglich, und die Tageszeit scheint sonnig zu sein, da das Zimmer gut beleuchtet ist.",
+        "metadata": {
+          "has_sarah": true,
+          "persons": "Sarah",
+          "cluster": "",
+          "lon": 10.2340383,
+          "date_iso": "2025-02-03T08:16:39+00:00",
+          "date_ts": 1738570599,
+          "has_joshua": false,
+          "lat": 53.6639005,
+          "has_nora": true,
+          "place_name": "Ahrensburg, Schleswig-Holstein, Deutschland",
+          "alt": 93.0,
+          "filename": "20250203_091639.jpg",
+          "source": "google_photos",
+          "user_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "score": 0.3551
+      },
+      {
+        "id": "photos_8f49a29f",
+        "collection": "photos",
+        "document": "Foto: 20250901_085745.jpg\nDatum: 01.09.2025 um 06:57 Uhr\nOrt: München, Bayern, Deutschland\nKoordinaten: 48.14059°N, 11.55471°E\nPersonen: Nora",
+        "metadata": {
+          "date_iso": "2025-09-01T06:57:45+00:00",
+          "cluster": "München-Ost",
+          "has_sarah": false,
+          "has_joshua": false,
+          "date_ts": 1756709865,
+          "lon": 11.5547106,
+          "alt": 568.0,
+          "persons": "Nora",
+          "filename": "20250901_085745.jpg",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "has_nora": true,
+          "place_name": "München, Bayern, Deutschland",
+          "lat": 48.1405936,
+          "source": "google_photos"
+        },
+        "score": 0.3548
+      },
+      {
+        "id": "photos_805044b9",
+        "collection": "photos",
+        "document": "Foto: 20250901_094337.jpg\nDatum: 01.09.2025 um 07:43 Uhr\nOrt: Augsburg, Bayern, Deutschland\nKoordinaten: 48.36386°N, 10.88845°E\nPersonen: Nora",
+        "metadata": {
+          "place_name": "Augsburg, Bayern, Deutschland",
+          "lat": 48.363863599999995,
+          "source": "google_photos",
+          "has_joshua": false,
+          "date_ts": 1756712617,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "alt": 0.0,
+          "has_sarah": false,
+          "filename": "20250901_094337.jpg",
+          "lon": 10.8884475,
+          "persons": "Nora",
+          "date_iso": "2025-09-01T07:43:37+00:00",
+          "has_nora": true,
+          "cluster": "Augsburg"
+        },
+        "score": 0.3497
+      },
+      {
+        "id": "photos_aa9a6a1d",
+        "collection": "photos",
+        "document": "Foto: 20250315_185402.jpg\nDatum: 15.03.2025 um 17:54 Uhr\nOrt: Ahrensburg, Schleswig-Holstein, Deutschland\nKoordinaten: 53.66382°N, 10.23359°E\nPersonen: Nora\nBildbeschreibung: Hier ist eine Beschreibung des Bildes in 2-4 Sätzen:\n\nDas Bild zeigt eine junge, lächelnde Mädchen mit blonden Haaren, die in einem Hochstuhl sitzt. Sie trägt ein geblümtes Shirt und einen Lätzchen und scheint etwas zu essen. Im Hintergrund ist eine Frau in bequemer Kleidung zu sehen, sowie ein Essbereich mit Tellern und eine spielerisch eingerichtete Umgebung mit Spielzeug. Die Szene findet drinnen statt, wahrscheinlich in einem Esszimmer oder einer Küche, und die Stimmung wirkt gemütlich und entspannt.",
+        "metadata": {
+          "has_joshua": false,
+          "date_iso": "2025-03-15T17:54:02+00:00",
+          "lon": 10.2335905,
+          "filename": "20250315_185402.jpg",
+          "date_ts": 1742061242,
+          "alt": 62.0,
+          "has_sarah": false,
+          "lat": 53.6638162,
+          "place_name": "Ahrensburg, Schleswig-Holstein, Deutschland",
+          "has_nora": true,
+          "source": "google_photos",
+          "cluster": "",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "persons": "Nora"
+        },
+        "score": 0.3467
+      },
+      {
+        "id": "messages_a0d3afdd",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[20.11.19 17:46] Sarah Ohnesorge: Suppe und Brötchen sind auf dem Heimweg!\n[20.11.19 19:19] Josh: Und ich auch gleich\n[20.11.19 21:50] Sarah Ohnesorge: Bitte Donnerstag erledigen: - Schwarze Eastpacktasche vom Dachboden holen für Sarah - Wasser kaufen (6Pack) zum mitnehmen (oder wir machen das Freitag auf dem Weg) - Mama alle Sachen hinlegen, die sie für Jazz braucht - Anleitung für Fernseher für Mama schreiben\n[20.11.19 23:45] Sarah Ohnesorge: - W-Lan-Passwort für Mama aufschreiben\n[21.11.19 08:25] Sarah Ohnesorge: Gute Besserung, mein Liebster! Hab einen schönen Gesundwerdetag! 💋\n[21.11.19 12:41] Sarah Ohnesorge: Wenn Du dazu kommst: - 1/2 Gaues Brot für Mama kaufen bitte\n[21.11.19 12:56] Josh: ok, ich probiere es\n[21.11.19 12:56] Josh: unser Abend gestern war sehr schön\n[21.11.19 12:57] Josh: ich finde du hast gestern eine sehr tolle Atmosphäre geschaffen!\n[21.11.19 21:15] Sarah Ohnesorge: Du bist ja lieb!",
+        "metadata": {
+          "date_ts": 1574268360,
+          "migration_source": "txt_import",
+          "timestamp": "2019-11-20T17:46:00",
+          "lat": 0.0,
+          "date_iso": "20.11.19 17:46",
+          "chat_name": "Sarah Ohnesorge",
+          "persons": "Sarah Ohnesorge,Josh",
+          "migration_date": "2026-03-09T23:06:07.738375",
+          "chat_id": "491786838260@c.us",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "primary_sender": "Sarah Ohnesorge",
+          "mentioned_persons": "Jazz,Josh,Mama,Sarah Ohnesorge",
+          "source": "whatsapp",
+          "lon": 0.0
+        },
+        "score": 0.388
+      },
+      {
+        "id": "messages_3e588141",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[06.01.21 16:17] Sarah Ohnesorge: Hebst Du ein Stück Kuchen für mich auf? 😇\n[06.01.21 16:35] Josh: Mach ich! Monika kommt sogar gleich persönlich vorbei um sich ihr Stück zu sichern 😄\n[07.01.21 08:59] Sarah Ohnesorge: <Medien ausgeschlossen>\n[09.01.21 13:23] Josh: Ich melde mich gleich\n[09.01.21 13:38] Sarah Ohnesorge: Bitte bring die sachen für Monika mit 😘\n[11.01.21 09:22] Josh: So, nachdem ich die Nachricht erhalten habe, dass unser neuer Waschtrockner auf dem Weg zu uns ist, habe ich unsere alte WaMa bei ebay Kleinanzeigen eingestellt. :)\n[11.01.21 10:29] Sarah Ohnesorge: Ach cool! Hoffentlich bekommen wir da noch was für?!\n[11.01.21 10:29] Josh: Ich hab sie mal fuer 190 Euro reingestellt. Mal sehen, was da passiert.\n[11.01.21 10:54] Sarah Ohnesorge: Noch kein Befund da in der Praxis ☹️\n[11.01.21 10:54] Sarah Ohnesorge: Gehe später zu Rewe, brauchst Du was?",
+        "metadata": {
+          "date_iso": "06.01.21 16:17",
+          "lon": 0.0,
+          "date_ts": 1609946220,
+          "source": "whatsapp",
+          "migration_source": "txt_import",
+          "timestamp": "2021-01-06T16:17:00",
+          "lat": 0.0,
+          "migration_date": "2026-03-09T23:08:06.350033",
+          "mentioned_persons": "Josh,Monika,Sarah Ohnesorge",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "persons": "Sarah Ohnesorge,Josh",
+          "chat_name": "Sarah Ohnesorge",
+          "chat_id": "491786838260@c.us"
+        },
+        "score": 0.3784
+      },
+      {
+        "id": "messages_23b4fc94",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[16.09.19 19:15] Sarah Ohnesorge: Bin noch nicht zu Hause... wann warst Du zuletzt mit Jazz draußen?\n[17.09.19 21:42] Sarah Ohnesorge: Katrin hat immer noch keine Antwort, ob Du am 11.10. abends Zeit hast, sie und Alan zu treffen. Sie fragt schon wieder nach. Hab jetzt nur für mich zugesagt. Wär aber cool, wenn Du auch könntest.\n[17.09.19 21:43] Sarah Ohnesorge: Sie müssen das planen, sind ja nur ganz kurz hier.\n[17.09.19 21:43] Josh: 11.10. sollte passen. :)\n[17.09.19 21:44] Sarah Ohnesorge: Sehr gut\n[17.09.19 21:45] Sarah Ohnesorge: Sag mit bitte vorher Bescheid, wenn Du abends jemanden mit her bringst. Das war mir SEHR unangenehm.\n[17.09.19 21:46] Josh: Verstehe ich nicht. Warum?\n[17.09.19 21:46] Josh: War echt total easy\n[18.09.19 08:35] Josh: Ich kann mich in all den Jahren meines Arbeitslebens nicht daran erinnern, daß ich mit dem was ich gemacht habe so erfolgreich war. Gleichzeitig kann ich mich nicht daran erinnern, wann ich mal über so eine lange Periode so viel Spaß hatte bei der Arbeit.\n[18.09.19 08:35] Josh: Gleichzeitig war ich bisher noch nicht so stolz auf meine Arbeit und auf mein Team.",
+        "metadata": {
+          "migration_source": "txt_import",
+          "persons": "Sarah Ohnesorge,Josh",
+          "date_ts": 1568654100,
+          "timestamp": "2019-09-16T19:15:00",
+          "migration_date": "2026-03-09T23:05:48.810920",
+          "source": "whatsapp",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lon": 0.0,
+          "primary_sender": "Sarah Ohnesorge",
+          "lat": 0.0,
+          "chat_name": "Sarah Ohnesorge",
+          "mentioned_persons": "Alan,Josh,Katrin,Sarah Ohnesorge",
+          "chat_id": "491786838260@c.us",
+          "date_iso": "16.09.19 19:15"
+        },
+        "score": 0.3527
+      },
+      {
+        "id": "messages_14a0a0f1",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[04.02.21 17:15] Sarah Ohnesorge: Du bist so ein Schatz!\n[04.02.21 17:15] Sarah Ohnesorge: Soll ich Dir als kleinen Ausgleich irgendwas einkaufen?\n[04.02.21 17:15] Sarah Ohnesorge: Und das mit dem Schatz ist ganz ernst gemeint diesmal. ❤️\n[04.02.21 17:15] Josh: Schatz??????\n[04.02.21 17:15] Josh: Du willst Dich trennen?\n[04.02.21 17:17] Josh: Kaufen brauchst Du fuer mich nix.\n[04.02.21 17:17] Josh: Hm.....vielleicht Maultaschen. :)\n[06.02.21 16:52] Sarah Ohnesorge: Öl Eier Bier Obst Gemüse Pflaster Milch Klobürste Geschenk Monika\n[06.02.21 17:41] Josh: <Medien ausgeschlossen>\n[06.02.21 18:53] Josh: Ich hab irgendwie richtig Bock auf Sandwiches heute",
+        "metadata": {
+          "mentioned_persons": "Josh,Sarah Ohnesorge",
+          "lat": 0.0,
+          "persons": "Sarah Ohnesorge,Josh",
+          "date_ts": 1612455300,
+          "source": "whatsapp",
+          "chat_id": "491786838260@c.us",
+          "migration_date": "2026-03-09T23:08:15.292807",
+          "chat_name": "Sarah Ohnesorge",
+          "date_iso": "04.02.21 17:15",
+          "migration_source": "txt_import",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lon": 0.0,
+          "timestamp": "2021-02-04T17:15:00"
+        },
+        "score": 0.3512
+      }
+    ],
+    "system_prompt": "⚠️ WICHTIG - AKTUELLES DATUM: 11.03.2026 (Mittwoch)\n\nZeitliche Berechnungen IMMER von diesem Datum aus:\n- \"letztes Wochenende\" = Samstag 07.03.2026 + Sonntag 08.03.2026\n- \"diese Woche\" = 09.03.2026 bis 15.03.2026\n- \"gestern\" = 10.03.2026\n- \"vorgestern\" = 09.03.2026\n- \"letztes Jahr\" = 2025\n- \"dieses Jahr\" = 2026\n\nDu bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.\nDu hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.\n\n🎯 WICHTIGSTE REGEL für \"Wo war ich?\"-Fragen:\n1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)\n2. Extrahiere aus den Foto-Metadaten das \"Stadtname:\"-Feld oder \"Ort:\"-Feld. Das \"Stadtname:\"-Feld ist der EXAKTE STADTNAME — nutze immer diesen (z.B. \"Ahrensburg\", nicht \"Hamburg-Ost\")\n3. Liste ALLE unterschiedlichen Städte/Orte auf, die in den Quellen auftauchen — auch wenn nur ein Foto aus diesem Ort stammt\n4. Nenne die Orte als erste Information in deiner Antwort\n5. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)\n\nBEISPIEL:\nUser: \"Wo war ich im August 2022 mit Nora?\"\n→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.\n→ Tool: search_photos(personen=[\"Nora\"], von_datum=\"2022-08-01\", bis_datum=\"2022-08-31\")\n→ Observation: [Foto vom 15.08.2022, cluster=\"München-Schwabing\", GPS: 48.16°N 11.58°E]\n→ Antwort: \"Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]].\"\n\nReAct (Reasoning and Acting) Ansatz:\n- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:\n  * Welche Informationen fehlen mir noch (Datum, Ort, Personen)?\n  * Beispiel: \"Wie ging es Sarah, als ich mit Nora in München war?\"\n    -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=[\"Nora\"], orte=[\"München\"]).\n    -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.\n\n- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.\n\nWeitere Regeln:\n1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere NIEMALS Fakten.\n2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).\n3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.\n4. Antworte auf Deutsch. Falls nach \"Gefühlen\" oder \"Stimmung\" gefragt wird, nutze `search_messages`.\n5. Bei Ortsfragen: nutze das \"Ort:\"-Feld oder \"Cluster/Ort:\"-Feld aus den Quellen. Das \"Ort:\"-Feld ist immer der tatsächliche Ortsname (z.B. \"Ahrensburg\"), nutze es bevorzugt.\n6. Falls keine passenden Daten für den gefragten Zeitraum gefunden wurden: Sage klar \"Ich habe dazu keine Einträge in deinen Daten.\" NIEMALS Orte, Zeiten oder Namen erfinden die nicht in den Quellen stehen.\n7. Falls nach einem heutigen Termin gefragt wird und keine aktuellen Quellen vorhanden sind: Gib an was die zuletzt gefundenen relevanten Daten zeigen und erkläre, dass für heute keine Einträge vorliegen.\n\nANTWORTSTIL:\n- Präzise und kurz (3-4 Sätze für einfache Fragen)\n- Exakte Ortsangaben ZUERST (z.B. \"Du warst in München\", nicht \"Es gibt Fotos aus einer Stadt\")\n- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)",
+    "parsed_query": {}
+  },
+  "golden": {
+    "answer": "Auf Fotos aus Ahrensburg (Januar 2025, Mai 2025) sind sowohl Nora als auch Sarah zu sehen. Monika ist ebenfalls in Ahrensburg auf Fotos. Eine direkte Überschneidung aller drei in einer Szene lässt sich aus den Metadaten schließen.",
+    "required_facts": [
+      "Ahrensburg",
+      "Monika",
+      "Sarah"
+    ],
+    "forbidden_facts": [],
+    "set_by": "prompt-engineer",
+    "set_at": "2026-03-11T20:56:02"
+  }
+}

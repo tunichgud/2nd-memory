@@ -70,6 +70,8 @@ async function _sendQueryStream(query, abortSignal) {
     chat_history: window._chatHistory,
     n_results: 6,
     min_score: 0.2,
+    use_thinking_mode: window._thinkingModeEnabled || false,
+    thinking_max_iterations: 3,
   };
   _debugLog('API POST /api/v1/query_stream', requestBody);
 
@@ -127,6 +129,18 @@ async function _sendQueryStream(query, abortSignal) {
           if (responseUi.lastToolStepId) {
             updateToolResultStep(responseUi, responseUi.lastToolStepId, chunk.content);
           }
+        }
+        // THINKING MODE EVENT TYPES (Researcher → Challenger → Decider)
+        else if (chunk.type === "thinking_start") {
+          addThinkingStartStep(responseUi, chunk.content);
+        } else if (chunk.type === "researcher") {
+          addResearcherStep(responseUi, chunk.content);
+        } else if (chunk.type === "challenger") {
+          addChallengerStep(responseUi, chunk.content);
+        } else if (chunk.type === "decider") {
+          addDeciderStep(responseUi, chunk.content);
+        } else if (chunk.type === "thinking_end") {
+          addThinkingEndStep(responseUi, chunk.content);
         }
         // LEGACY EVENT TYPES (Fallback for v2)
         else if (chunk.type === "plan") {
@@ -465,6 +479,129 @@ function updateToolResultStep(ui, stepId, resultData) {
 
   scrollBottom();
 }
+
+// ============================================================================
+// THINKING MODE UI — Researcher → Challenger → Decider
+// ============================================================================
+
+function addThinkingStartStep(ui, data) {
+  const step = document.createElement('div');
+  step.className = 'timeline-step opacity-0 animate-fadeIn';
+  step.innerHTML = `
+    <div class="flex items-start gap-2 p-2 bg-indigo-950/40 rounded-lg border-l-2 border-indigo-500">
+      <div class="text-indigo-400 mt-0.5">🔮</div>
+      <div class="flex-1">
+        <div class="text-indigo-300 font-semibold mb-1">Thinking Mode aktiv</div>
+        <div class="text-gray-400 text-[10px]">${escHtml(data.message || '')} (max. ${data.max_iterations} Iterationen)</div>
+      </div>
+      <div class="animate-pulse text-indigo-400">●</div>
+    </div>
+  `;
+  ui.timelineSteps.appendChild(step);
+  setTimeout(() => step.classList.remove('opacity-0'), 10);
+  scrollBottom();
+}
+
+function addResearcherStep(ui, data) {
+  const step = document.createElement('div');
+  step.className = 'timeline-step opacity-0 animate-fadeIn';
+
+  // Researcher-Inhalt einklappbar machen
+  const contentId = `researcher-content-${data.iteration || Date.now()}`;
+  const preview = (data.content || '').slice(0, 120).replace(/\n/g, ' ');
+
+  step.innerHTML = `
+    <div class="flex items-start gap-2 p-2 bg-blue-950/40 rounded-lg border-l-2 border-blue-400">
+      <div class="text-blue-400 mt-0.5">🔬</div>
+      <div class="flex-1">
+        <button class="text-blue-300 font-semibold mb-1 text-left hover:text-blue-200 w-full flex justify-between"
+                onclick="document.getElementById('${contentId}').classList.toggle('hidden'); this.querySelector('.toggle-icon').textContent = document.getElementById('${contentId}').classList.contains('hidden') ? '▶' : '▼'">
+          <span>Researcher (Iter. ${data.iteration || 1})</span>
+          <span class="toggle-icon text-[10px] text-gray-500">▼</span>
+        </button>
+        <div class="text-gray-500 italic text-[10px] mb-1">${escHtml(preview)}...</div>
+        <div id="${contentId}" class="text-gray-300 text-[10px] whitespace-pre-wrap hidden mt-1 p-2 bg-gray-900/50 rounded">${escHtml(data.content || '')}</div>
+      </div>
+      <div class="text-blue-400 text-lg">✓</div>
+    </div>
+  `;
+  ui.timelineSteps.appendChild(step);
+  setTimeout(() => step.classList.remove('opacity-0'), 10);
+  scrollBottom();
+}
+
+function addChallengerStep(ui, data) {
+  const step = document.createElement('div');
+  step.className = 'timeline-step opacity-0 animate-fadeIn';
+
+  const contentId = `challenger-content-${data.iteration || Date.now()}`;
+  const preview = (data.content || '').slice(0, 120).replace(/\n/g, ' ');
+
+  step.innerHTML = `
+    <div class="flex items-start gap-2 p-2 bg-orange-950/40 rounded-lg border-l-2 border-orange-400">
+      <div class="text-orange-400 mt-0.5">⚡</div>
+      <div class="flex-1">
+        <button class="text-orange-300 font-semibold mb-1 text-left hover:text-orange-200 w-full flex justify-between"
+                onclick="document.getElementById('${contentId}').classList.toggle('hidden'); this.querySelector('.toggle-icon').textContent = document.getElementById('${contentId}').classList.contains('hidden') ? '▶' : '▼'">
+          <span>Challenger (Iter. ${data.iteration || 1})</span>
+          <span class="toggle-icon text-[10px] text-gray-500">▼</span>
+        </button>
+        <div class="text-gray-500 italic text-[10px] mb-1">${escHtml(preview)}...</div>
+        <div id="${contentId}" class="text-gray-300 text-[10px] whitespace-pre-wrap hidden mt-1 p-2 bg-gray-900/50 rounded">${escHtml(data.content || '')}</div>
+      </div>
+      <div class="text-orange-400 text-lg">✓</div>
+    </div>
+  `;
+  ui.timelineSteps.appendChild(step);
+  setTimeout(() => step.classList.remove('opacity-0'), 10);
+  scrollBottom();
+}
+
+function addDeciderStep(ui, data) {
+  const step = document.createElement('div');
+  step.className = 'timeline-step opacity-0 animate-fadeIn';
+
+  const isContinue = data.decision === 'continue';
+  const decisionColor = isContinue ? 'border-yellow-400 bg-yellow-950/30' : 'border-green-400 bg-green-950/30';
+  const decisionIcon = isContinue ? '🔄' : '✅';
+  const decisionText = isContinue ? `Weiter recherchieren — ${escHtml(data.focus || '')}` : 'Antwort finalisieren';
+  const decisionLabelColor = isContinue ? 'text-yellow-300' : 'text-green-300';
+
+  step.innerHTML = `
+    <div class="flex items-start gap-2 p-2 rounded-lg border-l-2 ${decisionColor}">
+      <div class="mt-0.5">${decisionIcon}</div>
+      <div class="flex-1">
+        <div class="${decisionLabelColor} font-semibold mb-1">Decider (Iter. ${data.iteration || 1}): ${decisionText}</div>
+        <div class="text-gray-500 text-[10px] italic">${escHtml((data.reasoning || '').slice(0, 150))}</div>
+      </div>
+    </div>
+  `;
+  ui.timelineSteps.appendChild(step);
+  setTimeout(() => step.classList.remove('opacity-0'), 10);
+  scrollBottom();
+}
+
+function addThinkingEndStep(ui, data) {
+  const step = document.createElement('div');
+  step.className = 'timeline-step opacity-0 animate-fadeIn';
+  step.innerHTML = `
+    <div class="flex items-start gap-2 p-2 bg-purple-950/30 rounded-lg border-l-2 border-purple-400">
+      <div class="text-purple-400 mt-0.5">🏁</div>
+      <div class="flex-1">
+        <div class="text-purple-300 font-semibold">Thinking Mode abgeschlossen</div>
+        <div class="text-gray-500 text-[10px]">${data.iterations} Iteration(en) — Synthese läuft...</div>
+      </div>
+      <div class="text-green-400 text-lg">✓</div>
+    </div>
+  `;
+  ui.timelineSteps.appendChild(step);
+  setTimeout(() => step.classList.remove('opacity-0'), 10);
+  scrollBottom();
+}
+
+// ============================================================================
+// END THINKING MODE UI
+// ============================================================================
 
 async function updateStreamingSources(ui, sources) {
   if (!sources || sources.length === 0) return;

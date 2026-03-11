@@ -1,0 +1,441 @@
+{
+  "timestamp": "20260311_210128",
+  "test_cases": 23,
+  "models": 1,
+  "winner": "gemini:gemini-2.5-flash",
+  "summaries": [
+    {
+      "model": "gemini:gemini-2.5-flash",
+      "tested": 23,
+      "pass": 5,
+      "partial": 3,
+      "fail": 15,
+      "pass_rate": 0.217,
+      "partial_rate": 0.13,
+      "fail_rate": 0.652,
+      "overall_score": 0.317,
+      "avg_latency_ms": 3369
+    }
+  ],
+  "full_results": [
+    {
+      "model": "gemini:gemini-2.5-flash",
+      "tested": 23,
+      "pass": 5,
+      "partial": 3,
+      "fail": 15,
+      "pass_rate": 0.217,
+      "partial_rate": 0.13,
+      "fail_rate": 0.652,
+      "overall_score": 0.317,
+      "avg_latency_ms": 3369,
+      "details": [
+        {
+          "test_id": "q_20260311_150705_0170df",
+          "query": "Wo treffe ich mich heute mit Marius?",
+          "answer": "Basierend auf den vorliegenden Nachrichten ist der Treffpunkt mit Marius für heute nicht ersichtlich. Die Nachrichten vom **11. März 2026** zeigen lediglich, dass du selbst nach dem Treffpunkt gefragt hast [[1]], [[2]], [[3]].",
+          "golden": "Du triffst dich mit Marius um 12:15 Uhr beim Italiener, Villa Romana in Ahrensburg.",
+          "verdict": "FAIL",
+          "score": 0.0,
+          "embedding_sim": 0.5733,
+          "missing_facts": [
+            "Villa Romana",
+            "12:15",
+            "Ahrensburg"
+          ],
+          "wrong_facts": [
+            "Der Treffpunkt ist nicht ersichtlich"
+          ],
+          "reasoning": "Die generierte Antwort behauptet fälschlicherweise, der Treffpunkt sei nicht ersichtlich, obwohl die Referenzantwort alle notwendigen Details liefert. Alle Pflicht-Fakten fehlen und die Aussage ist inhaltlich komplett falsch.",
+          "latency_ms": 3237
+        },
+        {
+          "test_id": "q_20260311_151849_8bf1fb",
+          "query": "Wo war ich mit Nora im letzten August?",
+          "answer": "Im letzten August (August 2025) warst du mit Nora in **Ahrensburg** [[4]], **Hamburg** [[2]], **München** [[1], [6]], **Bruck** [[5]] und **Planegg** [[3]].\n\nDu warst am 14. August in Ahrensburg [[4]]. Am 29. August gab es Fotos aus Hamburg [[2]] und München [[1]]. Am 30. August warst du in Bruck [[5]] und am 31. August in Planegg [[3]] und erneut in München [[6]].",
+          "golden": "Im letzten August warst du mit Nora in München (München-Ost, München-FernOst/Bruck, München-Zentrum, Planegg), in Hamburg und in Ahrensburg.",
+          "verdict": "PARTIAL",
+          "score": 0.6,
+          "embedding_sim": 0.8156,
+          "missing_facts": [],
+          "wrong_facts": [
+            "Die Angabe 'August 2025' als Interpretation von 'letzten August'"
+          ],
+          "reasoning": "Die generierte Antwort nennt alle im Referenztext aufgeführten Orte (München, Ahrensburg, Hamburg, Bruck, Planegg) korrekt und vollständig, einschließlich der Pflicht-Fakten. Allerdings interpretiert sie 'letzten August' fälschlicherweise als 'August 2025', was eine inhaltliche Inkonsistenz bezüglich der Zeitreferenz darstellt, da 'letzten August' sich auf einen vergangenen Zeitpunkt bezieht. Dies ist ein signifikanter temporaler Fehler.",
+          "latency_ms": 2900
+        },
+        {
+          "test_id": "q_20260311_151907_f749db",
+          "query": "Wo war ich mit Nora im letzten Sommer?",
+          "answer": "Im letzten Sommer (Juni, Juli, August 2025) warst du mit Nora in **Ahrensburg**, **Stepenitztal**, **München**, **Planegg**, **Hamburg** und **Bruck**.\n\nIhr wart im Juni in Ahrensburg [[3]] und Stepenitztal [[7]]. Im Juli gab es Nachrichten von Nora aus Ahrensburg [[1]]. Ende August wart ihr in München [[2]], Planegg [[4]], Hamburg [[5]] und Bruck [[6]].",
+          "golden": "Im letzten Sommer warst du mit Nora in München (München-Ost, München-FernOst/Bruck, München-Zentrum, Planegg), in Hamburg, in Ahrensburg und in Stepenitztal (Wismar).",
+          "verdict": "PASS",
+          "score": 0.95,
+          "embedding_sim": 0.8138,
+          "missing_facts": [],
+          "wrong_facts": [
+            "Das Jahr '2025' ist inkorrekt für 'letzten Sommer', da dies ein zukünftiges Jahr ist."
+          ],
+          "reasoning": "Alle Pflicht-Fakten ('München', 'Ahrensburg', 'Stepenitztal') sind korrekt und vollständig enthalten. Die weiteren genannten Orte ('Hamburg', 'Planegg', 'Bruck') stimmen ebenfalls mit der Referenz überein. Die generierte Antwort liefert somit alle relevanten und korrekten Orte. Der einzige inhaltliche Fehler ist die Angabe des Jahres '2025' für 'letzten Sommer', was eine zeitliche Inkonsistenz darstellt. Da die Kerninformationen zu den Orten jedoch vollständig und korrekt sind, wird die Antwort als 'PASS' bewertet, mit einem kleinen Punktabzug für die inkorrekte Jahresangabe.",
+          "latency_ms": 8595
+        },
+        {
+          "test_id": "q_20260311_205558_86379b",
+          "query": "Wo war ich mit Nora und Sarah zusammen im Januar 2025?",
+          "answer": "Du warst im **Januar 2025** mit Nora und Sarah zusammen in **Ahrensburg** [[6]]. Ein Foto vom **1. Januar 2025** zeigt euch dort [[6]].",
+          "golden": "Ihr wart gemeinsam in Ahrensburg. Am 1. Januar 2025 gibt es ein Foto von euch dreien in Ahrensburg.",
+          "verdict": "PASS",
+          "score": 0.95,
+          "embedding_sim": 0.6286,
+          "missing_facts": [],
+          "wrong_facts": [],
+          "reasoning": "Alle Pflicht-Fakten ('Ahrensburg', 'Januar 2025') sind korrekt und vollständig in der generierten Antwort enthalten. Es sind keine verbotenen Fakten vorhanden und die Antwort ist inhaltlich korrekt und deckt sich mit der Referenz. Die Formulierung ist leicht abweichend ('Du warst' statt 'Ihr wart'), aber inhaltlich korrekt bezogen auf die Nutzeranfrage.",
+          "latency_ms": 1232
+        },
+        {
+          "test_id": "q_20260311_205559_1a74fd",
+          "query": "Was haben Sarah und ich im Sommer 2019 gemacht? Gab es Urlaube oder besondere Ereignisse?",
+          "answer": "Ich habe keine Einträge in deinen Daten gefunden, die Aktivitäten mit Sarah im Sommer 2019 beschreiben oder auf Urlaube oder besondere Ereignisse in diesem Zeitraum hinweisen. Die vorliegenden Informationen zu Sarah stammen aus dem **August 2020** [[1]] und dem **November 2025** [[7]].",
+          "golden": "Im Sommer 2019 hat Sarah Urlaub auf Amrum gemacht. Josh war währenddessen auf einer Surfveranstaltung (vermutlich Fehmarn/Ostsee). Sie haben sich regelmäßig per WhatsApp ausgetauscht.",
+          "verdict": "FAIL",
+          "score": 0.0,
+          "embedding_sim": 0.5678,
+          "missing_facts": [
+            "Sarahs Urlaub auf Amrum im Sommer 2019",
+            "Joshs Surfveranstaltung im Sommer 2019"
+          ],
+          "wrong_facts": [
+            "Ich habe keine Einträge in deinen Daten gefunden, die Aktivitäten mit Sarah im Sommer 2019 beschreiben oder auf Urlaube oder besondere Ereignisse in diesem Zeitraum hinweisen."
+          ],
+          "reasoning": "Die generierte Antwort behauptet, keine Informationen über Aktivitäten mit Sarah im Sommer 2019 gefunden zu haben, was direkt der Referenz widerspricht. Die Referenz gibt klare Auskunft über Sarahs Urlaub auf Amrum und Joshs Surfveranstaltung im Sommer 2019. Alle Pflicht-Fakten (Amrum, Urlaub, 2019) werden in ihrer korrekten Kontextualisierung verneint bzw. geleugnet.",
+          "latency_ms": 2638
+        },
+        {
+          "test_id": "q_20260311_205559_66df22",
+          "query": "Mit wem war ich im Stepenitztal?",
+          "answer": "Du warst im **Stepenitztal** am **02.02.2025** mit **Nora** und **Joshua Bacher** [[4], [5]].",
+          "golden": "Im Stepenitztal warst du mit Nora. Es gibt Fotos vom 29. Juni 2025 und vom 30. Mai 2025 aus dem Stepenitztal.",
+          "verdict": "FAIL",
+          "score": 0.2,
+          "embedding_sim": 0.4144,
+          "missing_facts": [],
+          "wrong_facts": [
+            "Joshua Bacher",
+            "02.02.2025 (als Besuchsdatum)"
+          ],
+          "reasoning": "Die Antwort enthält zwar die Pflicht-Fakten 'Nora' und 'Stepenitztal', fügt aber 'Joshua Bacher' als Begleitperson hinzu, was laut Referenz inkorrekt ist. Zudem wird ein Besuchsdatum ('02.02.2025') genannt, das nicht in der Referenz erwähnt wird und im Widerspruch zu den dort genannten Fotodaten (Mai/Juni 2025) steht. Die Hinzufügung falscher Fakten, insbesondere einer falschen Person, führt zum 'FAIL'.",
+          "latency_ms": 969
+        },
+        {
+          "test_id": "q_20260311_205559_68bfc6",
+          "query": "Wann war ich das erste Mal mit Nora in München?",
+          "answer": "Das erste Mal, dass du mit Nora in München warst, war am **29. August 2025** [[3]]. An diesem Tag wurden Fotos in München (München-Ost) aufgenommen, auf denen du und Nora zu sehen seid [[3]]. Es gibt auch Fotos mit Nora aus Bruck am 30. August 2025 [[1]], sowie aus Planegg [[2]] und München-Zentrum [[6]] am 31. August 2025.",
+          "golden": "Das erste gemeinsame Foto mit Nora in München stammt vom August 2025.",
+          "verdict": "PASS",
+          "score": 0.95,
+          "embedding_sim": 0.8883,
+          "missing_facts": [],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort nennt korrekt den 29. August 2025 als das erste Mal mit Nora in München, was eine zulässige Präzisierung des Referenzmonats 'August 2025' ist. Alle Pflicht-Fakten ('München', 'August 2025') sind enthalten und korrekt. Zusätzliche Informationen zu weiteren Orten und Daten sind korrekt, aber für die Kernfrage nicht zwingend notwendig.",
+          "latency_ms": 2883
+        },
+        {
+          "test_id": "q_20260311_205600_315769",
+          "query": "Wo war ich im September 2025 und was habe ich dort gemacht?",
+          "answer": "Ich habe keine Einträge in deinen Daten, die Aktivitäten oder Aufenthaltsorte im **September 2025** zeigen. Die vorhandenen Daten betreffen andere Zeiträume [[1], [2], [3], [4], [5], [6], [7], [8]].",
+          "golden": "Im September 2025 warst du in Oranienbaum-Wörlitz und hast das Restaurant 'Zum Herzog von Anhalt' besucht und mit 5 Sternen bewertet.",
+          "verdict": "FAIL",
+          "score": 0.05,
+          "embedding_sim": 0.2838,
+          "missing_facts": [
+            "Herzog von Anhalt",
+            "Oranienbaum",
+            "Aktivitäten im September 2025 (Besuch des Restaurants)"
+          ],
+          "wrong_facts": [
+            "Keine Einträge für September 2025 vorhanden"
+          ],
+          "reasoning": "Die generierte Antwort behauptet, keine Daten für September 2025 zu haben, obwohl die Referenzantwort detaillierte Informationen (Ort, Aktivität) für diesen Zeitraum bereitstellt. Dies ist eine direkte Falschaussage und führt dazu, dass alle Pflicht-Fakten fehlen oder geleugnet werden.",
+          "latency_ms": 2204
+        },
+        {
+          "test_id": "q_20260311_205600_3a4830",
+          "query": "Ich erinnere mich an ein schlechtes Zahnarzt-Erlebnis — wann war das und was ist danach passiert?",
+          "answer": "Ich habe in deinen Daten keine Einträge gefunden, die sich auf ein Zahnarzt-Erlebnis beziehen. Die vorhandenen Informationen umfassen Bewertungen von Orten wie der Agentenzentrale in **Brandenburg an der Havel** [[1]], der HMV Hanseatischen Materialverwaltung in **Hamburg** [[2]], Zum Herzog von Anhalt in **Oranienbaum-Wörlitz** [[3]] und Küche&Co Hamburg Wandsbek in **Hamburg** [[4]], sowie einige allgemeine Nachrichten [[5], [6], [7]].",
+          "golden": "Du hast die Zahnärzte Dorotheenstraße in Hamburg mit 1/5 Sternen bewertet (März 2025). Als Privatpatient hast du dich nicht gut aufgehoben gefühlt und die Praxis hat sogar eine Abmahnung wegen deiner negativen Rezension versucht.",
+          "verdict": "FAIL",
+          "score": 0.05,
+          "embedding_sim": 0.5688,
+          "missing_facts": [
+            "Dorotheenstraße",
+            "1/5 Sterne",
+            "Abmahnung"
+          ],
+          "wrong_facts": [
+            "Ich habe in deinen Daten keine Einträge gefunden, die sich auf ein Zahnarzt-Erlebnis beziehen."
+          ],
+          "reasoning": "Die generierte Antwort behauptet, keine Informationen zu einem Zahnarzt-Erlebnis gefunden zu haben, was im direkten Widerspruch zur Referenzantwort steht. Alle geforderten Pflicht-Fakten fehlen komplett.",
+          "latency_ms": 2142
+        },
+        {
+          "test_id": "q_20260311_205600_85cca1",
+          "query": "Welche Restaurants in Ahrensburg habe ich bewertet und war ich dort auch mit jemandem auf Fotos?",
+          "answer": "Du hast das **Ristorante Pizzeria da Barone** in Ahrensburg bewertet [[5]].\n\nEs gibt keine Fotos, die direkt im Ristorante Pizzeria da Barone aufgenommen wurden. Allerdings gibt es mehrere Fotos aus Ahrensburg, die Personen zeigen: Du warst am **15.03.2025** mit Nora [[8]], am **23.03.2025** mit Joshua Bacher [[6]] und am **30.03.2025** mit Nora und Joshua Bacher [[7]] in Ahrensburg. Ein weiteres Foto mit Nora stammt vom **28.05.2025** aus Ahrensburg [[9]].",
+          "golden": "In Ahrensburg wurde das Ristorante Pizzeria da Barone (2/5 Sterne, April 2025) und das Caligo Coffee (5/5 Sterne, August 2024) bewertet. In Ahrensburg gibt es viele Fotos, u.a. mit Nora und Sarah.",
+          "verdict": "PARTIAL",
+          "score": 0.65,
+          "embedding_sim": 0.6591,
+          "missing_facts": [
+            "Caligo Coffee",
+            "Sarah"
+          ],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort vergisst, das 'Caligo Coffee' bewertet wurde (Pflicht-Fakt). Zudem wird Sarah, die in der Referenz bei den Fotos genannt wird, in der generierten Antwort nicht erwähnt. Die Angabe der spezifischen Daten und die Erwähnung von Joshua Bacher sind zusätzliche Details, die nicht direkt in der Referenz stehen, aber nicht falsch sind.",
+          "latency_ms": 5294
+        },
+        {
+          "test_id": "q_20260311_205601_1d60fb",
+          "query": "Habe ich Arztpraxen in Hamburg gespeichert oder bewertet?",
+          "answer": "In deinen gespeicherten oder bewerteten Orten in Hamburg gibt es keine Einträge für Arztpraxen. Die vorhandenen Einträge sind unter anderem: HMV Hanseatische Materialverwaltung [[1]], MARIO Ristorante Pizzeria [[3]], Büromöbel - Hans Bunke GbR [[4]], Fressnapf Hamburg-Eppendorf [[5]], Restaurant - Hamburger Elbspeicher [[6]], Café Schöne Aussichten (CSA) [[7]] und Deichtorhallen Hamburg [[8]].",
+          "golden": "Ja, du hast die Zahnärzte Dorotheenstraße in Hamburg bewertet (1 Stern) und die Hausarzt-Praxis Forum Winterhude am Winterhuder Marktplatz als gespeicherten Ort. Außerdem gibt es einen Eintrag für Frau Ioanna Paradowski (Ärztin) in Eppendorf.",
+          "verdict": "FAIL",
+          "score": 0.05,
+          "embedding_sim": 0.5512,
+          "missing_facts": [
+            "Dorotheenstraße",
+            "Forum Winterhude",
+            "Ioanna Paradowski"
+          ],
+          "wrong_facts": [
+            "keine Einträge für Arztpraxen"
+          ],
+          "reasoning": "Die generierte Antwort ist inhaltlich falsch, da sie behauptet, es gäbe keine Einträge für Arztpraxen, obwohl die Referenzantwort explizit drei Einträge, inklusive der Pflicht-Fakten, auflistet. Alle wichtigen Fakten fehlen oder werden sogar negiert.",
+          "latency_ms": 2013
+        },
+        {
+          "test_id": "q_20260311_205601_4057e9",
+          "query": "Gibt es einen veganen Ort in Hamburg, den ich empfehlen würde?",
+          "answer": "Ja, ich würde dir in **Hamburg** \"The Vegan Eagle\" [[1]] empfehlen.\n\nEs ist ein veganes Restaurant im Norden Hamburgs, das am **14. Februar 2025** von dir mit 5 von 5 Sternen bewertet wurde [[1]]. Deine Rezension besagt, dass Essen, Service und Ambiente großartig waren und es als sehr empfehlenswert für Vegetarier eingestuft wurde [[1]].",
+          "golden": "Ja, The Vegan Eagle im Norden Hamburgs (Wischhöfen 4) wurde mit 5 Sternen bewertet. Essen, Service und Ambiente seien alle großartig gewesen.",
+          "verdict": "FAIL",
+          "score": 0.1,
+          "embedding_sim": 0.8169,
+          "missing_facts": [],
+          "wrong_facts": [
+            "Datum der Bewertung (14. Februar 2025)"
+          ],
+          "reasoning": "Die generierte Antwort enthält einen klaren falschen Fakt: Das Datum der Bewertung (14. Februar 2025) ist eine Halluzination und ein zukünftiges Datum für eine vergangene Bewertung. Obwohl die Pflichtfakten vorhanden sind, führt das Vorhandensein eines falschen Faktums gemäß den Bewertungsregeln zu einem 'FAIL'.",
+          "latency_ms": 2258
+        },
+        {
+          "test_id": "q_20260311_205601_9d46db",
+          "query": "Habe ich den Tierpark Wismar schon mal besucht und bewertet?",
+          "answer": "Ja, du hast den **Tierpark Wismar** besucht und bewertet. Dies geschah am **03. Mai 2025** [[2], [3]] und am **11. Mai 2025** [[1]].",
+          "golden": "Ja, du hast den Tierpark Wismar mehrfach bewertet — Bewertungen vom 3. Mai 2025 und 11. Mai 2025 sind vorhanden.",
+          "verdict": "PASS",
+          "score": 0.95,
+          "embedding_sim": 0.8075,
+          "missing_facts": [],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält alle Pflicht-Fakten ('Tierpark Wismar', 'Mai 2025') und ist inhaltlich vollständig korrekt, indem sie die beiden Bewertungsdaten explizit nennt.",
+          "latency_ms": 1516
+        },
+        {
+          "test_id": "q_20260311_205601_cbb068",
+          "query": "Welchen Campingplatz habe ich in Sardinien am besten bewertet?",
+          "answer": "Du hast zwei Campingplätze in Sardinien mit der besten Bewertung von 5/5 Sternen bewertet: Das **Villaggio - Camping La Mandragola** in Siniscola [[1]] am **08.10.2022** und das **International Camping Valledoria** in Valledoria [[2]] am **29.03.2023**.\n\nDu hast zum Villaggio - Camping La Mandragola geschrieben, dass es ein schöner Campingplatz mit direktem Strandzugang und gepflegten Sanitäranlagen ist [[1]]. Beim International Camping Valledoria lobtest du das super freundliche Personal und die Hilfe beim Laden deiner Batterie [[2]].",
+          "golden": "Du hast den Villaggio Camping La Mandragola in Siniscola mit 5 Sternen bewertet — schöner Campingplatz mit direktem Strandzugang und toller Umgebung.",
+          "verdict": "PASS",
+          "score": 0.95,
+          "embedding_sim": 0.8045,
+          "missing_facts": [],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält alle Pflicht-Fakten ('Sardinien', 'La Mandragola', '5 Sterne') korrekt. Sie liefert zusätzlich einen zweiten Campingplatz, der ebenfalls mit 5 Sternen bewertet wurde, was als eine vollständigere Antwort auf 'am besten bewertet' interpretiert werden kann, falls es mehrere gleich gute Bewertungen gibt. Die zusätzlichen Informationen (Bewertungsdatum, spezifisches Lob) sind ebenfalls relevant und korrekt.",
+          "latency_ms": 1788
+        },
+        {
+          "test_id": "q_20260311_205602_11731b",
+          "query": "Wann war Nora zuletzt in München auf Fotos und wann war Sarah das letzte Mal dabei?",
+          "answer": "Nora war zuletzt am **01. September 2025** auf Fotos in **München (München-Ost)** [[4], [10]]. Sarah war zuletzt am **30. August 2025** mit Nora auf Fotos in **Bruck (München-FernOst)** [[1], [7]].\n\nWeitere Fotos mit Nora in München gibt es aus Planegg und München-Zentrum vom 31. August 2025 [[2], [6], [9], [12]].",
+          "golden": "Nora war zuletzt im August 2025 in München auf Fotos. Sarah war ebenfalls im August 2025 in München dabei (z.B. Fotos vom 29.08.2025 in München-Ost und am 30.08.2025 in Bruck).",
+          "verdict": "PARTIAL",
+          "score": 0.5,
+          "embedding_sim": 0.8847,
+          "missing_facts": [
+            "Nora war zuletzt im August 2025 in München auf Fotos."
+          ],
+          "wrong_facts": [
+            "Nora war zuletzt am 01. September 2025 auf Fotos in München."
+          ],
+          "reasoning": "Die generierte Antwort ist teilweise korrekt. Sarahs letzte Anwesenheit am 30. August 2025 in München (Bruck) stimmt mit der Referenz (August 2025) überein. Jedoch gibt die Antwort als Noras letzte Anwesenheit den 01. September 2025 an, was der Referenz ('Nora war zuletzt im August 2025') widerspricht und somit einen wichtigen Fakt falsch wiedergibt.",
+          "latency_ms": 5028
+        },
+        {
+          "test_id": "q_20260311_205602_a9dcfb",
+          "query": "In welchen Ländern war ich auf Reisen und wo habe ich schlechte Erfahrungen gemacht?",
+          "answer": "Du warst auf Reisen in **Portugal** und **Italien**.\n\nIn Portugal hast du 2015 Hostels in **Lissabon** [[9]] und **Porto** [[6]] besucht und warst 2018 in **Ribeira Grande** [[2]]. Im Juli 2024 warst du in **Villamassargia**, Italien, wo du einen sehr positiven Urlaub in einem Agriturismo verbracht hast [[4]].\n\nBasierend auf den vorliegenden Bewertungen und Rezensionen gibt es keine Hinweise auf schlechte Erfahrungen. Alle verzeichneten Erfahrungen sind positiv mit 4 oder 5 von 5 Sternen [[2, 4, 6]].",
+          "golden": "Du warst in Deutschland, Italien, Portugal, Spanien, Vietnam und auf den Azoren. Schlechte Erfahrungen: Salitre Hostel Lissabon (2 Sterne, Schimmel), A Cabana Esposende Portugal (1 Stern), ElementFish Kite Camp Portugal (2 Sterne), sowie mehrere 1-Stern-Bewertungen in Hamburg.",
+          "verdict": "FAIL",
+          "score": 0.05,
+          "embedding_sim": 0.6618,
+          "missing_facts": [
+            "Deutschland",
+            "Spanien",
+            "Vietnam",
+            "Azoren",
+            "Schlechte Erfahrungen: Salitre Hostel Lissabon (2 Sterne, Schimmel)",
+            "Schlechte Erfahrungen: A Cabana Esposende Portugal (1 Stern)",
+            "Schlechte Erfahrungen: ElementFish Kite Camp Portugal (2 Sterne)",
+            "Schlechte Erfahrungen: Mehrere 1-Stern-Bewertungen in Hamburg",
+            "Pflicht-Fakt: '1 Stern'"
+          ],
+          "wrong_facts": [
+            "Es gibt keine Hinweise auf schlechte Erfahrungen.",
+            "Alle verzeichneten Erfahrungen sind positiv mit 4 oder 5 von 5 Sternen."
+          ],
+          "reasoning": "Die generierte Antwort behauptet fälschlicherweise, dass es keine Hinweise auf schlechte Erfahrungen gibt und alle Erlebnisse positiv waren, was im direkten Widerspruch zur Referenzantwort steht. Sie verfehlt somit den Kern der Nutzeranfrage zu schlechten Erfahrungen. Zudem fehlen mehrere bereiste Länder und der Pflicht-Fakt '1 Stern' wird nicht nur ausgelassen, sondern aktiv widerlegt.",
+          "latency_ms": 6789
+        },
+        {
+          "test_id": "q_20260311_205602_b742f2",
+          "query": "Haben Monika und Sarah gemeinsam an Ereignissen teilgenommen?",
+          "answer": "Ja, **Monika** und **Sarah** waren beide in eine gemeinsame Begebenheit involviert. Am **06.01.2021** fragte Sarah, ob ein Stück Kuchen für sie aufgehoben werden kann, woraufhin mitgeteilt wurde, dass Monika ebenfalls persönlich vorbeikommt, um sich ihr Stück zu sichern [[8]]. Später, am **09.01.2021**, bat Sarah, Sachen für Monika mitzubringen [[8]].",
+          "golden": "Auf Fotos aus Ahrensburg (Januar 2025, Mai 2025) sind sowohl Nora als auch Sarah zu sehen. Monika ist ebenfalls in Ahrensburg auf Fotos. Eine direkte Überschneidung aller drei in einer Szene lässt sich aus den Metadaten schließen.",
+          "verdict": "FAIL",
+          "score": 0.05,
+          "embedding_sim": 0.5224,
+          "missing_facts": [
+            "Ahrensburg",
+            "Fotos",
+            "Januar 2025",
+            "Mai 2025"
+          ],
+          "wrong_facts": [
+            "06.01.2021",
+            "Sarah fragte nach Kuchen",
+            "Monika kommt persönlich für Kuchen vorbei",
+            "09.01.2021",
+            "Sarah bat, Sachen für Monika mitzubringen"
+          ],
+          "reasoning": "Die generierte Antwort verfehlt den Pflicht-Fakt 'Ahrensburg' komplett. Sie beschreibt zudem völlig andere Ereignisse und Zeitpunkte (Kuchen und Sachen mitbringen im Januar 2021) als in der Referenzantwort angegeben (Anwesenheit auf Fotos in Ahrensburg im Januar/Mai 2025). Die in der generierten Antwort genannten Fakten zur gemeinsamen Begebenheit sind nicht in der Referenz enthalten und ersetzen die eigentlich referenzierten Fakten. Dies ist eine starke Abweichung vom Inhalt der Referenz.",
+          "latency_ms": 4247
+        },
+        {
+          "test_id": "q_20260311_205603_67de4c",
+          "query": "Gab es Momente wo Sarah in Nachrichten frustriert oder verärgert war?",
+          "answer": "Ich habe keine Nachrichten gefunden, in denen Sarah explizit Frustration oder Ärger äußert.\n\nAuf Joshs Frage, ob sie Äpfel und Honigmelone für Marvin mitbringen kann, antwortet Sarah am **08.08.20** mit \"Nee, war zu spät, sorry\" [[3]], was eine leichte Enttäuschung oder Bedauern ausdrücken könnte, aber nicht als Frustration oder Ärger interpretiert wird.\n\nAm **27.04.19** teilt Sarah Nachrichten über einen Todesfall und kommentiert dies mit \"Wie schrecklich...\" und \"Übel.\" [[4]], was Bestürzung, aber keine persönliche Frustration oder Ärger im Gesprächskontext darstellt.",
+          "golden": "Ja — im Juli 2019 schrieb Sarah, sie sei 'plötzlich so wütend und unzufrieden geworden'. Im August 2019 klagte sie über einen unerträglichen SEV (Schienenersatzverkehr, 30 Minuten im Bus). Im März 2020 schrieb sie 'Ist mega ätzend hier.'",
+          "verdict": "FAIL",
+          "score": 0.0,
+          "embedding_sim": 0.5629,
+          "missing_facts": [
+            "'wütend' im Juli 2019",
+            "Frustration/Ärger im Jahr 2019 (z.B. SEV-Beschwerde August 2019)"
+          ],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort behauptet, keine expliziten Äußerungen von Frustration oder Ärger gefunden zu haben, was der Referenzantwort direkt widerspricht. Die Referenzantwort listet mehrere klare Beispiele auf, darunter 'wütend' im Juli 2019 und Beschwerden über den SEV im August 2019, welche die Pflicht-Fakten 'wütend' und '2019' explizit abdecken. Die generierte Antwort hat diese wichtigen Fakten und den Kern der Nutzeranfrage komplett verfehlt.",
+          "latency_ms": 4682
+        },
+        {
+          "test_id": "q_20260311_205603_9df80c",
+          "query": "Wie war die Stimmung zwischen Sarah und mir im Februar/März 2020?",
+          "answer": "Ich habe in deinen Daten keine Nachrichten oder Informationen gefunden, die die Stimmung zwischen dir und Sarah im **Februar/März 2020** beschreiben. Die vorliegenden Nachrichten stammen aus späteren Zeiträumen im Jahr 2020 und 2021 [[1], [2], [3], [4], [5]] oder aus dem Jahr 2019 [[6]].",
+          "golden": "Im Februar und März 2020 schrieben sich Sarah und Josh regelmäßig. Die Nachrichten zeigen eine enge, unterstützende Beziehung. Es gab Momente der Sorge und gegenseitigen Unterstützung (Josh: 'Geht es Dir gut?', Sarah: 'Ja, ist schön.'). Die Corona-Zeit begann, was Reisen und Treffen erschwerte.",
+          "verdict": "FAIL",
+          "score": 0.0,
+          "embedding_sim": 0.6677,
+          "missing_facts": [
+            "regelmäßige Kommunikation zwischen Sarah und Josh im Februar/März 2020",
+            "enge, unterstützende Beziehung",
+            "Momente der Sorge und gegenseitigen Unterstützung (z.B. 'Geht es Dir gut?', 'Ja, ist schön.')",
+            "Beginn der Corona-Zeit, die Reisen und Treffen erschwerte"
+          ],
+          "wrong_facts": [
+            "Die Behauptung, keine Nachrichten oder Informationen gefunden zu haben, die die Stimmung zwischen Sarah und dem Nutzer im Februar/März 2020 beschreiben."
+          ],
+          "reasoning": "Die generierte Antwort behauptet explizit, keine Informationen für Februar/März 2020 gefunden zu haben, die die Stimmung beschreiben. Die Referenzantwort hingegen liefert detaillierte Informationen über die Kommunikation und Stimmung in genau diesem Zeitraum. Dies ist eine direkte und fundamentale inhaltliche Falschaussage, die das Kern der Nutzeranfrage komplett verfehlt.",
+          "latency_ms": 2265
+        },
+        {
+          "test_id": "q_20260311_205603_ea9342",
+          "query": "Hat Josh jemals über Papa oder Monika in Nachrichten gesprochen und in welchem Kontext?",
+          "answer": "Ich habe die vorliegenden Nachrichten durchsucht und konnte keine Erwähnung von **Josh**, **Papa** oder **Monika** finden [[1]], [[2]], [[3]], [[4]], [[5]], [[6]].",
+          "golden": "Ja — Im Juni 2019 fragte Sarah ob sie sich 'Samstagabend mit Papa und Monika' treffen können, Josh stimmte begeistert zu. Im Januar 2020 erwähnte Josh einen Anruf von 'Dieter'. Monika wird auch in Zusammenhang mit Jazz (dem Hund) erwähnt.",
+          "verdict": "FAIL",
+          "score": 0.0,
+          "embedding_sim": 0.4273,
+          "missing_facts": [
+            "Josh stimmte einem Treffen mit Papa und Monika im Juni 2019 zu",
+            "Monika wird in Zusammenhang mit Jazz (dem Hund) erwähnt"
+          ],
+          "wrong_facts": [
+            "Es wurde keine Erwähnung von Papa oder Monika gefunden."
+          ],
+          "reasoning": "Die generierte Antwort behauptet, keine Erwähnung von 'Papa' oder 'Monika' gefunden zu haben, was im direkten Widerspruch zur Referenzantwort steht. Die Referenzantwort gibt spezifische Kontexte an, in denen 'Papa' und 'Monika' (und Joshs Beteiligung) erwähnt wurden. Die generierte Antwort liefert somit eine vollständig falsche Information.",
+          "latency_ms": 1287
+        },
+        {
+          "test_id": "q_20260311_205603_f60ae9",
+          "query": "In welcher Stadt bin ich am häufigsten auf Fotos zu sehen — Hamburg oder München?",
+          "answer": "Du bist auf Fotos häufiger in **München** zu sehen als in Hamburg.\n\nEs gibt 5 Fotos aus München:\n*   Ein Foto aus **Planegg** vom 31. August 2025 [[4]].\n*   Zwei Fotos aus **München-Ost** vom 29. August 2025 [[8], [9]].\n*   Ein Foto aus **München-Ost** vom 1. September 2025 [[11]].\n*   Ein Foto aus **München-Zentrum** vom 31. August 2025 [[12]].\n\nDemgegenüber gibt es 4 Fotos aus Hamburg:\n*   Ein Foto aus **Hamburg-Zentrum** vom 29. August 2025 [[2]].\n*   Ein Foto aus **Hamburg-Süd2** vom 16. Mai 2025 [[5]].\n*   Ein Foto aus **Hamburg** vom 18. November 2025 [[6]].\n*   Ein Foto aus **Hamburg** vom 27. Januar 2025 [[7]].",
+          "golden": "In den gespeicherten Fotos ist Hamburg häufiger vertreten als München. Nora war in München vor allem im August 2025. Hamburg (inkl. Ahrensburg als Umland) ist über mehrere Jahre mit deutlich mehr Fotos präsent.",
+          "verdict": "FAIL",
+          "score": 0.1,
+          "embedding_sim": 0.8525,
+          "missing_facts": [],
+          "wrong_facts": [
+            "Die Aussage, dass München häufiger auf Fotos vertreten ist als Hamburg"
+          ],
+          "reasoning": "Die generierte Antwort behauptet, auf Fotos häufiger in München zu sein als in Hamburg (München: 5 Fotos, Hamburg: 4 Fotos). Die Referenzantwort stellt jedoch klar, dass Hamburg häufiger vertreten ist als München. Dies ist ein direkter und fundamentaler Faktfehler in der Hauptaussage der Antwort.",
+          "latency_ms": 6422
+        },
+        {
+          "test_id": "q_20260311_205603_fafd1f",
+          "query": "Wo habe ich in Hamburg gespeicherte Orte die mit Essen zu tun haben?",
+          "answer": "In **Hamburg** hast du mehrere Orte gespeichert, die mit Essen zu tun haben:\n*   Das **Restaurant - Hamburger Elbspeicher** (gespeichert am 21.12.2015) [[1]]\n*   Den **Pizza Social Club** (gespeichert am 04.01.2017) [[2]]\n*   Das **Café Schöne Aussichten (CSA)** (gespeichert am 24.02.2016) [[3]]\n*   Die **Gröninger Privatbrauerei Hamburg** (gespeichert am 02.03.2017) [[7]]",
+          "golden": "In Hamburg sind gespeichert: Pizza Social Club (Mühlenkamp), Ky Lan (Dorotheenstraße), Goldbeker (Schinkelstraße), Schramme 10 (Schrammsweg), Zum tanzenden Einhorn (Hammer Steindamm), Gröninger Privatbrauerei.",
+          "verdict": "FAIL",
+          "score": 0.1,
+          "embedding_sim": 0.655,
+          "missing_facts": [
+            "Ky Lan",
+            "Goldbeker",
+            "Schramme 10",
+            "Zum tanzenden Einhorn"
+          ],
+          "wrong_facts": [
+            "Restaurant - Hamburger Elbspeicher",
+            "Café Schöne Aussichten (CSA)"
+          ],
+          "reasoning": "Die generierte Antwort enthält zwei Orte, die laut Referenz nicht zu den gespeicherten Orten gehören (falsche Fakten) und lässt vier korrekt gespeicherte Orte unerwähnt (fehlende Fakten). Obwohl die Pflicht-Fakten ('Hamburg', 'Pizza Social Club') enthalten sind, überwiegen die inhaltlichen Fehler und die Unvollständigkeit, was zu einem 'FAIL' führt.",
+          "latency_ms": 2663
+        },
+        {
+          "test_id": "q_20260311_205604_a43cfe",
+          "query": "Welche Urlaubsreise war für mich besonders positiv — laut Bewertungen und Nachrichten?",
+          "answer": "Basierend auf deinen Bewertungen war die Reise nach **Porto, Portugal**, im **Juli 2015** besonders positiv [[5]]. Du hast dort das Restaurant \"Baixa 22 - Sushi & Sangrias\" mit 5 von 5 Sternen bewertet und die Erfahrung als \"Delicious sushi, friendly and helpful staff, good music. Love it.\" beschrieben [[5]].\n\nEs gibt auch positive Bewertungen aus **Fehmarn, Deutschland**, im **Mai 2016** für den \"Grünen Brink\" (4/5 Sterne) [[3]] und im **Oktober 2020** für \"Zum goldenen Anker\" (4/5 Sterne) [[6]], die auf Urlaub hindeuten könnten.",
+          "golden": "Besonders positiv bewertet wurde der Aufenthalt bei Agriturismo B&B Monte Majore in Sardinien (5 Sterne, 2024) — 'Ein absolutes Highlight'. Ebenfalls sehr positiv: die Azoren-Reise (Surf Center, Terra do Pico Whale Watching, alle 5 Sterne, 2018).",
+          "verdict": "FAIL",
+          "score": 0.05,
+          "embedding_sim": 0.4601,
+          "missing_facts": [
+            "Sardinien",
+            "5 Sterne (für Sardinien/Azoren)",
+            "Highlight (für Sardinien)",
+            "Agriturismo B&B Monte Majore",
+            "Azoren",
+            "2018",
+            "2024"
+          ],
+          "wrong_facts": [
+            "Porto, Portugal, Juli 2015 (als die besonders positive Reise)",
+            "Fehmarn, Deutschland, Mai 2016 (als die besonders positive Reise)",
+            "Fehmarn, Deutschland, Oktober 2020 (als die besonders positive Reise)"
+          ],
+          "reasoning": "Die generierte Antwort identifiziert komplett andere Reisen (Porto, Fehmarn) als die in der Referenzantwort genannten (Sardinien, Azoren). Dadurch werden alle Pflicht-Fakten sowie die Kerninformationen der Referenzantwort vollständig verfehlt und durch irrelevante Informationen ersetzt.",
+          "latency_ms": 4438
+        }
+      ]
+    }
+  ]
+}
