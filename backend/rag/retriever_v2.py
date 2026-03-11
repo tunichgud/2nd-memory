@@ -30,9 +30,10 @@ Du hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu eri
 
 🎯 WICHTIGSTE REGEL für "Wo war ich?"-Fragen:
 1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)
-2. Extrahiere aus den Foto-Metadaten das "cluster"-Feld (z.B. "München-Schwabing") oder "address"-Feld
-3. Nenne den EXAKTEN ORT als erste Information in deiner Antwort
-4. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)
+2. Extrahiere aus den Foto-Metadaten das "Stadtname:"-Feld oder "Ort:"-Feld. Das "Stadtname:"-Feld ist der EXAKTE STADTNAME — nutze immer diesen (z.B. "Ahrensburg", nicht "Hamburg-Ost")
+3. Liste ALLE unterschiedlichen Städte/Orte auf, die in den Quellen auftauchen — auch wenn nur ein Foto aus diesem Ort stammt
+4. Nenne die Orte als erste Information in deiner Antwort
+5. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)
 
 BEISPIEL:
 User: "Wo war ich im August 2022 mit Nora?"
@@ -51,12 +52,13 @@ ReAct (Reasoning and Acting) Ansatz:
 - WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.
 
 Weitere Regeln:
-1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere keine Fakten.
+1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere NIEMALS Fakten.
 2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).
 3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.
 4. Antworte auf Deutsch. Falls nach "Gefühlen" oder "Stimmung" gefragt wird, nutze `search_messages`.
-5. Bei Ortsfragen: nutze das Cluster/Ort-Feld ("München-Ost") und GPS-Koordinaten zur Verortung.
-6. Falls keine passenden Daten gefunden wurden, erkläre logisch, was du versucht hast zu suchen und warum es keine Treffer gab.
+5. Bei Ortsfragen: nutze das "Ort:"-Feld oder "Cluster/Ort:"-Feld aus den Quellen. Das "Ort:"-Feld ist immer der tatsächliche Ortsname (z.B. "Ahrensburg"), nutze es bevorzugt.
+6. Falls keine passenden Daten für den gefragten Zeitraum gefunden wurden: Sage klar "Ich habe dazu keine Einträge in deinen Daten." NIEMALS Orte, Zeiten oder Namen erfinden die nicht in den Quellen stehen.
+7. Falls nach einem heutigen Termin gefragt wird und keine aktuellen Quellen vorhanden sind: Gib an was die zuletzt gefundenen relevanten Daten zeigen und erkläre, dass für heute keine Einträge vorliegen.
 
 ANTWORTSTIL:
 - Präzise und kurz (3-4 Sätze für einfache Fragen)
@@ -353,6 +355,13 @@ def _format_sources_for_llm(sources: list[dict], use_compression: bool = False) 
             meta_parts.append(meta["date_iso"][:10])
         if meta.get("cluster"):
             meta_parts.append(f"Cluster/Ort: {meta['cluster']}")
+            # Wenn place_name eine andere Stadt nennt als der Cluster (z.B. cluster=Hamburg-Ost,
+            # place_name=Ahrensburg), beide anzeigen – verhindert, dass LLM falschen Ort nennt
+            place = meta.get("place_name", "")
+            if place:
+                city = place.split(",")[0].strip()
+                if city.lower() not in meta["cluster"].lower():
+                    meta_parts.append(f"Ort: {city}")
         elif meta.get("place_name"):
             meta_parts.append(meta["place_name"])
         if meta.get("lat") and meta.get("lat") != 0.0:
@@ -388,6 +397,9 @@ def answer_v2(
     """Vollständige v2 RAG-Pipeline. Antwortet mit Tokens."""
     from backend.llm.connector import chat, get_cfg
     from backend.rag.query_parser import parse_query
+    from backend.rag.query_logger import start_trace
+
+    trace = start_trace(masked_query)
 
     # 1. Fallback: Parse query via LLM if frontend NER missed anything (e.g., short queries like "in München")
     # This acts as a safety net. Anything already masked (like [LOC_1]) will be ignored or safely skipped.
@@ -398,17 +410,24 @@ def answer_v2(
         if locs:
             logger.info("Fallback-Parser fand Klartext-Orte: %s", locs)
             location_names = (location_names or []) + locs
-            
+
     if parsed.persons:
         pers = [p for p in parsed.persons if not p.startswith("[PER_")]
         if pers:
             logger.info("Fallback-Parser fand Klartext-Personen: %s", pers)
             person_tokens = (person_tokens or []) + pers
-            
+
     if parsed.date_from and not date_from:
         date_from = parsed.date_from
     if parsed.date_to and not date_to:
         date_to = parsed.date_to
+
+    trace.log_parsed({
+        "persons": person_tokens or [],
+        "locations": location_names or [],
+        "date_from": date_from,
+        "date_to": date_to,
+    })
 
     sources = retrieve_v2(
         query=masked_query,
@@ -421,6 +440,8 @@ def answer_v2(
         date_from=date_from,
         date_to=date_to,
     )
+
+    trace.log_retrieval(sources)
 
     # Nutze Kompression wenn viele Quellen (ab 10 statt 15 für bessere Qualität)
     use_compression = len(sources) > 10
@@ -538,6 +559,8 @@ def answer_v2(
     logger.info("USER:\n%s", user_prompt[:800] + "\n...[truncated_for_log]")
     logger.info("======================================")
 
+    trace.log_prompts(sys_prompt, user_prompt)
+
     messages = [
         {"role": "system", "content": sys_prompt},
         {"role": "user", "content": user_prompt},
@@ -545,15 +568,19 @@ def answer_v2(
 
     # Nur Gemini unterstützt aktuell Tool-Calling über unser Wrapper-Framework
     cfg = get_cfg()
-    use_tools = [search_photos, search_messages] if cfg.get("llm", {}).get("provider") == "gemini" else None
+    llm_cfg = cfg.get("llm", {})
+    trace.log_provider(llm_cfg.get("provider", ""), llm_cfg.get("model", ""))
+    use_tools = [search_photos, search_messages] if llm_cfg.get("provider") == "gemini" else None
 
     llm_answer = chat(messages, tools=use_tools)
+    trace.finish(llm_answer)
 
     return {
         "masked_query": masked_query,
         "answer": llm_answer,
-        "sources": sources, # Frontend bekommt jetzt auch Tools-Sources!
+        "sources": sources,
         "filter_summary": filter_summary,
+        "query_id": trace.query_id,
     }
 
 async def answer_v2_stream(

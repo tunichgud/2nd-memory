@@ -256,6 +256,13 @@ def compress_sources(
             meta_parts.append(meta["date_iso"][:10])
         if meta.get("cluster"):
             meta_parts.append(f"Ort: {meta['cluster']}")
+            # Wenn place_name eine andere Stadt nennt als der Cluster (z.B. cluster=Hamburg-Ost,
+            # place_name=Ahrensburg), beide anzeigen – verhindert falschen Ortsnamen im LLM
+            place = meta.get("place_name", "")
+            if place:
+                city = place.split(",")[0].strip()
+                if city.lower() not in meta["cluster"].lower():
+                    meta_parts.append(f"Stadtname: {city}")
         elif meta.get("place_name"):
             meta_parts.append(meta["place_name"])
         if meta.get("lat") and meta.get("lat") != 0.0:

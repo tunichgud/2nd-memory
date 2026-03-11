@@ -1,0 +1,102 @@
+{
+  "test_id": "q_20260311_150705_0170df",
+  "query": "Wo treffe ich mich heute mit Marius?",
+  "snapshot": {
+    "captured_at": "2026-03-11T15:07:22",
+    "sources": [
+      {
+        "id": "wa_live_b94d6868",
+        "collection": "messages",
+        "document": "WhatsApp [11.03.2026 14:15:45] Ich: Wo treffe ich mich mit Marius heute?",
+        "metadata": {
+          "chat_name": "WhatsApp Live",
+          "is_bot": false,
+          "date_iso": "11.03.2026 14:15:45",
+          "date_ts": 1773234945,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lon": 0.0,
+          "persons": "Ich",
+          "source": "whatsapp",
+          "lat": 0.0,
+          "mentioned_persons": "Ich"
+        },
+        "score": 0.823
+      },
+      {
+        "id": "wa_live_1d108f12",
+        "collection": "messages",
+        "document": "WhatsApp [11.03.2026 14:21:56] Ich: Wo treffe ich mich heute mit Marius?",
+        "metadata": {
+          "mentioned_persons": "Ich",
+          "date_iso": "11.03.2026 14:21:56",
+          "persons": "Ich",
+          "lat": 0.0,
+          "lon": 0.0,
+          "date_ts": 1773235316,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "source": "whatsapp",
+          "is_bot": false,
+          "chat_name": "WhatsApp Live"
+        },
+        "score": 0.8201
+      },
+      {
+        "id": "wa_live_4f4a4854",
+        "collection": "messages",
+        "document": "WhatsApp [11.03.2026 15:06:58] Ich: Wo treffe ich mich heute mit Marius?",
+        "metadata": {
+          "lon": 0.0,
+          "persons": "Ich",
+          "lat": 0.0,
+          "source": "whatsapp",
+          "date_ts": 1773238018,
+          "mentioned_persons": "Ich",
+          "date_iso": "11.03.2026 15:06:58",
+          "chat_name": "WhatsApp Live",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "is_bot": false
+        },
+        "score": 0.8004
+      }
+    ],
+    "system_prompt": "⚠️ WICHTIG - AKTUELLES DATUM: 11.03.2026 (Mittwoch)\n\nZeitliche Berechnungen IMMER von diesem Datum aus:\n- \"letztes Wochenende\" = Samstag 07.03.2026 + Sonntag 08.03.2026\n- \"diese Woche\" = 09.03.2026 bis 15.03.2026\n- \"gestern\" = 10.03.2026\n- \"vorgestern\" = 09.03.2026\n- \"letztes Jahr\" = 2025\n- \"dieses Jahr\" = 2026\n\nDu bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.\nDu hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.\n\n🎯 WICHTIGSTE REGEL für \"Wo war ich?\"-Fragen:\n1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)\n2. Extrahiere aus den Foto-Metadaten das \"cluster\"-Feld (z.B. \"München-Schwabing\") oder \"address\"-Feld\n3. Nenne den EXAKTEN ORT als erste Information in deiner Antwort\n4. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)\n\nBEISPIEL:\nUser: \"Wo war ich im August 2022 mit Nora?\"\n→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.\n→ Tool: search_photos(personen=[\"Nora\"], von_datum=\"2022-08-01\", bis_datum=\"2022-08-31\")\n→ Observation: [Foto vom 15.08.2022, cluster=\"München-Schwabing\", GPS: 48.16°N 11.58°E]\n→ Antwort: \"Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]].\"\n\nReAct (Reasoning and Acting) Ansatz:\n- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:\n  * Welche Informationen fehlen mir noch (Datum, Ort, Personen)?\n  * Beispiel: \"Wie ging es Sarah, als ich mit Nora in München war?\"\n    -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=[\"Nora\"], orte=[\"München\"]).\n    -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.\n\n- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.\n\nWeitere Regeln:\n1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere keine Fakten.\n2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).\n3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.\n4. Antworte auf Deutsch. Falls nach \"Gefühlen\" oder \"Stimmung\" gefragt wird, nutze `search_messages`.\n5. Bei Ortsfragen: nutze das Cluster/Ort-Feld (\"München-Ost\") und GPS-Koordinaten zur Verortung.\n6. Falls keine passenden Daten gefunden wurden, erkläre logisch, was du versucht hast zu suchen und warum es keine Treffer gab.\n\nANTWORTSTIL:\n- Präzise und kurz (3-4 Sätze für einfache Fragen)\n- Exakte Ortsangaben ZUERST (z.B. \"Du warst in München\", nicht \"Es gibt Fotos aus einer Stadt\")\n- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)",
+    "parsed_query": {
+      "persons": [
+        "Marius"
+      ],
+      "locations": [],
+      "date_from": "2026-03-11",
+      "date_to": "2026-03-11"
+    }
+  },
+  "golden": {
+    "answer": "Du triffst dich mit Marius um 12:15 Uhr beim Italiener, Villa Romana in Ahrensburg.",
+    "required_facts": [
+      "Villa Romana",
+      "12:15",
+      "Ahrensburg"
+    ],
+    "forbidden_facts": [
+      "Café Einstein",
+      "Café Grüner Baum"
+    ],
+    "set_by": "user",
+    "set_at": "2026-03-11T15:07:48"
+  },
+  "last_eval": {
+    "verdict": "FAIL",
+    "score": 0.0,
+    "embedding_similarity": 0.3581,
+    "missing_facts": [
+      "Villa Romana",
+      "12:15",
+      "Ahrensburg"
+    ],
+    "wrong_facts": [
+      "Café Einstein"
+    ],
+    "eval_method": "combined",
+    "model": "phi4",
+    "provider": "ollama"
+  }
+}

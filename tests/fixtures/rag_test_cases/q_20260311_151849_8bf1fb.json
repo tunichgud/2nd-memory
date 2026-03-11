@@ -1,0 +1,286 @@
+{
+  "test_id": "q_20260311_151849_8bf1fb",
+  "query": "Wo war ich mit Nora im letzten August?",
+  "snapshot": {
+    "captured_at": "2026-03-11T15:19:04",
+    "sources": [
+      {
+        "id": "photo_20250829_192312.jpg",
+        "collection": "photos",
+        "document": "Foto: 20250829_192312.jpg\nDatum: 29.08.2025 um 17:23 Uhr\nOrt: München, Bayern, Deutschland\nKoordinaten: 48.14021°N, 11.55518°E\nPersonen: Nora, Sarah",
+        "metadata": {
+          "persons": "Nora,Sarah",
+          "has_joshua": false,
+          "place_name": "München, Bayern, Deutschland",
+          "filename": "20250829_192312.jpg",
+          "date_iso": "2025-08-29T17:23:13+00:00",
+          "has_ringo": true,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lat": 48.140210499999995,
+          "cluster": "München-Ost",
+          "has_sarah": true,
+          "date_ts": 1756488193,
+          "source": "google_photos",
+          "alt": 568.0,
+          "lon": 11.555185,
+          "has_nora": true
+        },
+        "score": 0.344
+      },
+      {
+        "id": "photo_20250829_115859.jpg",
+        "collection": "photos",
+        "document": "Foto: 20250829_115859.jpg\nDatum: 29.08.2025 um 09:58 Uhr\nOrt: Hamburg, Deutschland\nKoordinaten: 53.64449°N, 10.18776°E\nPersonen: Nora",
+        "metadata": {
+          "date_iso": "2025-08-29T09:58:59+00:00",
+          "has_nora": true,
+          "persons": "Nora",
+          "alt": 0.0,
+          "source": "google_photos",
+          "place_name": "Hamburg, Deutschland",
+          "date_ts": 1756461539,
+          "has_sarah": false,
+          "lon": 10.1877603,
+          "filename": "20250829_115859.jpg",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lat": 53.644487299999994,
+          "has_joshua": false,
+          "cluster": "Hamburg-Zentrum"
+        },
+        "score": 0.3282
+      },
+      {
+        "id": "photo_20250831_105530.jpg",
+        "collection": "photos",
+        "document": "Foto: 20250831_105530.jpg\nDatum: 31.08.2025 um 08:55 Uhr\nOrt: Planegg, Bayern, Deutschland\nKoordinaten: 48.10602°N, 11.41716°E\nPersonen: Nora",
+        "metadata": {
+          "filename": "20250831_105530.jpg",
+          "has_joshua": false,
+          "date_ts": 1756630530,
+          "has_sarah": false,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "source": "google_photos",
+          "alt": 595.0,
+          "lon": 11.4171617,
+          "has_nora": true,
+          "lat": 48.1060228,
+          "date_iso": "2025-08-31T08:55:30+00:00",
+          "persons": "Nora",
+          "cluster": "München",
+          "place_name": "Planegg, Bayern, Deutschland"
+        },
+        "score": 0.3281
+      },
+      {
+        "id": "photo_20250814_145734.jpg",
+        "collection": "photos",
+        "document": "Foto: 20250814_145734.jpg\nDatum: 14.08.2025 um 12:57 Uhr\nOrt: Ahrensburg, Schleswig-Holstein, Deutschland\nKoordinaten: 53.67936°N, 10.25996°E\nPersonen: Nora",
+        "metadata": {
+          "cluster": "Hamburg-Ost",
+          "lon": 10.2599588,
+          "persons": "Nora",
+          "alt": 84.0,
+          "date_iso": "2025-08-14T12:57:35+00:00",
+          "filename": "20250814_145734.jpg",
+          "date_ts": 1755176255,
+          "source": "google_photos",
+          "has_joshua": false,
+          "place_name": "Ahrensburg, Schleswig-Holstein, Deutschland",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "has_nora": true,
+          "lat": 53.6793588,
+          "has_sarah": false
+        },
+        "score": 0.3239
+      },
+      {
+        "id": "photo_20250830_101808.jpg",
+        "collection": "photos",
+        "document": "Foto: 20250830_101808.jpg\nDatum: 30.08.2025 um 08:18 Uhr\nOrt: Bruck, Bayern, Deutschland\nKoordinaten: 48.05569°N, 11.92447°E\nPersonen: Nora, Sarah",
+        "metadata": {
+          "lat": 48.0556916,
+          "cluster": "München-FernOst",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_ts": 1756541888,
+          "has_sarah": true,
+          "filename": "20250830_101808.jpg",
+          "persons": "Nora,Sarah",
+          "place_name": "Bruck, Bayern, Deutschland",
+          "lon": 11.9244745,
+          "date_iso": "2025-08-30T08:18:08+00:00",
+          "has_joshua": false,
+          "alt": 0.0,
+          "source": "google_photos",
+          "has_nora": true
+        },
+        "score": 0.3211
+      },
+      {
+        "id": "photo_20250831_145441.jpg",
+        "collection": "photos",
+        "document": "Foto: 20250831_145441.jpg\nDatum: 31.08.2025 um 12:54 Uhr\nOrt: München, Bayern, Deutschland\nKoordinaten: 48.14000°N, 11.54000°E\nPersonen: Nora",
+        "metadata": {
+          "lon": 11.54,
+          "place_name": "München, Bayern, Deutschland",
+          "has_nora": true,
+          "has_joshua": false,
+          "cluster": "München-Zentrum",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lat": 48.14,
+          "alt": 0.0,
+          "has_sarah": false,
+          "source": "google_photos",
+          "filename": "20250831_145441.jpg",
+          "persons": "Nora,Tom",
+          "date_iso": "2025-08-31T12:54:41+00:00",
+          "date_ts": 1756644881,
+          "has_tom": true
+        },
+        "score": 0.3173
+      },
+      {
+        "id": "wa_WhatsApp-Chat mit Sa_26480",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[25.08.25 12:50] Josh: Sorry, aber ich war gerade so gut gelaunt und Nora auch, das wollte ich mir nicht wieder nehmen lassen. Du magst es halt nicht so gerne, wenn ich aufgedreht und gut gelaunt bin. Und dann ist Lasse aufgewacht und das hat alles überdeckt. Ich hoffe ihr habt trotzdem einen guten Tag.\n[25.08.25 13:02] Sarah Ohnesorge: Ich freu mich sehr, dass es Euch so gut gefallen hst\n[25.08.25 13:03] Sarah Ohnesorge: Wofür du dich entschuldigst versteh ich nicht\n[25.08.25 13:17] Josh: Weil wir dann so schnell los sind. Aber es war zeitlich auch genau richtig.\n[25.08.25 13:24] Sarah Ohnesorge: Hab ich dir nicht übel genommen\n[25.08.25 13:24] Sarah Ohnesorge: Dass lasse zu kurz gepennt hat ist ärgerlich aber ihr konntet nichts dafür\n[25.08.25 13:55] Josh: Wir sind 16:30 Uhr zurück.\n[25.08.25 13:55] Josh: Friseur Daniel hat angerufen. Mittwoch fällt aus.\n[25.08.25 13:58] Josh: Du wolltest Donnerstag unterwegs sein richtig? Überlege gerade ob ich dann mit Monika, Lasse und Nora am Donnerstag ins Bad gehe.\n[25.08.25 14:04] Josh: Und am Mittwoch kann ich auch Mal einen Spaziergang mit Lasse machen. Ich muss ohnehin den Thule reparieren, da brauche ich noch Ersatzteile vom Fahrradladen. Das kann ich am Mittwoch mit ihm im Wagen machen.",
+        "metadata": {
+          "mentioned_persons": "Josh,Lasse,Nora,Sarah Ohnesorge",
+          "lon": 0.0,
+          "chat_name": "Sarah Ohnesorge",
+          "persons": "Sarah Ohnesorge,Josh",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "chat_id": "491786838260@c.us",
+          "lat": 0.0,
+          "date_iso": "25.08.25 12:50",
+          "date_ts": 1756119000,
+          "source": "whatsapp",
+          "timestamp": "2025-08-25T12:50:00"
+        },
+        "score": 0.3018
+      },
+      {
+        "id": "wa_WhatsApp-Chat mit Sa_26720",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[30.08.25 21:54] Josh: Vielleicht einfach rumhängen bei Spielplatz.\n[30.08.25 21:54] Josh: Welche Fragen?\n[30.08.25 21:54] Sarah Ohnesorge: Ich vermisse Nora einfach und ihr weinen gestern Abend war schwer auszuhalten. Und wenn Du schreibst, dass sie mich so vermisst, wenn sie müde ist, besorgt mich das einfach.\n[30.08.25 21:55] Sarah Ohnesorge: .\n[30.08.25 21:55] Sarah Ohnesorge: .\n[30.08.25 21:56] Sarah Ohnesorge: Hört sich gut an!\n[30.08.25 21:57] Sarah Ohnesorge: Kannst Du mir nochmal Eure Verbindung am Montag schicken? Finde ich nicht mehr.\n[30.08.25 21:57] Josh: Ich fürchte nur, dass das ohne Freude auf dem Spielplatz ziemlich langweilig wird für sie.\n[30.08.25 21:57] Sarah Ohnesorge: Meinst Du Freunde?\n[30.08.25 21:58] Josh: <Medien ausgeschlossen>",
+        "metadata": {
+          "lon": 0.0,
+          "chat_id": "491786838260@c.us",
+          "lat": 0.0,
+          "persons": "Sarah Ohnesorge,Josh",
+          "date_ts": 1756583640,
+          "mentioned_persons": "Josh,Nora,Sarah Ohnesorge",
+          "timestamp": "2025-08-30T21:54:00",
+          "chat_name": "Sarah Ohnesorge",
+          "source": "whatsapp",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_iso": "30.08.25 21:54"
+        },
+        "score": 0.2957
+      },
+      {
+        "id": "wa_WhatsApp-Chat mit Sa_26710",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[30.08.25 21:37] Josh: Der Zug total überfüllt. Sie hat einen Platz mit ihrem Gepäck vollgestellt und auf Nachfrage gesagt, dass man da nicht sitzen kann. Der Gang war brechend voll. Ich hab mich so geschämt. Ich hab Nora auf meinen Schoß genommen und Platz für andere gemacht.\n[30.08.25 21:38] Josh: Dann hat sie heute morgen als erstes meinen Becher Kaffee nicht halten können und den ganzen Kaffee, einen halben Liter, in der Bahn ausgeschüttet. Ich musste alles sauber machen. Sie wollte es tun, aber sie ist so im Tunnel rumgerannt, dsas ich es ihr verboten habe und es selber gemacht habe.\n[30.08.25 21:40] Sarah Ohnesorge: Das klingt schrecklich. Ich möchte Nora einfach nur ganz schnell nach Hause holen. 😔\n[30.08.25 21:42] Sarah Ohnesorge: Für Dich tut es mir natürlich auch leid. Könnt Ihr denn morgen nur zu zweit schön chillen vor und nach der Feier bei Barbara?\n[30.08.25 21:43] Josh: Hm. Aber ich glaube es geht uns gut. Nora geht es auch gut.\n[30.08.25 21:44] Sarah Ohnesorge: Ich hoffe es. 😔\n[30.08.25 21:52] Sarah Ohnesorge: Wieso antwortest Du nicht auf meine Fragen zu morgen?\n[30.08.25 21:52] Sarah Ohnesorge: Sei bitte nicht böse. Du bist ein toller Papa.\n[30.08.25 21:53] Josh: Äh, was meinst Du? Was wir morgen vorhaben?\n[30.08.25 21:53] Josh: Ich weiß es noch nicht so 100%.",
+        "metadata": {
+          "lon": 0.0,
+          "mentioned_persons": "Josh,Nora,Sarah Ohnesorge",
+          "persons": "Sarah Ohnesorge,Josh",
+          "chat_id": "491786838260@c.us",
+          "source": "whatsapp",
+          "timestamp": "2025-08-30T21:37:00",
+          "date_iso": "30.08.25 21:37",
+          "date_ts": 1756582620,
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "chat_name": "Sarah Ohnesorge",
+          "lat": 0.0
+        },
+        "score": 0.2938
+      },
+      {
+        "id": "wa_WhatsApp-Chat mit Sa_26740",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[31.08.25 11:04] Sarah Ohnesorge: Aber gut, dass ihrs vorher geklärt habt\n[31.08.25 15:21] Josh: <Medien ausgeschlossen>\n[31.08.25 15:26] Sarah Ohnesorge: 😄 wer ist denn das?\n[31.08.25 15:35] Josh: Jon!\n[31.08.25 15:36] Josh: Und das war echt toll!\n[31.08.25 15:36] Sarah Ohnesorge: Oh schön!!\n[31.08.25 15:36] Josh: Nora ist bei ihm geblieben während ich im Biergarten was zu essen gekauft habe <Diese Nachricht wurde bearbeitet.>\n[31.08.25 15:38] Josh: Das war nach ein paar Minuten kennenlernen.\n[31.08.25 15:40] Josh: Nora sagt, sie will bald wiederkommen zu alles . Berg und Gondel und Zug fahren und spielen und alles. Bald wieder. 🥰\n[31.08.25 15:41] Sarah Ohnesorge: Oh toll Das erwärmt mein Herz ☺️",
+        "metadata": {
+          "source": "whatsapp",
+          "lon": 0.0,
+          "persons": "Sarah Ohnesorge,Josh",
+          "chat_id": "491786838260@c.us",
+          "lat": 0.0,
+          "date_iso": "31.08.25 11:04",
+          "mentioned_persons": "Jon,Josh,Nora,Sarah Ohnesorge",
+          "timestamp": "2025-08-31T11:04:00",
+          "chat_name": "Sarah Ohnesorge",
+          "date_ts": 1756631040,
+          "user_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "score": 0.2678
+      },
+      {
+        "id": "wa_WhatsApp-Chat mit Sa_26760",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[31.08.25 21:04] Josh: 🥰🥰🥰\n[31.08.25 21:06] Josh: Eine sehr gute Entscheidung hierherzufahren. Ich kann verstehen, dass Du sie vermisst. Aber so intensiv erlebe ich das ja nie mit Nora. Wir hatten so eine schöne Zeit. Und das sagt sie (aus freien Stücken!!!) immer wieder.\n[31.08.25 22:13] Sarah Ohnesorge: Liebe/r du, ich würde Philipp zu seinem Geburtstag gern die Teilnahme am Lauf zwischen Meeren schenken! Lauf zwischen den Meeren (LzdM) | Lauf zwischen den Meeren Für die Teilnahme fänd ich es toll, wenn ich schon vorher ohne sein Wissen eine 10erStaffel zusammenbekommen könnte, die am 30. Mai 2026 Lust und Zeit hat mit Philipp diesen Lauf zu absolvieren ☺️ Wer mir eine grobe Zusage erteilen kann: Mega! (So wie ich es lese, ist es keine Katastrphe, wenn am Ende 1 oder 2 Läufer ausfallen…) Das Geschenk für ihn wäre dann quasi die Unterstützung und die Übernahme der eigenen Teilnahmegebühr (ich übernehme Philipps Anteil) Ich freue mich auf eure Rückmeldung! Catherina\n[01.09.25 06:15] Josh: Guter Morgen! Wir brechen heute auf! Die Einladung hat mit Frieda auch geschickt, ich werde ihr direkt antworten. Bis später!\n[01.09.25 07:25] Sarah Ohnesorge: Guten Morgen Ihr Zwei, Ich drück fest die Daumen, dass alles gut läuft!! Hattest Du Nora beim Zauberredder abgemeldet? Erinnere ich nicht mehr... glaub ja, ne?\n[01.09.25 07:42] Josh: Hatte ich\n[01.09.25 08:58] Josh: <Medien ausgeschlossen>\n[01.09.25 09:29] Sarah Ohnesorge: Schöne jacke!\n[01.09.25 09:36] Josh: Ist ein Pulli, hat sie vom Barbara. Der ist wirklich schön.\n[01.09.25 09:37] Josh: Die Hose allerdings....",
+        "metadata": {
+          "lon": 0.0,
+          "timestamp": "2025-08-31T21:04:00",
+          "chat_name": "Sarah Ohnesorge",
+          "mentioned_persons": "Josh,Nora,Philipp,Sarah Ohnesorge",
+          "date_ts": 1756667040,
+          "source": "whatsapp",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "date_iso": "31.08.25 21:04",
+          "persons": "Sarah Ohnesorge,Josh",
+          "lat": 0.0,
+          "chat_id": "491786838260@c.us"
+        },
+        "score": 0.2673
+      },
+      {
+        "id": "wa_WhatsApp-Chat mit Sa_26530",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[26.08.25 17:00] Josh: Mittwoch Nachmittag nächste Woche  Treffen mit Jessica?\n[26.08.25 17:13] Josh: Großartig\n[26.08.25 17:54] Josh: Wo bleibt ihr denn?\n[26.08.25 17:55] Josh: Wir vermissen euch!\n[26.08.25 18:16] Josh: Wir sind Ahrensburg Ost\n[26.08.25 21:25] Josh: <Medien ausgeschlossen>\n[26.08.25 23:20] Sarah Ohnesorge: Mi klappt, habe Jessica schon geschrieben.\n[26.08.25 23:22] Josh: Danke! Das freut mich.\n[26.08.25 23:22] Josh: Vielleicht kann ich ja später dazu stoßen.\n[27.08.25 08:27] Josh: Es fängt schon gut an, ich sitze in der anderen Ecke und Nora spielt mit der Erzieherin. Ich hab Nebenrolle.",
+        "metadata": {
+          "chat_name": "Sarah Ohnesorge",
+          "mentioned_persons": "Jessica,Josh,Sarah Ohnesorge",
+          "persons": "Sarah Ohnesorge,Josh",
+          "user_id": "00000000-0000-0000-0000-000000000001",
+          "lat": 0.0,
+          "source": "whatsapp",
+          "lon": 0.0,
+          "chat_id": "491786838260@c.us",
+          "date_iso": "26.08.25 17:00",
+          "date_ts": 1756220400,
+          "timestamp": "2025-08-26T17:00:00"
+        },
+        "score": 0.2626
+      }
+    ],
+    "system_prompt": "⚠️ WICHTIG - AKTUELLES DATUM: 11.03.2026 (Mittwoch)\n\nZeitliche Berechnungen IMMER von diesem Datum aus:\n- \"letztes Wochenende\" = Samstag 07.03.2026 + Sonntag 08.03.2026\n- \"diese Woche\" = 09.03.2026 bis 15.03.2026\n- \"gestern\" = 10.03.2026\n- \"vorgestern\" = 09.03.2026\n- \"letztes Jahr\" = 2025\n- \"dieses Jahr\" = 2026\n\nDu bist ein analytischer Agent (Memosaur) für ein persönliches Gedächtnis-System.\nDu hilfst dem Benutzer, sich an Ereignisse, Orte, Personen und Erlebnisse zu erinnern.\n\n🎯 WICHTIGSTE REGEL für \"Wo war ich?\"-Fragen:\n1. Suche IMMER zuerst gezielt nach Fotos mit den genannten Filtern (Personen, Datum)\n2. Extrahiere aus den Foto-Metadaten das \"cluster\"-Feld (z.B. \"München-Schwabing\") oder \"address\"-Feld\n3. Nenne den EXAKTEN ORT als erste Information in deiner Antwort\n4. Halte die Antwort KURZ (maximal 3-4 Sätze für einfache Ortsfragen)\n\nBEISPIEL:\nUser: \"Wo war ich im August 2022 mit Nora?\"\n→ Thought: Ich suche nach Fotos mit Nora im August 2022, um den Ort zu finden.\n→ Tool: search_photos(personen=[\"Nora\"], von_datum=\"2022-08-01\", bis_datum=\"2022-08-31\")\n→ Observation: [Foto vom 15.08.2022, cluster=\"München-Schwabing\", GPS: 48.16°N 11.58°E]\n→ Antwort: \"Du warst im August 2022 mit Nora in **München (Schwabing)** [[1]]. Auf dem Foto vom 15. August sieht man euch am Englischen Garten [[1]].\"\n\nReAct (Reasoning and Acting) Ansatz:\n- Plane in Schritten! Wenn der Nutzer eine komplexe Frage stellt, überlege erst:\n  * Welche Informationen fehlen mir noch (Datum, Ort, Personen)?\n  * Beispiel: \"Wie ging es Sarah, als ich mit Nora in München war?\"\n    -> Schritt 1: Finde das Datum des München-Aufenthalts mit Nora via search_photos(personen=[\"Nora\"], orte=[\"München\"]).\n    -> Schritt 2: Suche gezielt nach Nachrichten von Sarah in diesem Zeitraum.\n\n- WICHTIG FÜR TRANSPARENZ: Bevor du ein Tool aufrufst, schreibe IMMER 1-2 Sätze auf, was du als Nächstes tun wirst und warum.\n\nWeitere Regeln:\n1. Nutze ausschließlich die bereitgestellten Quellen und Tools. Halluziniere keine Fakten.\n2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).\n3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.\n4. Antworte auf Deutsch. Falls nach \"Gefühlen\" oder \"Stimmung\" gefragt wird, nutze `search_messages`.\n5. Bei Ortsfragen: nutze das Cluster/Ort-Feld (\"München-Ost\") und GPS-Koordinaten zur Verortung.\n6. Falls keine passenden Daten gefunden wurden, erkläre logisch, was du versucht hast zu suchen und warum es keine Treffer gab.\n\nANTWORTSTIL:\n- Präzise und kurz (3-4 Sätze für einfache Fragen)\n- Exakte Ortsangaben ZUERST (z.B. \"Du warst in München\", nicht \"Es gibt Fotos aus einer Stadt\")\n- Nutze Fettdruck für wichtige Informationen (Orte, Daten, Personen)",
+    "parsed_query": {
+      "persons": [
+        "Nora"
+      ],
+      "locations": [],
+      "date_from": "2025-08-01",
+      "date_to": "2025-08-31"
+    }
+  },
+  "golden": {
+    "answer": "Im letzten August warst du mit Nora in München (München-Ost, München-FernOst/Bruck, München-Zentrum, Planegg), in Hamburg und in Ahrensburg.",
+    "required_facts": [
+      "München",
+      "Ahrensburg"
+    ],
+    "forbidden_facts": [],
+    "set_by": "user",
+    "set_at": "2026-03-11T16:27:10"
+  },
+  "last_eval": {
+    "verdict": "PASS",
+    "score": 0.95,
+    "embedding_similarity": 0.4996,
+    "missing_facts": [],
+    "wrong_facts": [],
+    "eval_method": "combined",
+    "model": "phi4",
+    "provider": "ollama"
+  }
+}

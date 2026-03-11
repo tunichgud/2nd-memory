@@ -25,6 +25,7 @@ class WebhookRequest(BaseModel):
 class WebhookResponse(BaseModel):
     status: str
     answer: str | None = None
+    query_id: str | None = None
 
 @router.post("/webhook", response_model=WebhookResponse)
 async def whatsapp_webhook(
@@ -96,6 +97,7 @@ async def whatsapp_webhook(
         # 2. RAG-Abfrage starten (v2 Pipeline)
         # Wir antworten NUR auf echte eingehende Nachrichten, die NICHT von der KI selbst sind.
         answer = None
+        query_id = None
         if req.is_incoming and not is_bot_msg:
             result = await loop.run_in_executor(
                 None,
@@ -104,12 +106,13 @@ async def whatsapp_webhook(
                     user_id=DEFAULT_USER_ID,
                     person_tokens=[],
                     location_tokens=[],
-                    collections=None 
+                    collections=None
                 )
             )
             answer = result.get("answer")
+            query_id = result.get("query_id")
 
-        return WebhookResponse(status="success", answer=answer)
+        return WebhookResponse(status="success", answer=answer, query_id=query_id)
 
     except Exception as exc:
         logger.exception("Fehler im WhatsApp Webhook")
