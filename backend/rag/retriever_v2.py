@@ -56,6 +56,7 @@ Weitere Regeln:
 2. Nenne die exakte Quellenart und das Datum bei jeder Information (Foto, Bewertung, Nachricht).
 3. Nutze INLINE-REFERENZEN: Wenn du dich auf eine Information aus dem Kontext (INITIALER KONTEXT oder Tool-Ergebnisse) beziehst, setze die Nummer der Quelle in doppelte eckige Klammern, z.B. [[1]], [[2]]. Das Frontend macht daraus interaktive Buttons.
 4. Antworte auf Deutsch. Falls nach "Gefühlen" oder "Stimmung" gefragt wird, nutze `search_messages`.
+   Falls nach spezifischen Eigennamen (Haustiere, seltene Namen) gefragt wird, nutze `search_messages` mit `schluesselwoerter=["Name"]`.
 5. Bei Ortsfragen: nutze das "Ort:"-Feld oder "Cluster/Ort:"-Feld aus den Quellen. Das "Ort:"-Feld ist immer der tatsächliche Ortsname (z.B. "Ahrensburg"), nutze es bevorzugt.
 6. Falls keine passenden Daten für den gefragten Zeitraum gefunden wurden: Sage klar "Ich habe dazu keine Einträge in deinen Daten." NIEMALS Orte, Zeiten oder Namen erfinden die nicht in den Quellen stehen.
 7. Falls nach einem heutigen Termin gefragt wird und keine aktuellen Quellen vorhanden sind: Gib an was die zuletzt gefundenen relevanten Daten zeigen und erkläre, dass für heute keine Einträge vorliegen.
@@ -494,18 +495,24 @@ def answer_v2(
         personen: list[str] | None = None,
         von_datum: str | None = None,
         bis_datum: str | None = None,
+        schluesselwoerter: list[str] | None = None,
     ) -> str:
         """Sucht gezielt in den Textnachrichten und Chatverläufen des Nutzers (WhatsApp/Signal).
-        Ideal um Emotionen, Unterhaltungen und Stimmungen herauszufinden.
+        Ideal um Emotionen, Unterhaltungen, spezifische Namen oder Ereignisse herauszufinden.
 
         Args:
             suchtext: Inhalt der gesuchten Nachrichten (z.B. "Wie geht es dir?", "Treffen").
             personen: Liste von Personen-Tokens mit denen geschrieben wurde (z.B. ["[PER_1]"]).
             von_datum: Startdatum im Format YYYY-MM-DD (optional).
             bis_datum: Enddatum im Format YYYY-MM-DD (optional).
+            schluesselwoerter: Exakte Wörter/Namen die im Text vorkommen MÜSSEN (z.B. ["Jazz", "Schlaganfall"]).
+                               Nutze dies für Eigennamen von Personen, Haustieren oder spezifischen Ereignissen,
+                               die per Semantic Search nicht gefunden werden könnten.
         """
-        logger.info(f"==> Tool Call: search_messages(suchtext='{suchtext[:30]}...', personen={personen}, von={von_datum}, bis={bis_datum})")
+        logger.info(f"==> Tool Call: search_messages(suchtext='{suchtext[:30]}...', personen={personen}, von={von_datum}, bis={bis_datum}, keywords={schluesselwoerter})")
         pers_toks = [p for p in (personen or []) if p.startswith("[PER_")]
+
+        # Phase 1: Semantic Search (immer)
         res = retrieve_v2(
             query=suchtext,
             user_id=user_id,
@@ -516,6 +523,25 @@ def answer_v2(
             date_from=von_datum,
             date_to=bis_datum,
         )
+
+        # Phase 2: Keyword-Suche wenn schluesselwoerter angegeben
+        # Ergänzt Ergebnisse die per Similarity NICHT gefunden werden (z.B. Eigennamen)
+        if schluesselwoerter:
+            from backend.rag.store import keyword_search
+            kw_results = keyword_search(
+                collection_name="messages",
+                keywords=schluesselwoerter,
+                n_results=15,
+                date_from=von_datum,
+                date_to=bis_datum,
+            )
+            logger.info(f"    Keyword-Search '{schluesselwoerter}': {len(kw_results)} Treffer")
+            existing_ids = {s["id"] for s in res}
+            for s in kw_results:
+                if s["id"] not in existing_ids:
+                    res.append(s)
+                    existing_ids.add(s["id"])
+
         existing_ids = {s["id"] for s in sources}
         for s in res:
             if s["id"] not in existing_ids:
@@ -742,8 +768,20 @@ async def answer_v2_stream(
         personen: list[str] | None = None,
         von_datum: str | None = None,
         bis_datum: str | None = None,
+        schluesselwoerter: list[str] | None = None,
     ) -> str:
-        logger.info(f"==> Stream Tool Call: search_messages({suchtext}, {personen}, {von_datum}, {bis_datum})")
+        """Sucht in Textnachrichten (WhatsApp/Signal). Nutze schluesselwoerter für
+        Eigennamen wie Haustiere, Personen oder spezifische Ereignisse.
+
+        Args:
+            suchtext: Semantischer Suchtext.
+            personen: Personen mit denen geschrieben wurde.
+            von_datum: Startdatum YYYY-MM-DD (optional).
+            bis_datum: Enddatum YYYY-MM-DD (optional).
+            schluesselwoerter: Exakte Wörter/Namen die vorkommen MÜSSEN (z.B. ["Jazz"]).
+                               Ideal für Eigennamen von Haustieren, seltene Begriffe.
+        """
+        logger.info(f"==> Stream Tool Call: search_messages({suchtext}, {personen}, {von_datum}, {bis_datum}, kw={schluesselwoerter})")
         pers_names = [p.strip() for p in (personen or []) if p.strip()]
 
         # ReAct Disambiguierung
@@ -756,6 +794,7 @@ async def answer_v2_stream(
                         f"Bekannte Personen in der Datenbank sind: {', '.join(matches)}. "
                         f"Bitte stoppe deine Suche und frage den User im Chat direkt, welche Person genau gemeint ist.")
 
+        # Phase 1: Semantic Search
         res = retrieve_v2(
             query=suchtext,
             user_id=user_id,
@@ -766,6 +805,24 @@ async def answer_v2_stream(
             date_from=von_datum,
             date_to=bis_datum,
         )
+
+        # Phase 2: Keyword-Suche für Eigennamen/spezifische Begriffe
+        if schluesselwoerter:
+            from backend.rag.store import keyword_search
+            kw_results = keyword_search(
+                collection_name="messages",
+                keywords=schluesselwoerter,
+                n_results=15,
+                date_from=von_datum,
+                date_to=bis_datum,
+            )
+            logger.info(f"    Stream Keyword-Search '{schluesselwoerter}': {len(kw_results)} Treffer")
+            existing_in_res = {s["id"] for s in res}
+            for s in kw_results:
+                if s["id"] not in existing_in_res:
+                    res.append(s)
+                    existing_in_res.add(s["id"])
+
         existing_ids = {s["id"] for s in sources}
         new_sources = []
         for s in res:
@@ -773,7 +830,7 @@ async def answer_v2_stream(
                 sources.append(s)
                 new_sources.append(s)
                 existing_ids.add(s["id"])
-                
+
         # Nutze Kompression für Tool-Results (ab 10 statt 15)
         use_compression = len(res) > 10
         return json.dumps({"new_sources": new_sources, "formatted_context": _format_sources_for_llm(res, use_compression=use_compression)})
@@ -827,7 +884,9 @@ async def answer_v2_stream(
         f"1. Analysiere die NUTZERANFRAGE.\n"
         f"2. Da der INITIALE KONTEXT leer ist, MUSST du aktiv Tools "
         f"(`search_photos`, `search_messages`, `search_places`) nutzen, um Fakten zu sammeln. "
-        f"(`search_places` sucht in Restaurantbewertungen und gespeicherten Orten).\n"
+        f"(`search_places` sucht in Restaurantbewertungen und gespeicherten Orten). "
+        f"WICHTIG: Bei Eigennamen wie Haustieren (z.B. 'Jazz') nutze `search_messages` mit `schluesselwoerter=[\"Jazz\"]` — "
+        f"sonst findet die semantische Suche den Namen möglicherweise nicht.\n"
         f"3. Falls Sentiment oder Emotionen gefragt sind, werte alle relevanten Texte und Fotobeschreibungen aktiv aus.\n"
         f"4. Kombiniere schlussendlich alle gesammelten Fakten zu einer hilfreichen Antwort."
     )
