@@ -87,6 +87,15 @@ Aufgabe:
 2. Prüfe: Gibt es Widersprüche zwischen extrahierten Fakten?
 3. Wenn kritisches Faktum fehlt: gib konkrete Suchparameter an.
 
+TEMPORALE INFERENZ-REGEL (kritisch!):
+Suche NIE ab dem frühesten bekannten Datum. Leite date_from logisch ab:
+- Tod/Abschied: date_from = letzter bekannter Lebenszeichen-Zeitstempel
+- Erste Erwähnung: date_from = frühester möglicher Zeitpunkt
+- "Wann passierte X nach Y?": date_from = Datum von Y
+
+Falsch: date_from=2000-01-01 (sucht die ganze Geschichte durch)
+Richtig: letzter Jazz-Chunk war 2021-01-24 → date_from=2021-01-24
+
 VOCABULARY-MISMATCH-REGEL (kritisch!):
 Keywords müssen Wörter sein, die TATSÄCHLICH im originalen Chat-Text vorkommen.
 NIEMALS analytische Meta-Begriffe verwenden — echte Menschen schreiben die nie.
@@ -97,14 +106,14 @@ VERBOTEN (analytisch, nie im Chat):       STATTDESSEN (echte Alltagssprache):
 "Jazz Todesdatum", "wer ist Jazz"         "eingeschläfert", "Regenbogenbrücke"
 "Jazz Joshua Bacher"                      "vermisse", "traurig", "letzter Tag"
 
-WICHTIG: Wenn ein Haustier stirbt, nennen Besitzer es oft "Hund"/"Katze" statt beim Namen.
-Suche IMMER zusätzlich mit dem Gattungsnamen: keywords=["Hund"] ODER keywords=["Katze"].
+GATTUNGSNAME-REGEL: Bei Haustier-Sterbefällen suche mit Gattungsnamen.
+Im Trauermoment schreiben Besitzer "Hund"/"Katze" — nicht den Eigennamen.
 
-Beispiel — Todesdatum eines Haustieres (Jazz) fehlt:
+Beispiel — Todesdatum von Jazz (Hund) fehlt, letzter Lebensbeleg 24.01.21:
   LÜCKEN:
-  - Sterbebeleg fehlt (kein Chunk mit konkretem Todesdatum)
-  SUCHPARAMETER: date_from=2021-01-20, date_to=2021-02-10, keywords=["Hund"]
-  HINWEIS: Im Trauermoment nennen Besitzer ihr Tier oft "Hund" statt beim Namen
+  - Sterbebeleg fehlt. Letzter Lebensbeleg: [24.01.21] "Geht's Jazz gut?"
+  SUCHPARAMETER: date_from=2021-01-24, date_to=2021-03-01, keywords=["Hund"]
+  HINWEIS: Suche ab letztem Lebenszeichen vorwärts — nicht von 2019 an
 
 Format (strikt einhalten):
 LÜCKEN:
