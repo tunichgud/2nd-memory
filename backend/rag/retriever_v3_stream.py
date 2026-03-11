@@ -87,6 +87,9 @@ async def answer_v3_stream(
     trace = start_trace(query)
     _llm_answer_parts: list[str] = []  # Sammelt Streaming-Chunks für trace.finish()
 
+    # Sende query_id sofort — Frontend zeigt sie als Referenz an
+    yield _event("query_id", trace.query_id) + "\n\n"
+
     try:
         # ====================================================================
         # Phase 1: Query Parsing (LLM-basiertes Temporal Reasoning!)

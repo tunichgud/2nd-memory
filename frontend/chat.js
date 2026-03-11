@@ -116,7 +116,9 @@ async function _sendQueryStream(query, abortSignal) {
         const chunk = JSON.parse(chunkStr);
 
         // NEW EVENT TYPES (v3 Streaming)
-        if (chunk.type === "query_analysis") {
+        if (chunk.type === "query_id") {
+          responseUi.queryId = chunk.content;
+        } else if (chunk.type === "query_analysis") {
           addQueryAnalysisStep(responseUi, chunk.content);
         } else if (chunk.type === "retrieval") {
           addRetrievalStep(responseUi, chunk.content);
@@ -160,6 +162,15 @@ async function _sendQueryStream(query, abortSignal) {
         console.warn("Konnte SSE Chunk nicht parsen", chunkStr, e);
       }
     }
+  }
+
+  // query_id anzeigen (für QS-Review / Benchmark-Aufnahme)
+  if (responseUi.queryId) {
+    const qidEl = document.createElement('div');
+    qidEl.className = 'text-[10px] text-gray-600 mt-1 ml-1 font-mono select-all';
+    qidEl.title = 'Query-ID — für QS / Benchmark-Aufnahme';
+    qidEl.textContent = responseUi.queryId;
+    responseUi.root.appendChild(qidEl);
   }
 
   // Session merken
