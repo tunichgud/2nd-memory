@@ -81,6 +81,12 @@ async def answer_v3_stream(
     Yields:
         JSON Strings für SSE Stream
     """
+    from backend.rag.query_logger import start_trace
+    from backend.llm.connector import get_cfg
+
+    trace = start_trace(query)
+    _llm_answer_parts: list[str] = []  # Sammelt Streaming-Chunks für trace.finish()
+
     try:
         # ====================================================================
         # Phase 1: Query Parsing (LLM-basiertes Temporal Reasoning!)
@@ -90,6 +96,16 @@ async def answer_v3_stream(
 
         # Also run query_analyzer for Chain-of-Thought decomposition
         analyzed: AnalyzedQuery = analyze_query(query)
+
+        trace.log_parsed({
+            "persons": parsed.persons,
+            "locations": parsed.locations,
+            "date_from": parsed.date_from,
+            "date_to": parsed.date_to,
+            "relevant_collections": parsed.relevant_collections,
+            "query_type": analyzed.query_type,
+            "complexity": analyzed.complexity,
+        })
 
         # Stream Analysis Result (combine both results)
         yield _event("query_analysis", {
@@ -162,6 +178,8 @@ async def answer_v3_stream(
             date_to=effective_date_to,
         )
 
+        trace.log_retrieval(sources)
+
         # Stream Retrieval Results (AFTER retrieval completes)
         yield _event("retrieval", {
             "status": "completed",
@@ -177,6 +195,7 @@ async def answer_v3_stream(
             no_results_msg = _generate_no_results_message(query, analyzed)
             yield _event("text", no_results_msg) + "\n\n"
             yield _event("sources", []) + "\n\n"
+            trace.finish(no_results_msg)
             return
 
         # ====================================================================
@@ -227,6 +246,12 @@ async def answer_v3_stream(
                 context=context,
                 max_iterations=thinking_max_iterations,
             ):
+                try:
+                    ev = json.loads(thinking_event)
+                    if ev.get("type") == "text":
+                        _llm_answer_parts.append(ev.get("content", ""))
+                except Exception:
+                    pass
                 yield thinking_event
         else:
             # ── STANDARD MODE: Direkter LLM-Call ─────────────────────────
@@ -238,6 +263,7 @@ async def answer_v3_stream(
                 # chat_stream yields {"type": "text"|"thought"|"tool_call", "content": ...}
                 # We pass it through as-is
                 if event["type"] == "text":
+                    _llm_answer_parts.append(event["content"])
                     yield _event("text", event["content"]) + "\n\n"
                 elif event["type"] in ("thought", "tool_call", "tool_result"):
                     # Forward tool events to frontend
@@ -260,8 +286,19 @@ async def answer_v3_stream(
 
         yield _event("sources", formatted_sources) + "\n\n"
 
+        # ====================================================================
+        # Phase 9: Trace finalisieren (Query-Log schreiben)
+        # ====================================================================
+        llm_cfg = get_cfg()
+        trace.log_provider(llm_cfg.get("provider", ""), llm_cfg.get("model", ""))
+        sys_prompt = messages[0]["content"] if messages else ""
+        user_prompt = messages[-1]["content"] if messages else ""
+        trace.log_prompts(sys_prompt, user_prompt)
+        trace.finish("".join(_llm_answer_parts))
+
     except Exception as exc:
         logger.exception("Error in answer_v3_stream")
+        trace.finish(f"[ERROR] {exc}")
         yield _event("error", str(exc)) + "\n\n"
 
 
