@@ -97,11 +97,14 @@ VERBOTEN (analytisch, nie im Chat):       STATTDESSEN (echte Alltagssprache):
 "Jazz Todesdatum", "wer ist Jazz"         "eingeschläfert", "Regenbogenbrücke"
 "Jazz Joshua Bacher"                      "vermisse", "traurig", "letzter Tag"
 
-Beispiel — Todesdatum eines Haustieres fehlt:
+WICHTIG: Wenn ein Haustier stirbt, nennen Besitzer es oft "Hund"/"Katze" statt beim Namen.
+Suche IMMER zusätzlich mit dem Gattungsnamen: keywords=["Hund"] ODER keywords=["Katze"].
+
+Beispiel — Todesdatum eines Haustieres (Jazz) fehlt:
   LÜCKEN:
-  - Sterbebeleg fehlt (kein Chunk mit konkretem Datum + "eingeschläfert"/"gestorben")
-  SUCHPARAMETER: date_from=2021-01-01, date_to=2021-06-30, keywords=["eingeschläfert"]
-  HINWEIS: Suche nach Todestag mit echten Chat-Wörtern, nicht analytischen Begriffen
+  - Sterbebeleg fehlt (kein Chunk mit konkretem Todesdatum)
+  SUCHPARAMETER: date_from=2021-01-20, date_to=2021-02-10, keywords=["Hund"]
+  HINWEIS: Im Trauermoment nennen Besitzer ihr Tier oft "Hund" statt beim Namen
 
 Format (strikt einhalten):
 LÜCKEN:

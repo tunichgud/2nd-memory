@@ -303,21 +303,45 @@ def compress_sources(
     logger.info("Context Compression: %d Quellen genutzt, %d tokens (%.1f%% Budget)",
                 len(parts), used_tokens, (used_tokens / available_tokens) * 100)
 
-    # ── Keyword-Block: chronologisch, eigenes Budget ──────────────────────────
+    # ── Keyword-Block: Dense-Window-First, eigenes Budget ────────────────────
     # Keyword-Quellen (z.B. alle Nachrichten mit "Jazz") werden NICHT in die
-    # Score-Sortierung oben gemischt — sie kämen sonst alle vor den semantischen
-    # Treffern und würden entweder abgeschnitten oder dominieren.
-    # Stattdessen: kompakter chronologischer Block am Ende des Kontexts.
+    # Score-Sortierung oben gemischt.
+    #
+    # Sortierung: Dense-Window-First statt älteste-zuerst.
+    # Problem mit älteste-zuerst: Bei 137 Jazz-Chunks à ~120 Token und nur
+    # 2500 Token Budget kommen nur die ältesten ~21 Chunks rein. Der entscheidende
+    # Todesbeleg (Jan 2021, Rang ~90 chronologisch) fällt raus.
+    #
+    # Lösung: Gruppiere in 30-Tage-Fenster, sortiere Fenster nach Dichte
+    # (meiste Chunks zuerst), innerhalb jedes Fensters chronologisch.
+    # → Jan-2021-Cluster (16 Treffer) kommt vor 2019-Einzelnennungen.
     if keyword_sources:
         KEYWORD_BUDGET_TOKENS = 2500
         kw_parts = []
         kw_used = 0
-        # Chronologisch sortieren (älteste zuerst → Kontext lesbar wie ein Tagebuch)
-        kw_sorted = sorted(
-            keyword_sources,
-            key=lambda s: s.get("metadata", {}).get("timestamp", ""),
+
+        # Schritt 1: Chunks in 30-Tage-Fenster gruppieren
+        window_map: dict[str, list] = {}  # "YYYY-MM" → Chunks (Monats-Fenster)
+        for s in keyword_sources:
+            ts = s.get("metadata", {}).get("timestamp", "")
+            month_key = ts[:7] if ts and len(ts) >= 7 else "0000-00"
+            window_map.setdefault(month_key, []).append(s)
+
+        # Schritt 2: Fenster nach Chunk-Dichte sortieren (dichteste zuerst),
+        # bei Gleichstand das neuere Fenster vorziehen
+        sorted_windows = sorted(
+            window_map.items(),
+            key=lambda kv: (len(kv[1]), kv[0]),
+            reverse=True,
         )
-        for kw_src in kw_sorted:
+
+        # Schritt 3: Innerhalb jedes Fensters chronologisch, dann Budget füllen
+        kw_ordered = []
+        for _month, chunks in sorted_windows:
+            chunks_sorted = sorted(chunks, key=lambda s: s.get("metadata", {}).get("timestamp", ""))
+            kw_ordered.extend(chunks_sorted)
+
+        for kw_src in kw_ordered:
             icon, label = SOURCE_LABELS.get(kw_src["collection"], ("📄", kw_src["collection"].upper()))
             meta = kw_src.get("metadata", {})
             date_str = meta.get("date_iso", meta.get("timestamp", ""))[:10]
@@ -335,7 +359,7 @@ def compress_sources(
             kw_used += entry_tokens
 
         if kw_parts:
-            kw_block = "=== KEYWORD-TREFFER (chronologisch) ===\n" + "\n\n".join(kw_parts)
+            kw_block = "=== KEYWORD-TREFFER (dichte Zeiträume zuerst) ===\n" + "\n\n".join(kw_parts)
             logger.info("Keyword-Block: %d/%d Chunks, %d tokens", len(kw_parts), len(keyword_sources), kw_used)
             parts.append(kw_block)
 
