@@ -522,7 +522,12 @@ def _event(event_type: str, content: object) -> str:
 
 
 def _split_into_chunks(text: str, chunk_size: int = 100) -> list[str]:
-    """Teilt Text in Wort-Chunks für Streaming-Simulation."""
+    """Teilt Text in Wort-Chunks für Streaming-Simulation.
+
+    Wichtig: Nicht-letzte Chunks erhalten einen trailing Space, damit
+    das Frontend beim Konkatenieren keine Wörter zusammenführt.
+    ("Jazz hatte" + "bereits" würde sonst zu "Jazz hattebereits".)
+    """
     words = text.split(" ")
     chunks: list[str] = []
     current: list[str] = []
@@ -531,9 +536,9 @@ def _split_into_chunks(text: str, chunk_size: int = 100) -> list[str]:
         current.append(word)
         current_len += len(word) + 1
         if current_len >= chunk_size:
-            chunks.append(" ".join(current))
+            chunks.append(" ".join(current) + " ")  # trailing space!
             current = []
             current_len = 0
     if current:
-        chunks.append(" ".join(current))
+        chunks.append(" ".join(current))  # letzter Chunk: kein trailing space
     return chunks
