@@ -76,6 +76,17 @@ def retrieve(
         date_to=date_to,
     )  # type: ignore[assignment]
 
+    # --- Live-Echo-Filter: WhatsApp-Live-Nachrichten entfernen ---
+    # Live-Echo-Messages sind Reflexionen der eigenen Queries an das System —
+    # keine echten Erinnerungen, kontaminieren aber das Retrieval als False Positives.
+    n_before = len(semantic_sources)
+    semantic_sources = [s for s in semantic_sources if not s.get("id", "").startswith("wa_live_")]
+    if len(semantic_sources) < n_before:
+        logger.info(
+            "Live-Echo-Filter: %d wa_live_* Chunk(s) entfernt",
+            n_before - len(semantic_sources),
+        )
+
     # --- Re-Ranking: Cross-Encoder bewertet (query, chunk)-Paare neu ---
     # Keyword-Quellen werden NICHT re-ranked (chronologischer Block bleibt unverändert).
     from backend.rag.reranker import rerank
@@ -109,7 +120,7 @@ def build_retrieval_fn(
     query: str,
     user_id: str,
     base_params: RetrievalParams,
-) -> RetrievalFn:
+) -> tuple[RetrievalFn, list[Source]]:
     """
     Erstellt eine RetrievalFn-Closure für den Thinking Mode.
 
@@ -118,8 +129,18 @@ def build_retrieval_fn(
     komprimierten Kontext-String zurück.
 
     Die Closure mergt base_params mit den focus-Params (focus gewinnt).
+
+    Returns:
+        (retrieval_fn, thinking_sources)
+        thinking_sources ist ein geteiltes Mutable-List, das nach jedem
+        Thinking-Mode-Re-Retrieval mit den abgerufenen Quellen befüllt wird.
+        Reihenfolge entspricht der compress_sources-Sortierung ([1], [2], ...).
+        Damit können Aufrufer die Sources nach dem Thinking Mode für das
+        Frontend nutzen — [[n]]-Referenzen in der Antwort stimmen dann überein.
     """
     from backend.rag.context_manager import compress_sources, ContextBudget
+
+    thinking_sources: list[Source] = []
 
     async def retrieval_fn(focus: RetrievalParams) -> str:
         merged: RetrievalParams = {**base_params, **focus}  # type: ignore[misc]
@@ -130,14 +151,35 @@ def build_retrieval_fn(
         if not semantic and not keyword:
             return "(Keine weiteren Quellen für diesen Fokus gefunden)"
 
+        # Sortiere semantic sources so wie compress_sources es tut —
+        # damit [[1]] im LLM-Output zu thinking_sources[0] passt.
+        sort_order = focus.get("sort_order", "relevance")
+        if sort_order == "date_desc":
+            def _dk(s: Source) -> str:
+                m = s.get("metadata", {})
+                return m.get("date_iso") or m.get("timestamp") or ""
+            sorted_sem = sorted(semantic, key=_dk, reverse=True)
+        elif sort_order == "date_asc":
+            def _dk(s: Source) -> str:  # type: ignore[misc]
+                m = s.get("metadata", {})
+                return m.get("date_iso") or m.get("timestamp") or ""
+            sorted_sem = sorted(semantic, key=_dk)
+        else:
+            sorted_sem = sorted(semantic, key=lambda s: s.get("score", 0), reverse=True)
+
+        # Tracking: keyword sources nach semantic anhängen (eigener Block)
+        thinking_sources.clear()
+        thinking_sources.extend(sorted_sem + keyword)
+
         return compress_sources(
             semantic,
             budget=ContextBudget(max_tokens=DEFAULT_TOKEN_BUDGET),
             top_n_full=TOP_N_FULL,
             keyword_sources=keyword or None,
+            sort_order=sort_order,
         )
 
-    return retrieval_fn
+    return retrieval_fn, thinking_sources
 
 
 # ---------------------------------------------------------------------------

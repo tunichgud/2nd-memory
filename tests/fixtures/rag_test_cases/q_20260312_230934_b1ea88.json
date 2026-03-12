@@ -1,0 +1,59 @@
+{
+  "test_id": "q_20260312_230934_b1ea88",
+  "query": "Was ist Deine erste Aufzeichnung über einen Aufenthalt in München und was habe ich dort gemacht?",
+  "snapshot": {
+    "captured_at": "2026-03-12T23:09:34",
+    "sources": [
+      {
+        "id": "wa_WhatsApp-Chat mit Sa_12310",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[24.06.22 22:23] Sarah Ohnesorge: Toll, danke!\n[24.06.22 22:24] Josh: Komme verspätet um eine halbe Stunde in München an. Hatten noch einen langen Halt in Ludwigslust, weil jemand mit dem Krankenwagen abgeholt werden musste und die ganze Bahn musste warten...\n[24.06.22 15:51] Sarah Ohnesorge: Ich hoffe es wird schön mit deinen Freundinnen. 😘\n[24.06.22 16:18] Sarah Ohnesorge: Viele Grüße an Barbara!",
+        "metadata": {
+          "chat_name": "Sarah Ohnesorge",
+          "persons": "Sarah Ohnesorge,Josh",
+          "date_ts": 1656102180,
+          "timestamp": "2022-06-24T22:23:00",
+          "date_iso": "24.06.22 22:23",
+          "source": "whatsapp",
+          "user_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "score": -7.42
+      },
+      {
+        "id": "saved_204_Trachten_Angermaier",
+        "collection": "saved_places",
+        "document": "Gespeicherter Ort: Trachten Angermaier\nAdresse: Rosental 10, 80331 München, Deutschland\nLand: DE\nKoordinaten: 48.13525°N, 11.57420°E\nGespeichert am: 18.02.2012",
+        "metadata": {
+          "name": "Trachten Angermaier",
+          "address": "Rosental 10, 80331 München, Deutschland",
+          "date_iso": "2012-02-18T11:10:32Z",
+          "date_ts": 1329563432,
+          "source": "google_saved",
+          "user_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "score": -8.45
+      }
+    ]
+  },
+  "golden": {
+    "answer": "Die früheste Aufzeichnung mit München-Bezug ist der gespeicherte Ort 'Trachten Angermaier' (Rosental 10, München) vom 18. Februar 2012 — allerdings belegt das nur eine Ortsspeicherung, keinen physischen Aufenthalt. Der erste belegte physische Aufenthalt ist der 24. Juni 2022: Josh kam mit 30 Minuten Verspätung in München an (Zugverzögerung in Ludwigslust). Er war zum Besuch bei Freundinnen — darunter Barbara. Sarah Ohnesorge war nicht dabei: sie schrieb ihm aus der Ferne ('Viele Grüße an Barbara!').",
+    "required_facts": [
+      "Trachten Angermaier",
+      "18. Februar 2012",
+      "24. Juni 2022",
+      "verspätet",
+      "Ludwigslust",
+      "Barbara",
+      "Sarah nicht dabei"
+    ],
+    "forbidden_facts": [
+      "Sarah Ohnesorge war in München",
+      "Sarah traf sich mit Josh in München",
+      "Sarah war dabei",
+      "wa_live"
+    ],
+    "notes": "Kritischer Testfall für Chat-Richtungsinterpretation: Sarah schreibt 'Ich hoffe es wird schön mit deinen Freundinnen' und 'Viele Grüße an Barbara!' — das beweist, dass Sarah NICHT in München war, sondern von andernorts an Josh schrieb. Ein früheres System halluzinierte fälschlicherweise 'Josh traf sich mit Sarah Ohnesorge, Frieda und Barbara in München'. Außerdem wurde die wa_live_89f946e9 Echo-Nachricht (Joshs eigene Frage ans System) als Quelle kontaminiert. Dieser Test prüft: (1) Chat-Richtungs-Inferenz, (2) wa_live-Filterung, (3) korrekte [[n]]-Zitate (keine halluzinierten Nummern).",
+    "set_by": "qs",
+    "set_at": "2026-03-12T23:09:34"
+  }
+}
