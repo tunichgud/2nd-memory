@@ -82,6 +82,18 @@ FEHLENDE FAKTEN:
 RECHERCHE-PARAMETER (nur wenn FEHLENDE FAKTEN vorhanden):
 date_from=YYYY-MM-DD, date_to=YYYY-MM-DD, keywords=["term1"]
 
+RELEVANZ-FILTER (kritisch!):
+Extrahiere NUR Fakten die DIREKT zur Nutzeranfrage beitragen.
+Wenn eine Quelle thematisch unpassend ist (z.B. Anfrage nach Jazz-Hund, Quelle über Menschenbeerdigung),
+dann IGNORIERE sie vollständig — extrahiere keinen einzigen Fakt daraus.
+Lieber zu wenig als irrelevante Fakten, die den Kontext verstopfen.
+
+DEDUPLICATION (kritisch!):
+Fakten die bereits in "BEREITS BEKANNTE FAKTEN" stehen → NICHT nochmals extrahieren.
+Wenn ALLE Fakten der neuen Quellen bereits bekannt sind → schreibe nur:
+FAKTEN:
+- (Keine neuen Fakten — alle relevanten Informationen bereits bekannt)
+
 Regeln:
 - FAKTEN: nur was explizit in den Quellen steht — kein Fließtext, kein Paraphrasieren.
 - THESEN: nur was logisch aus den Fakten folgt — keine Spekulation ohne Quellenbeleg.
@@ -244,11 +256,15 @@ async def thinking_mode_stream(
             iteration=iteration,
         )
 
-        # Akkumuliere FAKTEN+THESEN aller Iterationen (komprimiert, kein Roh-Kontext)
-        if accumulated_researcher_facts:
-            accumulated_researcher_facts += f"\n\n--- Iteration {iteration} ---\n{researcher_draft}"
-        else:
-            accumulated_researcher_facts = researcher_draft
+        # Akkumuliere FAKTEN+THESEN aller Iterationen (komprimiert, kein Roh-Kontext).
+        # "Keine neuen Fakten"-Ausgaben werden NICHT angehängt — sie blähen sonst
+        # accumulated_researcher_facts auf ohne inhaltlichen Mehrwert.
+        _is_empty_draft = "keine neuen fakten" in researcher_draft.lower()
+        if not _is_empty_draft:
+            if accumulated_researcher_facts:
+                accumulated_researcher_facts += f"\n\n--- Iteration {iteration} ---\n{researcher_draft}"
+            else:
+                accumulated_researcher_facts = researcher_draft
 
         yield _event("researcher", {"iteration": iteration, "content": researcher_draft})
 
@@ -295,10 +311,18 @@ async def thinking_mode_stream(
                     retrieval_found_count = len(new_context) if new_context else 0
                     if new_context:
                         accumulated_context = new_context   # NUR neue Docs, kein Merge
-                    logger.info(
-                        "Thinking Mode Iteration %d: neuer Kontext geladen (%d Zeichen)",
-                        iteration, len(new_context) if new_context else 0,
-                    )
+                        logger.info(
+                            "Thinking Mode Iteration %d: neuer Kontext geladen (%d Zeichen)",
+                            iteration, len(new_context),
+                        )
+                    else:
+                        # Leerer String = Early-Exit-Signal aus build_retrieval_fn:
+                        # Alle Chunks wurden bereits in früheren Iterationen gesehen.
+                        logger.info(
+                            "Thinking Mode Iteration %d: keine neuen Chunks — Early Exit",
+                            iteration,
+                        )
+                        should_finalize = True
                 except Exception as exc:
                     logger.warning("retrieval_fn fehlgeschlagen in Iteration %d: %s", iteration, exc)
 

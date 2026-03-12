@@ -34,7 +34,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from typing import AsyncGenerator, Any
+from typing import AsyncGenerator, Any, Callable
 
 from backend.llm.connector import chat_stream, get_cfg
 from backend.rag.constants import (
@@ -173,7 +173,16 @@ async def answer_v3_stream(
         messages = _phase_build_messages(query, context, chat_history)
 
         # ── Phase 6: Generierung ─────────────────────────────────────────────
-        retrieval_fn: RetrievalFn = build_retrieval_fn(query, user_id, retrieval_params)
+        initial_ids = {s["id"] for s in semantic_sources + kw_sources}
+        retrieval_fn, thinking_sources = build_retrieval_fn(
+            query, user_id, retrieval_params, initial_source_ids=initial_ids
+        )
+
+        # Thinking-Trace Closure
+        _qid = trace.query_id
+        def _trace_fn(data: dict) -> None:
+            from backend.rag.query_logger import log_thinking_iteration
+            log_thinking_iteration(query_id=_qid, **data)
 
         async for chunk in _phase_generate(
             messages=messages,
@@ -183,6 +192,7 @@ async def answer_v3_stream(
             use_thinking_mode=use_thinking_mode,
             thinking_max_iterations=thinking_max_iterations,
             show_thoughts=show_thoughts,
+            trace_fn=_trace_fn,
         ):
             event = json.loads(chunk)
             if event.get("type") == "text":
@@ -190,8 +200,17 @@ async def answer_v3_stream(
             yield chunk + "\n\n"
 
         # ── Phase 7: Sources + Trace ─────────────────────────────────────────
-        all_sources = semantic_sources + kw_sources
-        yield _sse("sources", _format_sources(all_sources[:MAX_SOURCES_DISPLAY]))
+        # Im Thinking Mode entsprechen [[n]]-Referenzen in der Antwort den
+        # zuletzt re-retrievten Quellen, nicht den initialen semantischen.
+        # thinking_sources enthält diese Quellen in compress_sources-Reihenfolge.
+        # Im Standard-Modus: semantic_sources score-sortiert (wie compress_sources),
+        # damit [[n]] auch dort korrekt auf _lastSources[n-1] zeigt.
+        if thinking_sources:
+            display_sources = thinking_sources
+        else:
+            sorted_sem = sorted(semantic_sources, key=lambda s: s.get("score", 0), reverse=True)
+            display_sources = sorted_sem + kw_sources
+        yield _sse("sources", _format_sources(display_sources[:MAX_SOURCES_DISPLAY]))
 
         llm_cfg = get_cfg()
         trace.log_provider(llm_cfg.get("provider", ""), llm_cfg.get("model", ""))
@@ -303,6 +322,7 @@ async def _phase_generate(
     use_thinking_mode: bool,
     thinking_max_iterations: int,
     show_thoughts: bool,
+    trace_fn: Callable[[dict], None] | None = None,
 ) -> AsyncGenerator[str, None]:
     """
     Phase 5: LLM-Generierung.
@@ -323,6 +343,7 @@ async def _phase_generate(
             context=context,
             max_iterations=thinking_max_iterations,
             retrieval_fn=retrieval_fn,
+            trace_fn=trace_fn,
         ):
             yield ev
 

@@ -120,6 +120,7 @@ def build_retrieval_fn(
     query: str,
     user_id: str,
     base_params: RetrievalParams,
+    initial_source_ids: set[str] | None = None,
 ) -> tuple[RetrievalFn, list[Source]]:
     """
     Erstellt eine RetrievalFn-Closure für den Thinking Mode.
@@ -129,6 +130,11 @@ def build_retrieval_fn(
     komprimierten Kontext-String zurück.
 
     Die Closure mergt base_params mit den focus-Params (focus gewinnt).
+
+    Chunk-ID-Deduplication: Bereits dem Researcher gezeigte Chunks werden
+    aus nachfolgenden Retrievals herausgefiltert. Wenn keine neuen Chunks
+    vorhanden sind, gibt die Funktion einen leeren String zurück — das
+    ist das Signal für thinking_mode_stream, den Loop zu beenden.
 
     Returns:
         (retrieval_fn, thinking_sources)
@@ -140,6 +146,9 @@ def build_retrieval_fn(
     """
     from backend.rag.context_manager import compress_sources, ContextBudget
 
+    # Chunk-ID-Tracking: bereits gezeigte Chunks nicht erneut zeigen.
+    # Mit initialen Sources vorbelegen, damit Iter-1-Retrieval keine Duplikate liefert.
+    seen_ids: set[str] = set(initial_source_ids or [])
     thinking_sources: list[Source] = []
 
     async def retrieval_fn(focus: RetrievalParams) -> str:
@@ -147,9 +156,6 @@ def build_retrieval_fn(
         logger.info("Thinking Mode Nachforschung: %s", _summarize_params(focus))
 
         semantic, keyword = retrieve(query, user_id, merged)
-
-        if not semantic and not keyword:
-            return "(Keine weiteren Quellen für diesen Fokus gefunden)"
 
         # Sortiere semantic sources so wie compress_sources es tut —
         # damit [[1]] im LLM-Output zu thinking_sources[0] passt.
@@ -167,15 +173,32 @@ def build_retrieval_fn(
         else:
             sorted_sem = sorted(semantic, key=lambda s: s.get("score", 0), reverse=True)
 
+        # --- Chunk-ID-Deduplication: bereits gesehene IDs rausfiltern ---
+        new_sem = [s for s in sorted_sem if s.get("id") not in seen_ids]
+        new_kw  = [s for s in keyword    if s.get("id") not in seen_ids]
+
+        if not new_sem and not new_kw:
+            logger.info(
+                "Thinking Mode: alle %d Chunks bereits gesehen — Early-Exit-Signal",
+                len(sorted_sem) + len(keyword),
+            )
+            return ""  # Leerer String = Signal für Early Exit in thinking_mode_stream
+
+        seen_ids.update(s.get("id") for s in new_sem + new_kw)
+        logger.info(
+            "Thinking Mode: %d neue Chunks (%d sem, %d kw), %d bereits gesehen",
+            len(new_sem) + len(new_kw), len(new_sem), len(new_kw), len(seen_ids),
+        )
+
         # Tracking: keyword sources nach semantic anhängen (eigener Block)
         thinking_sources.clear()
-        thinking_sources.extend(sorted_sem + keyword)
+        thinking_sources.extend(new_sem + new_kw)
 
         return compress_sources(
-            semantic,
+            new_sem,
             budget=ContextBudget(max_tokens=DEFAULT_TOKEN_BUDGET),
             top_n_full=TOP_N_FULL,
-            keyword_sources=keyword or None,
+            keyword_sources=new_kw or None,
             sort_order=sort_order,
         )
 
