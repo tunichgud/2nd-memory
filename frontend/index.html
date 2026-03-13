@@ -1,0 +1,1858 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2nd Memory – Persönliches Gedächtnis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    #map {
+      height: 400px;
+    }
+
+    .source-photo {
+      border-left: 4px solid #3b82f6;
+    }
+
+    .source-reviews {
+      border-left: 4px solid #10b981;
+    }
+
+    .source-saved_places {
+      border-left: 4px solid #f59e0b;
+    }
+
+    .source-messages {
+      border-left: 4px solid #8b5cf6;
+    }
+
+    .typing-dot {
+      animation: blink 1.2s infinite;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes blink {
+
+      0%,
+      80%,
+      100% {
+        opacity: 0
+      }
+
+      40% {
+        opacity: 1
+      }
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    #ner-overlay {
+      backdrop-filter: blur(4px);
+    }
+
+    /* Indeterminate Progress Bar */
+    .loading-bar {
+      height: 2px;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      background-color: transparent;
+    }
+
+    .loading-bar::after {
+      content: '';
+      position: absolute;
+      left: -50%;
+      height: 100%;
+      width: 50%;
+      background: linear-gradient(to right, transparent, #3b82f6, #60a5fa, #3b82f6, transparent);
+      animation: indeterminate-loading 1.5s infinite linear;
+    }
+
+    @keyframes indeterminate-loading {
+      from {
+        left: -50%;
+      }
+
+      to {
+        left: 100%;
+      }
+    }
+
+    @keyframes slide-up {
+      from {
+        opacity: 0;
+        transform: translateY(1rem);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Carousel Styles */
+    .carousel-container {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      height: 256px;
+      /* 16rem - fits w-64 h-64 or similar */
+    }
+
+    .carousel-track {
+      display: flex;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      height: 100%;
+    }
+
+    .carousel-slide {
+      min-width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(17, 24, 39, 0.7);
+      backdrop-filter: blur(4px);
+      color: white;
+      border: 1px solid rgba(75, 85, 99, 0.5);
+      border-radius: 50%;
+      width: 2.5rem;
+      height: 2.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.2s;
+    }
+
+    .carousel-btn:hover {
+      background: rgba(31, 41, 55, 0.9);
+      border-color: #3b82f6;
+    }
+
+    .carousel-btn.prev {
+      left: 0.5rem;
+    }
+
+    .carousel-btn.next {
+      right: 0.5rem;
+    }
+
+    .carousel-dots {
+      position: absolute;
+      bottom: 0.75rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 0.5rem;
+      z-index: 10;
+    }
+
+    .carousel-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .carousel-dot.active {
+      background: #3b82f6;
+      transform: scale(1.2);
+    }
+
+    @keyframes zoom-in {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Thinking Timeline Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-fadeIn {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+
+    .thinking-timeline {
+      transition: all 0.3s ease-out;
+    }
+
+    .timeline-step {
+      transition: all 0.2s ease-out;
+    }
+
+    .timeline-step:hover {
+      transform: translateX(2px);
+    }
+
+    /* Pulsing animation for active tool calls */
+    @keyframes pulse-border {
+      0%, 100% {
+        border-color: rgb(234, 179, 8);
+        opacity: 1;
+      }
+      50% {
+        border-color: rgb(250, 204, 21);
+        opacity: 0.7;
+      }
+    }
+
+    .border-yellow-500.animate-pulse {
+      animation: pulse-border 2s ease-in-out infinite;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-950 text-gray-100 min-h-screen font-sans">
+
+  <!-- Lightbox Overlay (Vollbild) -->
+  <div id="2nd-memory-lightbox"
+    class="hidden fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-4 backdrop-blur-md transition-opacity duration-300">
+    <div class="relative w-full h-full flex items-center justify-center flex-col animate-[zoom-in_0.2s_ease-out]">
+      <button onclick="closeLightbox()"
+        class="absolute top-4 right-4 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full text-white flex items-center justify-center text-3xl transition-all z-[101]">×</button>
+      <img id="lightbox-img" src=""
+        class="max-h-[85vh] max-w-full object-contain rounded-lg shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+      <div id="lightbox-caption"
+        class="mt-6 text-white text-sm text-center flex flex-wrap justify-center gap-6 font-medium"></div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="text-2xl">🦕</span>
+      <h1 class="text-xl font-bold tracking-tight">2nd Memory/h1>
+      <span class="text-xs text-gray-500">v2 · Privacy-First</span>
+    </div>
+    <nav class="flex gap-4 text-sm">
+      <button onclick="showTab('chat')" id="tab-chat" class="tab-btn active px-3 py-1 rounded">Chat</button>
+      <button onclick="showTab('map')" id="tab-map" class="tab-btn px-3 py-1 rounded">Karte</button>
+      <button onclick="showTab('entities')" id="tab-entities" class="tab-btn px-3 py-1 rounded">Personen</button>
+      <button onclick="showTab('validation')" id="tab-validation" class="tab-btn px-3 py-1 rounded">🏷️
+        Validierung</button>
+      <button onclick="showTab('import')" id="tab-import" class="tab-btn px-3 py-1 rounded">Import</button>
+      <button onclick="showTab('settings')" id="tab-settings" class="tab-btn px-3 py-1 rounded">Einstellungen</button>
+    </nav>
+    <div class="flex items-center gap-3">
+      <span id="sync-status-badge" class="text-xs text-gray-500">🔒 Kein Sync-PW</span>
+      <div id="status-bar" class="text-xs text-gray-500"></div>
+    </div>
+  </header>
+
+  <!-- Chat-Tab -->
+  <div id="view-chat" class="view max-w-4xl mx-auto p-4 flex flex-col gap-4" style="height:calc(100vh - 70px)">
+    <!-- Global Loading Indicator -->
+    <div id="global-loading" class="hidden">
+      <div class="flex items-center justify-between mb-1 px-1">
+        <span class="text-[10px] text-blue-400 font-medium tracking-wider uppercase">2nd Memory denkt nach...</span>
+        <span class="text-[10px] text-gray-600 animate-pulse">🦖</span>
+      </div>
+      <div class="loading-bar rounded-full"></div>
+    </div>
+
+    <div id="chat-messages" class="flex-1 overflow-y-auto flex flex-col gap-4 pr-2"></div>
+
+    <!-- Eingabe -->
+    <div class="flex gap-2">
+      <input id="chat-input" type="text" placeholder="Frage stellen, z.B. ›Wo war ich im August mit Anna?‹"
+        class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-500"
+        onkeydown="if(event.key==='Enter') sendQuery()" />
+      <button onclick="sendQuery()"
+        class="bg-blue-600 hover:bg-blue-500 px-5 py-3 rounded-lg text-sm font-medium transition-colors">
+        Fragen
+      </button>
+      <button id="stop-btn" onclick="abortQuery()"
+        class="bg-red-900 border border-red-700 hover:bg-red-800 text-red-100 px-5 py-3 rounded-lg text-sm font-medium transition-colors hidden z-[9999]"
+        title="Abbruch der Anfrage">
+        <span class="text-sm">Stop</span>
+      </button>
+    </div>
+    <!-- Thinking Mode Toggle -->
+    <div class="flex items-center gap-2 mt-1">
+      <label class="flex items-center gap-2 cursor-pointer select-none" title="Aktiviert Researcher → Challenger → Decider Analyse-Pipeline">
+        <div class="relative">
+          <input type="checkbox" id="thinking-mode-toggle" class="sr-only peer" onchange="window._thinkingModeEnabled = this.checked" />
+          <div class="w-9 h-5 bg-gray-700 peer-focus:ring-2 peer-focus:ring-indigo-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+        </div>
+        <span class="text-[11px] text-gray-400 peer-checked:text-indigo-300">🔮 Thinking Mode <span class="text-gray-600">(Researcher · Challenger · Decider)</span></span>
+      </label>
+    </div>
+
+    <!-- Schnellfilter -->
+    <div class="flex gap-2 flex-wrap text-xs">
+      <span class="text-gray-500">Schnell:</span>
+      <button onclick="quickQuery('Wo war ich im August?')" class="quick-btn">August</button>
+      <button onclick="quickQuery('Mit wem war ich in München?')" class="quick-btn">München</button>
+      <button onclick="quickQuery('Welche Restaurants habe ich besucht?')" class="quick-btn">Restaurants</button>
+      <button onclick="quickQuery('Was habe ich mit Anna gemacht?')" class="quick-btn">Anna</button>
+      <button onclick="quickQuery('Wo habe ich im November Fotos gemacht?')" class="quick-btn">November</button>
+    </div>
+  </div>
+
+  <!-- Karten-Tab -->
+  <div id="view-map" class="view hidden p-4">
+    <div class="flex gap-3 mb-3 text-sm flex-wrap items-center">
+      <select id="map-source" onchange="loadMap()" class="bg-gray-800 border border-gray-700 rounded px-3 py-1">
+        <option value="">Alle Quellen</option>
+        <option value="photos">Fotos</option>
+        <option value="reviews">Bewertungen</option>
+        <option value="saved_places">Gespeicherte Orte</option>
+      </select>
+      <input type="date" id="map-from" onchange="loadMap()"
+        class="bg-gray-800 border border-gray-700 rounded px-3 py-1">
+      <span class="text-gray-500">bis</span>
+      <input type="date" id="map-to" onchange="loadMap()" class="bg-gray-800 border border-gray-700 rounded px-3 py-1">
+      <span id="map-count" class="text-gray-500 ml-2"></span>
+    </div>
+    <div id="map" class="rounded-lg border border-gray-800"></div>
+    <div id="map-legend" class="flex gap-4 mt-3 text-xs text-gray-400">
+      <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span>
+        Fotos</span>
+      <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+        Bewertungen</span>
+      <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+        Gespeicherte Orte</span>
+    </div>
+  </div>
+
+  <!-- Personen-Tab (Entity Resolution) -->
+  <div id="view-entities" class="view hidden max-w-4xl mx-auto p-4 flex flex-col gap-6">
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-semibold flex items-center gap-2">🕵️ Unbekannte Gesichter zuordnen</h2>
+        <button onclick="window.Entities?.loadSuggestedClusters()"
+          class="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 bg-blue-900/30 px-3 py-1.5 rounded-lg border border-blue-800/50 transition-colors">
+          <span>🔄</span> Aktualisieren
+        </button>
+      </div>
+      <p class="text-sm text-gray-400 mb-6">
+        Hier findest du Gesichter, die auf importierten Fotos erkannt wurden, aber noch mit keinem Chat-Kontakt
+        verknüpft sind. Weise ihnen einen Namen und einen Identifier (z.B. Handynummer) zu.
+      </p>
+
+      <!-- Lade-Indikator (Init) -->
+      <div id="entities-loading" class="hidden text-center py-8 text-gray-500 text-sm flex flex-col items-center gap-3">
+        <div class="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        Gefundene Gesichter werden analysiert...
+      </div>
+
+      <!-- Leerer Status -->
+      <div id="entities-empty"
+        class="hidden text-center py-12 bg-gray-800/30 rounded-lg border border-gray-800 border-dashed">
+        <div class="text-3xl mb-3 opacity-50">✨</div>
+        <h3 class="text-gray-300 font-medium mb-1">Alles aufgeräumt!</h3>
+        <p class="text-gray-500 text-sm">Es wurden keine neuen, unzugewiesenen Gesichter in der Datenbank gefunden.</p>
+      </div>
+
+      <!-- Liste der Cluster -->
+      <div id="cluster-list" class="flex flex-col gap-5"></div>
+
+      <!-- Sektion: Einzelne Gesichter -->
+      <div id="single-faces-section" class="hidden mt-8">
+        <h3 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+          <span>👤</span> Einzelne Gesichter (Seltene Personen)
+        </h3>
+        <div id="single-faces-list" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4"></div>
+      </div>
+    </div>
+
+    <!-- Modal / Overlay: Person analysieren & aufteilen -->
+    <div id="split-modal"
+      class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div
+        class="bg-gray-900 border border-gray-800 rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-[slide-up_0.3s_ease-out]">
+        <div class="p-6 border-b border-gray-800 flex justify-between items-center">
+          <div>
+            <h3 class="text-xl font-bold text-gray-100 flex items-center gap-2">
+              <span class="text-blue-500">🔍</span> Person analysieren: <span id="split-entity-name"
+                class="text-blue-400"></span>
+            </h3>
+            <p class="text-sm text-gray-400 mt-1">Wir suchen nach Untergruppen in dieser Person, um sie ggf.
+              aufzuteilen.</p>
+          </div>
+          <button onclick="document.getElementById('split-modal').classList.add('hidden')"
+            class="text-gray-500 hover:text-white text-2xl">×</button>
+        </div>
+
+        <div id="split-content" class="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+          <!-- Wird via JS befüllt -->
+          <div id="split-loading" class="flex flex-col items-center justify-center py-12">
+            <div class="w-10 h-10 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+            <p class="text-sm text-gray-500 mt-4">Analysiere Gesichtsgruppen...</p>
+          </div>
+          <div id="split-results" class="hidden flex flex-col gap-6"></div>
+        </div>
+
+        <div class="p-6 border-t border-gray-800 bg-gray-950/50 flex justify-end">
+          <button onclick="document.getElementById('split-modal').classList.add('hidden')"
+            class="px-6 py-2 rounded-xl border border-gray-700 text-gray-300 hover:bg-gray-800 transition-all">Schließen</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal / Overlay: Fotos verwalten -->
+    <div id="manage-photos-modal"
+      class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div
+        class="bg-gray-900 border border-gray-800 rounded-3xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-[slide-up_0.3s_ease-out]">
+        <div class="p-6 border-b border-gray-800 flex justify-between items-center">
+          <div>
+            <h3 class="text-xl font-bold text-gray-100 flex items-center gap-2">
+              <span class="text-emerald-500">🖼️</span> Bilder verwalten: <span id="manage-photos-entity-name"
+                class="text-emerald-400"></span>
+            </h3>
+            <p class="text-sm text-gray-400 mt-1">Hier kannst du alle zugeordneten Gesichter sehen und falsch
+              zugeordnete Bilder entfernen.</p>
+          </div>
+          <button onclick="document.getElementById('manage-photos-modal').classList.add('hidden')"
+            class="text-gray-500 hover:text-white text-2xl">×</button>
+        </div>
+
+        <div id="manage-photos-content" class="flex-1 overflow-y-auto p-6">
+          <div id="manage-photos-loading" class="flex flex-col items-center justify-center py-12">
+            <div class="w-10 h-10 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+            <p class="text-sm text-gray-500 mt-4">Lade verknüpfte Bilder...</p>
+          </div>
+          <div id="manage-photos-grid"
+            class="hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <!-- Wird via JS befüllt -->
+          </div>
+        </div>
+
+        <div class="p-6 border-t border-gray-800 bg-gray-950/50 flex justify-end">
+          <button onclick="document.getElementById('manage-photos-modal').classList.add('hidden')"
+            class="px-6 py-2 rounded-xl border border-gray-700 text-gray-300 hover:bg-gray-800 transition-all">Schließen</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sektion: Personen verwalten -->
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5 mt-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-semibold flex items-center gap-2">👤 Verknüpfte Personen verwalten</h2>
+        <button onclick="window.Entities?.loadLinkedEntities()"
+          class="text-xs text-gray-400 hover:text-gray-300 flex items-center gap-1 bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-700 transition-colors">
+          <span>🔄</span> Liste aktualisieren
+        </button>
+      </div>
+      <p class="text-sm text-gray-400 mb-6">
+        Hier siehst du alle Personen, die du bereits verknüpft hast. Du kannst ihre Namen korrigieren oder die
+        Verknüpfung wieder aufheben.
+      </p>
+
+      <div id="entities-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Wird via JS befüllt -->
+      </div>
+
+      <div id="entities-list-empty"
+        class="hidden text-center py-8 text-gray-600 text-sm border border-gray-800 border-dashed rounded-lg">
+        Noch keine Personen verknüpft.
+      </div>
+    </div>
+  </div>
+
+  <!-- Import-Tab -->
+  <div id="view-import" class="view hidden max-w-2xl mx-auto p-4 flex flex-col gap-6">
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <h2 class="font-semibold mb-4 flex items-center gap-2">📷 Google Fotos & Maps</h2>
+      <p class="text-sm text-gray-400 mb-4">
+        Indexiert die 50 Sample-Fotos mit GPS, Personen-Tags und KI-Bildbeschreibung
+        sowie alle Google Maps Bewertungen und gespeicherten Orte.
+      </p>
+      <div class="flex gap-3">
+        <button onclick="ingestSource('all')" class="ingest-btn bg-blue-700 hover:bg-blue-600">Alles einlesen</button>
+        <button onclick="ingestSource('photos')" class="ingest-btn bg-gray-700 hover:bg-gray-600">Nur Fotos</button>
+        <button onclick="ingestSource('reviews')" class="ingest-btn bg-gray-700 hover:bg-gray-600">Nur
+          Bewertungen</button>
+        <button onclick="ingestSource('saved')" class="ingest-btn bg-gray-700 hover:bg-gray-600">Nur
+          Gespeicherte</button>
+      </div>
+      <div id="ingest-progress" class="mt-4 hidden">
+        <div class="flex justify-between text-xs text-gray-400 mb-1">
+          <span id="progress-text">Verarbeite…</span>
+          <span id="progress-pct"></span>
+        </div>
+        <div class="w-full bg-gray-800 rounded-full h-2">
+          <div id="progress-bar" class="bg-blue-500 h-2 rounded-full transition-all" style="width:0%"></div>
+        </div>
+      </div>
+      <div id="ingest-result" class="mt-3 text-sm"></div>
+    </div>
+
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <h2 class="font-semibold mb-4 flex items-center gap-2">💬 WhatsApp Export</h2>
+      <p class="text-sm text-gray-400 mb-3">
+        WhatsApp → Einstellungen → Chats → Chat exportieren → Ohne Medien → TXT-Datei hochladen.
+      </p>
+      <div class="flex gap-3 items-center">
+        <input type="file" id="wa-file" accept=".txt,.zip" class="text-sm text-gray-400">
+        <button onclick="uploadWhatsApp()" class="ingest-btn bg-emerald-700 hover:bg-emerald-600">Hochladen</button>
+      </div>
+      <div id="wa-result" class="mt-3 text-sm"></div>
+    </div>
+
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <h2 class="font-semibold mb-4 flex items-center gap-2">🔒 Signal Export</h2>
+      <p class="text-sm text-gray-400 mb-3">
+        Signal Desktop → Einstellungen → Chats → Chats exportieren → messages.json hochladen.
+      </p>
+      <div class="flex gap-3 items-center">
+        <input type="file" id="signal-file" accept=".json,.zip" class="text-sm text-gray-400">
+        <button onclick="uploadSignal()" class="ingest-btn bg-purple-700 hover:bg-purple-600">Hochladen</button>
+      </div>
+      <div id="signal-result" class="mt-3 text-sm"></div>
+    </div>
+
+    <!-- DB-Status -->
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <h2 class="font-semibold mb-3">📊 Datenbank-Status</h2>
+      <div id="db-status" class="grid grid-cols-2 gap-3 text-sm"></div>
+      <button onclick="loadStatus()" class="mt-3 text-xs text-gray-500 hover:text-gray-300">Aktualisieren</button>
+    </div>
+  </div>
+
+  <style>
+    .tab-btn {
+      color: #9ca3af;
+    }
+
+    .tab-btn:hover {
+      color: #e5e7eb;
+    }
+
+    .tab-btn.active {
+      color: #fff;
+      background: #374151;
+    }
+
+    .quick-btn {
+      background: #1f2937;
+      color: #9ca3af;
+      border: 1px solid #374151;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      cursor: pointer;
+    }
+
+    .quick-btn:hover {
+      background: #374151;
+      color: #e5e7eb;
+    }
+
+    .ingest-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    /* Debug Panel */
+    #debug-panel {
+      position: fixed;
+      bottom: 1.25rem;
+      right: 1.25rem;
+      z-index: 9999;
+      width: 22rem;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: rgba(10, 10, 20, 0.97);
+      border: 1px solid #2d4a6e;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.15), 0 8px 32px rgba(0, 0, 0, 0.6);
+      font-family: ui-monospace, monospace;
+      font-size: 0.72rem;
+      color: #94a3b8;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+
+    #debug-panel.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+    }
+
+    #debug-panel h3 {
+      color: #60a5fa;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    #debug-panel .dbg-section {
+      margin-bottom: 0.75rem;
+      border-top: 1px solid #1e2d40;
+      padding-top: 0.5rem;
+    }
+
+    #debug-panel .dbg-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 1px 0;
+    }
+
+    #debug-panel .dbg-key {
+      color: #64748b;
+    }
+
+    #debug-panel .dbg-val {
+      color: #e2e8f0;
+      text-align: right;
+      max-width: 14rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #debug-panel .dbg-val.highlight {
+      color: #34d399;
+    }
+
+    #debug-panel .dbg-shortcut {
+      color: #475569;
+      font-size: 0.65rem;
+      margin-top: 0.5rem;
+      text-align: center;
+    }
+  </style>
+
+  <!-- Validierungs-Tab -->
+  <div id="view-validation" class="view hidden max-w-5xl mx-auto p-4 flex flex-col gap-6">
+    <!-- Header -->
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <h2 class="font-semibold text-xl flex items-center gap-2 mb-3">✅ Personen-Validierung</h2>
+      <p class="text-sm text-gray-400">
+        Überprüfe die zugeordneten Personen und korrigiere falsche Zuordnungen.
+        Gehe zum <strong>Personen-Tab</strong>, um neue Gesichter zu benennen.
+      </p>
+    </div>
+
+    <!-- Personen-Übersicht -->
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold flex items-center gap-2">👥 Alle erkannten Personen</h3>
+        <button onclick="Validation.loadPersonsList()"
+          class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm transition-all shadow-lg">
+          🔄 Liste laden
+        </button>
+      </div>
+      <p class="text-xs text-gray-500 mb-4">
+        Klicke auf eine Person, um alle zugeordneten Gesichter zu sehen. Falsch zugeordnete Gesichter können entfernt werden.
+      </p>
+      <div id="persons-list-container">
+        <div class="text-center py-8 text-gray-500 text-sm">
+          Klicke auf "Liste laden", um die Personen-Übersicht anzuzeigen
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistik-Übersicht -->
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <h3 class="font-semibold mb-4 flex items-center gap-2">📊 Statistiken</h3>
+      <div class="flex gap-2 mb-4">
+        <button onclick="Validation.loadStats()"
+          class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm transition-all">
+          Statistiken laden
+        </button>
+        <button onclick="Validation.repairMigrateGroundTruth()"
+          class="bg-yellow-600 hover:bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm transition-all"
+          title="Repariert fehlende Personen aus alten Validierungen">
+          🔧 Daten reparieren
+        </button>
+      </div>
+      <div id="validation-stats-overview"></div>
+    </div>
+  </div>
+
+  <!-- Einstellungen-Tab -->
+  <div id="view-settings" class="view hidden max-w-2xl mx-auto p-4 flex flex-col gap-6">
+
+    <!-- Profile -->
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <h2 class="font-semibold mb-3">👤 Profil</h2>
+      <div class="flex flex-col gap-3">
+        <div>
+          <label for="display-name-input" class="block text-sm text-gray-400 mb-2">Anzeigename</label>
+          <div class="flex gap-2">
+            <input
+              type="text"
+              id="display-name-input"
+              placeholder="Dein Name"
+              maxlength="100"
+              class="flex-1 bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              aria-label="Anzeigename bearbeiten"
+            />
+            <button
+              onclick="updateDisplayName()"
+              class="bg-blue-600 hover:bg-blue-500 text-sm px-4 py-2 rounded transition-all whitespace-nowrap"
+              aria-label="Namen speichern"
+            >
+              💾 Speichern
+            </button>
+          </div>
+          <div id="display-name-feedback" class="text-xs mt-2 hidden"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- User-Info & Logout -->
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <h2 class="font-semibold mb-3">ℹ️ Benutzer-Information</h2>
+      <div id="user-info" class="text-sm text-gray-400 mb-4">Lädt…</div>
+      <button onclick="logout()" class="bg-red-700 hover:bg-red-600 text-sm px-4 py-2 rounded-lg transition-all">
+        🚪 Abmelden
+      </button>
+    </div>
+
+    <!-- WhatsApp Integration -->
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
+      <h2 class="font-semibold mb-3">💬 WhatsApp Integration</h2>
+      <div id="whatsapp-status" class="text-sm text-gray-400">Prüfe Status...</div>
+
+      <!-- Bot-Konfiguration -->
+      <div class="mt-4">
+        <h3 class="text-sm font-semibold mb-2">⚙️ Bot-Konfiguration</h3>
+        <div id="whatsapp-config" class="text-xs text-gray-400 mb-2">Lade...</div>
+
+        <!-- User-Chat-ID setzen -->
+        <div class="mt-3 p-3 bg-gray-800 rounded">
+          <label class="text-xs font-semibold block mb-2">👤 Deine WhatsApp-ID (User-Chat-ID)</label>
+          <div class="text-xs text-gray-500 mb-2">
+            ℹ️ Der Bot antwortet nur auf Nachrichten AN dich in diesem Chat
+          </div>
+          <div class="flex gap-2">
+            <input
+              type="text"
+              id="user-chat-id-input"
+              placeholder="z.B. 4917012345678@c.us"
+              class="flex-1 bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm"
+            />
+            <button
+              onclick="setUserChatId()"
+              class="bg-green-600 hover:bg-green-500 text-sm px-4 py-2 rounded transition-all whitespace-nowrap"
+            >
+              💾 Speichern
+            </button>
+          </div>
+          <div class="mt-2">
+            <button
+              onclick="showAvailableChats()"
+              class="text-xs text-blue-400 hover:text-blue-300 underline"
+            >
+              📋 Verfügbare Chats anzeigen
+            </button>
+          </div>
+        </div>
+
+        <!-- Bot-Schalter -->
+        <div class="mt-3 flex items-center gap-3">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="bot-enabled-toggle" onchange="toggleBotEnabled()" />
+            <span class="text-xs">Bot aktiviert</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer ml-4">
+            <input type="checkbox" id="test-mode-toggle" onchange="toggleTestMode()" />
+            <span class="text-xs">TEST_MODE (eigene Nachrichten verarbeiten)</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Import-Bereich -->
+      <div class="mt-4 p-3 bg-gray-800 rounded">
+        <h3 class="text-sm font-semibold mb-2">📥 Chat-Historie importieren</h3>
+        <div class="text-xs text-gray-500 mb-3">
+          Intelligenter Import mit Priorisierung nach Aktivität und automatischer Deduplizierung.<br>
+          ⚠️ Import läuft nur 09:00-22:00 Uhr (Ban-Schutz). Rate-Limiting aktiv.
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="flex gap-2 mb-3">
+          <button
+            onclick="importAllChats()"
+            id="import-button"
+            class="bg-green-600 hover:bg-green-500 text-sm px-4 py-2 rounded transition-all"
+          >
+            📥 Alle Chats importieren
+          </button>
+          <button
+            onclick="showChatSelection()"
+            class="bg-blue-600 hover:bg-blue-500 text-sm px-4 py-2 rounded transition-all"
+          >
+            🎯 Chats auswählen
+          </button>
+          <button
+            onclick="loadImportStats()"
+            class="bg-gray-700 hover:bg-gray-600 text-sm px-4 py-2 rounded transition-all"
+          >
+            📊 Statistiken
+          </button>
+        </div>
+
+        <!-- Import Status & Progress -->
+        <div id="import-status" class="text-xs text-gray-400"></div>
+        <div id="import-progress" class="hidden mt-3 p-3 bg-gray-900 rounded border border-green-600">
+          <div class="text-xs font-semibold mb-2">⏳ Import läuft...</div>
+          <div class="text-xs space-y-1">
+            <div>📝 Chat: <span id="progress-chat-name" class="text-green-400">-</span></div>
+            <div>📊 Fortschritt: <span id="progress-count" class="text-blue-400">-</span></div>
+            <div>✨ Neue Nachrichten: <span id="progress-new" class="text-green-400">-</span></div>
+            <div>⏩ Übersprungen: <span id="progress-skipped" class="text-gray-500">-</span></div>
+            <div>⏰ Nächste Pause in: <span id="progress-pause" class="text-yellow-400">-</span></div>
+          </div>
+        </div>
+
+        <!-- Chat Selection Modal -->
+        <div id="chat-selection-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-semibold">🎯 Chats für Import auswählen</h3>
+              <button onclick="closeChatSelection()" class="text-gray-500 hover:text-white text-2xl">&times;</button>
+            </div>
+
+            <!-- Quick Select Buttons -->
+            <div class="flex gap-2 mb-4">
+              <button onclick="selectTopChats(10)" class="bg-blue-600 hover:bg-blue-500 text-xs px-3 py-1 rounded">
+                Top 10 aktive
+              </button>
+              <button onclick="selectRecentChats(30)" class="bg-blue-600 hover:bg-blue-500 text-xs px-3 py-1 rounded">
+                Letzte 30 Tage
+              </button>
+              <button onclick="selectAllChats()" class="bg-blue-600 hover:bg-blue-500 text-xs px-3 py-1 rounded">
+                Alle auswählen
+              </button>
+              <button onclick="deselectAllChats()" class="bg-gray-600 hover:bg-gray-500 text-xs px-3 py-1 rounded">
+                Alle abwählen
+              </button>
+            </div>
+
+            <!-- Sort Options & Stats -->
+            <div class="mb-3 flex items-center justify-between">
+              <div>
+                <label class="text-xs text-gray-400">Sortierung:</label>
+                <select id="chat-sort-order" onchange="sortChatList()" class="ml-2 bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs">
+                  <option value="activity">Aktivität (neueste zuerst)</option>
+                  <option value="name">Name (A-Z)</option>
+                  <option value="messages">Nachrichtenanzahl</option>
+                </select>
+              </div>
+              <div class="text-xs text-gray-400" id="chat-list-stats">
+                0 Chats
+              </div>
+            </div>
+
+            <!-- Chat List (scrollable, max 20 visible) -->
+            <div id="chat-selection-list" class="space-y-2 mb-4 max-h-96 overflow-y-auto">
+              <div class="text-xs text-gray-500 text-center py-4">Lade Chats...</div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-2 justify-end">
+              <button onclick="closeChatSelection()" class="bg-gray-700 hover:bg-gray-600 text-sm px-4 py-2 rounded">
+                Abbrechen
+              </button>
+              <button onclick="startSelectedImport()" class="bg-green-600 hover:bg-green-500 text-sm px-4 py-2 rounded">
+                Import starten (<span id="selected-count">0</span>)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Import Stats Modal -->
+        <div id="import-stats-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 max-w-3xl w-full max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-semibold">📊 Import-Statistiken</h3>
+              <button onclick="closeImportStats()" class="text-gray-500 hover:text-white text-2xl">&times;</button>
+            </div>
+            <div id="import-stats-content" class="text-xs space-y-3">
+              <div class="text-gray-500 text-center py-4">Lade Statistiken...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 flex gap-2">
+        <button onclick="checkWhatsAppStatus()" class="bg-gray-700 hover:bg-gray-600 text-sm px-4 py-2 rounded-lg transition-all">
+          🔄 Status aktualisieren
+        </button>
+        <button onclick="showWhatsAppLogs()" class="bg-blue-700 hover:bg-blue-600 text-sm px-4 py-2 rounded-lg transition-all">
+          📋 Logs anzeigen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Debug Panel (toggle: Ctrl+Shift+D) -->
+  <div id="debug-panel" class="hidden" aria-label="Debug Panel">
+    <h3>🛠 2nd Memory Debug</h3>
+    <div class="dbg-section">
+      <div class="dbg-row"><span class="dbg-key">LLM Provider</span><span class="dbg-val highlight"
+          id="dbg-provider">…</span></div>
+      <div class="dbg-row"><span class="dbg-key">Chat-Modell</span><span class="dbg-val" id="dbg-model">…</span></div>
+      <div class="dbg-row"><span class="dbg-key">Vision-Modell</span><span class="dbg-val" id="dbg-vision">…</span>
+      </div>
+      <div class="dbg-row"><span class="dbg-key">Embedding</span><span class="dbg-val" id="dbg-embed">…</span></div>
+    </div>
+    <div class="dbg-section">
+      <div class="dbg-row"><span class="dbg-key">RAG top_k</span><span class="dbg-val" id="dbg-topk">…</span></div>
+      <div class="dbg-row"><span class="dbg-key">RAG min_score</span><span class="dbg-val" id="dbg-minscore">…</span>
+      </div>
+      <div class="dbg-row"><span class="dbg-key">photo_sample_size</span><span class="dbg-val" id="dbg-photos">…</span>
+      </div>
+    </div>
+    <div class="dbg-section">
+      <div class="dbg-row"><span class="dbg-key">Elasticsearch</span><span class="dbg-val highlight">bereit</span></div>
+      <div class="dbg-row"><span class="dbg-key">User-ID</span><span class="dbg-val" id="dbg-uid">…</span></div>
+    </div>
+    <div class="dbg-shortcut">Strg+Shift+D zum Schließen · aktualisiert beim Öffnen</div>
+  </div>
+
+  <!-- Module laden -->
+  <script src="/static/chat.js"></script>
+  <script src="/static/map.js"></script>
+  <script src="/static/entities.js"></script>
+  <script src="/static/validation.js"></script>
+  <script>
+    // Aktueller User (wird nach Auth-Check gesetzt)
+    window._userId = null;
+
+    // Auth-Check: Prüft ob User eingeloggt ist
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/auth/status');
+        const data = await res.json();
+
+        if (!data.authenticated) {
+          // Nicht eingeloggt → Redirect zu Login
+          console.log('[Auth] Nicht eingeloggt, redirecte zu /login.html');
+          window.location.href = '/login.html';
+          return false;
+        }
+
+        // User-ID setzen
+        window._userId = data.user.id;
+        console.log('[Auth] Eingeloggt als:', data.user.display_name);
+        return true;
+
+      } catch (err) {
+        console.error('[Auth] Status-Check fehlgeschlagen:', err);
+        // Bei Fehler: Redirect zu Login (sicherer Fallback)
+        window.location.href = '/login.html';
+        return false;
+      }
+    }
+
+    // App-Initialisierung
+    async function initApp() {
+      // WICHTIG: Erst Auth-Check, dann Rest laden
+      const authenticated = await checkAuth();
+      if (!authenticated) return;  // Redirect läuft bereits
+
+      loadStatus();
+      loadUserInfo();
+    }
+
+    // Start
+    window.onload = initApp;
+
+    // -------------------------------------------------------------------------
+    // Tab-Navigation
+    // -------------------------------------------------------------------------
+    function showTab(name) {
+      document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('view-' + name).classList.remove('hidden');
+      document.getElementById('tab-' + name).classList.add('active');
+      if (name === 'map') loadMap();
+      if (name === 'import') loadStatus();
+      if (name === 'entities' && window.Entities) {
+        window.Entities.loadSuggestedClusters();
+        window.Entities.loadLinkedEntities();
+      }
+      if (name === 'settings') {
+        window.Sync?.renderSyncUI('sync-container', window._userId);
+        checkWhatsAppStatus();
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // Status laden
+    // -------------------------------------------------------------------------
+    async function loadStatus() {
+      try {
+        const r = await fetch(`/api/v1/ingest/status?user_id=${window._userId}`);
+        const d = await r.json();
+        const total = Object.values(d).reduce((a, b) => a + b, 0);
+        const el = document.getElementById('db-status');
+        if (el) el.innerHTML = `
+      <div class="bg-gray-800 rounded p-3"><span class="text-blue-400 font-bold text-lg">${d.photos || 0}</span><br><span class="text-gray-400">Fotos</span></div>
+      <div class="bg-gray-800 rounded p-3"><span class="text-emerald-400 font-bold text-lg">${d.reviews || 0}</span><br><span class="text-gray-400">Bewertungen</span></div>
+      <div class="bg-gray-800 rounded p-3"><span class="text-amber-400 font-bold text-lg">${d.saved_places || 0}</span><br><span class="text-gray-400">Gespeicherte Orte</span></div>
+      <div class="bg-gray-800 rounded p-3"><span class="text-purple-400 font-bold text-lg">${d.messages || 0}</span><br><span class="text-gray-400">Nachrichten</span></div>
+    `;
+        document.getElementById('status-bar').textContent = `${total} Einträge indexiert`;
+      } catch (e) {
+        const el = document.getElementById('db-status');
+        if (el) el.innerHTML = '<span class="text-red-400">Fehler beim Laden</span>';
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // User Info
+    // -------------------------------------------------------------------------
+    async function loadUserInfo() {
+      try {
+        const r = await fetch(`/api/v1/users/${window._userId}`);
+        const d = await r.json();
+        const el = document.getElementById('user-info');
+        if (el) el.innerHTML = `<strong>${d.display_name}</strong> <span class="text-gray-600 text-xs">(${d.id})</span>`;
+
+        // Populate display name input in Settings tab
+        const input = document.getElementById('display-name-input');
+        if (input) input.value = d.display_name;
+      } catch (e) { }
+    }
+
+    async function updateDisplayName() {
+      const input = document.getElementById('display-name-input');
+      const feedback = document.getElementById('display-name-feedback');
+      const newName = input.value.trim();
+
+      // Validation
+      if (!newName || newName.length === 0) {
+        showFeedback(feedback, '❌ Name darf nicht leer sein', 'error');
+        return;
+      }
+
+      if (newName.length > 100) {
+        showFeedback(feedback, '❌ Name darf maximal 100 Zeichen lang sein', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/v1/users/${window._userId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ display_name: newName })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          showFeedback(feedback, `❌ Fehler: ${error.detail}`, 'error');
+          return;
+        }
+
+        const updatedUser = await response.json();
+        console.log('Profil aktualisiert:', updatedUser);
+
+        // Update UI
+        const userInfoEl = document.getElementById('user-info');
+        if (userInfoEl) {
+          userInfoEl.innerHTML = `<strong>${updatedUser.display_name}</strong> <span class="text-gray-600 text-xs">(${updatedUser.id})</span>`;
+        }
+
+        showFeedback(feedback, '✅ Name erfolgreich geändert!', 'success');
+      } catch (err) {
+        console.error('Fehler beim Aktualisieren:', err);
+        showFeedback(feedback, '❌ Netzwerkfehler', 'error');
+      }
+    }
+
+    function showFeedback(element, message, type) {
+      element.textContent = message;
+      element.classList.remove('hidden', 'text-red-400', 'text-green-400');
+      element.classList.add(type === 'error' ? 'text-red-400' : 'text-green-400');
+
+      // Auto-hide success messages after 3 seconds
+      if (type === 'success') {
+        setTimeout(() => {
+          element.classList.add('hidden');
+        }, 3000);
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // Logout
+    // -------------------------------------------------------------------------
+    async function logout() {
+      if (!confirm('Möchtest du dich wirklich abmelden?')) return;
+
+      try {
+        const res = await fetch('/api/auth/logout', { method: 'POST' });
+        if (res.ok) {
+          console.log('[Auth] Logout erfolgreich');
+          window.location.href = '/login.html';
+        } else {
+          console.error('[Auth] Logout fehlgeschlagen');
+          alert('Logout fehlgeschlagen');
+        }
+      } catch (err) {
+        console.error('[Auth] Logout-Fehler:', err);
+        alert('Verbindungsfehler');
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // Lightbox (Vollbild-Ansicht)
+    // -------------------------------------------------------------------------
+    function openLightbox(url, captionHtml = "") {
+      const lb = document.getElementById('2nd-memory-lightbox');
+      const img = document.getElementById('lightbox-img');
+      const cap = document.getElementById('lightbox-caption');
+      if (!lb || !img || !cap) return;
+
+      img.src = url;
+      cap.innerHTML = captionHtml;
+      lb.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+
+      const escHandler = (e) => {
+        if (e.key === 'Escape') {
+          closeLightbox();
+          document.removeEventListener('keydown', escHandler);
+        }
+      };
+      document.addEventListener('keydown', escHandler);
+    }
+
+    function closeLightbox() {
+      const lb = document.getElementById('2nd-memory-lightbox');
+      if (lb) {
+        lb.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+    }
+  </script>
+
+  <!-- Debug Panel: Ctrl+Shift+D -->
+  <script>
+    (function () {
+      const panel = document.getElementById('debug-panel');
+      let _panelOpen = false;
+
+      function set(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value ?? '–';
+      }
+
+      async function refreshDebugPanel() {
+        // 1. Config vom Server
+        try {
+          const r = await fetch('/api/config');
+          const cfg = await r.json();
+          const llm = cfg.llm || {};
+          set('dbg-provider', llm.provider || '–');
+          set('dbg-model', llm.model || '–');
+          set('dbg-vision', llm.vision_model || '–');
+          set('dbg-embed', llm.embedding_model || '–');
+          set('dbg-topk', cfg.rag?.top_k ?? '–');
+          set('dbg-minscore', cfg.rag?.min_score ?? '–');
+          set('dbg-photos', cfg.ingestion?.photo_sample_size ?? '–');
+        } catch (e) {
+          set('dbg-provider', 'Fehler beim Laden');
+        }
+
+        // 3. Status
+        set('dbg-uid', window._userId || '–');
+      }
+
+      function togglePanel() {
+        _panelOpen = !_panelOpen;
+        panel.classList.toggle('hidden', !_panelOpen);
+        if (_panelOpen) refreshDebugPanel();
+      }
+
+      // Ctrl+Shift+D (kein Browser-Standard-Shortcut)
+      document.addEventListener('keydown', function (e) {
+        if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+          e.preventDefault();
+          togglePanel();
+        }
+      });
+
+      // Panel auch schließen bei Klick außerhalb
+      document.addEventListener('click', function (e) {
+        if (_panelOpen && panel && !panel.contains(e.target)) {
+          _panelOpen = false;
+          panel.classList.add('hidden');
+        }
+      });
+    })();
+
+    // -------------------------------------------------------------------------
+    // WhatsApp Integration
+    // -------------------------------------------------------------------------
+    async function checkWhatsAppStatus() {
+      const statusEl = document.getElementById('whatsapp-status');
+      if (!statusEl) return;
+
+      statusEl.innerHTML = '<div class="text-gray-400">Prüfe WhatsApp-Status...</div>';
+
+      try {
+        const response = await fetch('http://localhost:3001/api/whatsapp/status');
+        const data = await response.json();
+
+        if (data.connected) {
+          statusEl.innerHTML = `
+            <div class="flex items-start gap-3">
+              <div class="text-4xl">✅</div>
+              <div class="flex-1">
+                <div class="text-green-400 font-semibold mb-1">WhatsApp verbunden</div>
+                <div class="text-gray-400 text-xs space-y-1">
+                  <div>👤 Benutzer: <span class="text-white">${data.user || 'Unbekannt'}</span></div>
+                  <div>📱 Telefon: <span class="text-white">+${data.phone || 'Unbekannt'}</span></div>
+                  <div class="mt-2 text-gray-500">
+                    Nachrichten werden automatisch an den AI-Agent weitergeleitet.
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+
+          // Lade Bot-Konfiguration
+          loadWhatsAppConfig();
+        } else {
+          statusEl.innerHTML = `
+            <div class="flex items-start gap-3">
+              <div class="text-4xl">⚠️</div>
+              <div class="flex-1">
+                <div class="text-yellow-400 font-semibold mb-1">WhatsApp nicht verbunden</div>
+                <div class="text-gray-400 text-xs space-y-2">
+                  <div>Die WhatsApp-Brücke läuft, aber ist nicht mit WhatsApp verbunden.</div>
+                  <div class="mt-2">
+                    <strong class="text-white">Erste Einrichtung:</strong>
+                    <ol class="list-decimal list-inside mt-1 space-y-1">
+                      <li>Öffne ein Terminal und führe aus: <code class="bg-gray-800 px-1 rounded">tail -f logs/whatsapp.log</code></li>
+                      <li>Scanne den QR-Code mit WhatsApp (Einstellungen → Verknüpfte Geräte)</li>
+                      <li>Warte auf "WhatsApp-Brücke ist online!"</li>
+                      <li>Klicke "Status aktualisieren"</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        statusEl.innerHTML = `
+          <div class="flex items-start gap-3">
+            <div class="text-4xl">❌</div>
+            <div class="flex-1">
+              <div class="text-red-400 font-semibold mb-1">WhatsApp-Brücke nicht erreichbar</div>
+              <div class="text-gray-400 text-xs space-y-2">
+                <div>Die WhatsApp-Brücke läuft nicht oder ist nicht erreichbar.</div>
+                <div class="mt-2">
+                  <strong class="text-white">Lösung:</strong>
+                  <ol class="list-decimal list-inside mt-1 space-y-1">
+                    <li>Stoppe das Backend mit CTRL+C</li>
+                    <li>Starte neu mit: <code class="bg-gray-800 px-1 rounded">./start.sh</code></li>
+                    <li>Warte bis beide Services laufen</li>
+                    <li>Klicke "Status aktualisieren"</li>
+                  </ol>
+                </div>
+                <div class="mt-2 text-gray-500">
+                  Fehler: ${error.message}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    async function loadWhatsAppConfig() {
+      const configEl = document.getElementById('whatsapp-config');
+      if (!configEl) return;
+
+      try {
+        const response = await fetch('/api/whatsapp/config');
+        const data = await response.json();
+
+        // Update UI
+        const userChatInput = document.getElementById('user-chat-id-input');
+        if (userChatInput && data.user_chat_id) {
+          userChatInput.value = data.user_chat_id;
+        }
+
+        const botEnabledToggle = document.getElementById('bot-enabled-toggle');
+        if (botEnabledToggle) {
+          botEnabledToggle.checked = data.bot_enabled;
+        }
+
+        const testModeToggle = document.getElementById('test-mode-toggle');
+        if (testModeToggle) {
+          testModeToggle.checked = data.test_mode;
+        }
+
+        // Status anzeigen
+        if (data.configured && data.user_chat_id) {
+          configEl.innerHTML = `
+            <div class="text-xs space-y-1">
+              <div>✅ <strong>Konfiguriert</strong></div>
+              <div>👤 User-Chat-ID: <span class="font-mono text-white">${data.user_chat_id}</span></div>
+              <div>🤖 Bot: ${data.bot_enabled ? '<span class="text-green-400">Aktiviert</span>' : '<span class="text-red-400">Deaktiviert</span>'}</div>
+              <div>🧪 TEST_MODE: ${data.test_mode ? '<span class="text-yellow-400">An</span>' : '<span class="text-gray-400">Aus</span>'}</div>
+            </div>
+          `;
+        } else {
+          configEl.innerHTML = `
+            <div class="text-xs text-yellow-400">
+              ⚠️ Keine User-Chat-ID konfiguriert - Bot ist inaktiv
+            </div>
+          `;
+        }
+      } catch (error) {
+        configEl.innerHTML = '<div class="text-red-400 text-xs">Fehler beim Laden der Config</div>';
+      }
+    }
+
+    async function setUserChatId() {
+      const input = document.getElementById('user-chat-id-input');
+      const chatId = input.value.trim();
+
+      if (!chatId) {
+        alert('Bitte gib eine Chat-ID ein');
+        return;
+      }
+
+      if (!chatId.includes('@')) {
+        alert('Ungültiges Format. Erwartet: 4917012345678@c.us');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/whatsapp/config/user-chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: chatId })
+        });
+
+        if (response.ok) {
+          alert('✅ User-Chat-ID gespeichert!');
+          loadWhatsAppConfig();
+        } else {
+          const error = await response.json();
+          alert('Fehler: ' + (error.detail || 'Unbekannter Fehler'));
+        }
+      } catch (error) {
+        alert('Fehler beim Speichern: ' + error.message);
+      }
+    }
+
+    async function toggleBotEnabled() {
+      const toggle = document.getElementById('bot-enabled-toggle');
+      const enabled = toggle.checked;
+
+      try {
+        await fetch('/api/whatsapp/config/bot-enabled', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled: enabled })
+        });
+        loadWhatsAppConfig();
+      } catch (error) {
+        alert('Fehler: ' + error.message);
+        toggle.checked = !enabled; // Zurücksetzen
+      }
+    }
+
+    async function toggleTestMode() {
+      const toggle = document.getElementById('test-mode-toggle');
+      const enabled = toggle.checked;
+
+      try {
+        await fetch('/api/whatsapp/config/test-mode', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled: enabled })
+        });
+        loadWhatsAppConfig();
+      } catch (error) {
+        alert('Fehler: ' + error.message);
+        toggle.checked = !enabled; // Zurücksetzen
+      }
+    }
+
+    async function showAvailableChats() {
+      try {
+        const response = await fetch('http://localhost:3001/api/whatsapp/chats');
+        const data = await response.json();
+
+        if (!data.chats || data.chats.length === 0) {
+          alert('Keine Chats gefunden');
+          return;
+        }
+
+        let chatList = 'Verfügbare Chats:\n\n';
+        data.chats.forEach((chat, i) => {
+          chatList += `${i+1}. ${chat.name}\n   ID: ${chat.id}\n\n`;
+        });
+
+        alert(chatList);
+      } catch (error) {
+        alert('Fehler beim Laden der Chats: ' + error.message);
+      }
+    }
+
+    async function importAllChats() {
+      const button = document.getElementById('import-button');
+      const statusEl = document.getElementById('import-status');
+      const progressEl = document.getElementById('import-progress');
+
+      // Prüfe Zeitfenster (09:00-22:00)
+      const now = new Date();
+      const hour = now.getHours();
+      if (hour < 9 || hour >= 22) {
+        alert(`Import nur zwischen 09:00-22:00 Uhr erlaubt!\n\nAktuelle Zeit: ${now.toLocaleTimeString('de-DE')}\n\nDies schützt vor WhatsApp-Bans.`);
+        return;
+      }
+
+      if (!confirm(`Alle Chats importieren?\n\n✨ Features:\n- Sortierung nach Aktivität (neueste zuerst)\n- Automatische Deduplizierung\n- Rate-Limiting (3s zwischen Chats, 60s Batch-Pausen)\n- Nur 09:00-22:00 Uhr\n- Import wird fortgesetzt bei Neustart\n\n⚠️ Dies kann mehrere Stunden dauern!`)) {
+        return;
+      }
+
+      try {
+        button.disabled = true;
+        button.textContent = '⏳ Import läuft...';
+        statusEl.innerHTML = '<div class="text-yellow-400">📥 Import gestartet...</div>';
+        progressEl.classList.remove('hidden');
+
+        const response = await fetch('http://localhost:3001/api/whatsapp/import-all-chats', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = await response.json();
+
+        progressEl.classList.add('hidden');
+
+        if (data.success) {
+          statusEl.innerHTML = `
+            <div class="text-green-400 space-y-1">
+              <div>🎉 Import abgeschlossen!</div>
+              <div>📊 ${data.total_chats} Chats verarbeitet</div>
+              <div>✨ ${data.new_messages || 0} neue Nachrichten importiert</div>
+              <div>⏩ ${data.skipped_messages || 0} bereits vorhanden (übersprungen)</div>
+              ${data.errors > 0 ? `<div class="text-yellow-400">⚠️ ${data.errors} Fehler</div>` : ''}
+            </div>
+          `;
+        } else if (data.paused) {
+          statusEl.innerHTML = `
+            <div class="text-yellow-400 space-y-1">
+              <div>⏸️ Import pausiert: ${data.reason}</div>
+              <div>📊 Fortschritt: ${data.progress.chats_processed}/${data.progress.total_chats} Chats</div>
+              <div>✨ ${data.progress.new_messages} neue Nachrichten</div>
+              <div>⏩ ${data.progress.skipped_messages} übersprungen</div>
+              <div class="mt-2 text-xs">💡 Tipp: Import wird beim nächsten Durchlauf fortgesetzt</div>
+            </div>
+          `;
+        } else {
+          statusEl.innerHTML = '<div class="text-red-400">❌ Import fehlgeschlagen</div>';
+        }
+
+      } catch (error) {
+        progressEl.classList.add('hidden');
+        statusEl.innerHTML = `<div class="text-red-400">❌ Fehler: ${error.message}</div>`;
+      } finally {
+        button.disabled = false;
+        button.textContent = '📥 Alle Chats importieren';
+      }
+    }
+
+    function showWhatsAppLogs() {
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+      modal.innerHTML = `
+        <div class="bg-gray-900 border border-gray-700 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+          <div class="flex justify-between items-center p-6 border-b border-gray-700">
+            <h2 class="text-2xl font-bold text-gray-200">📋 WhatsApp Logs</h2>
+            <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-white text-3xl leading-none">×</button>
+          </div>
+          <div class="flex-1 overflow-y-auto p-6">
+            <div class="bg-gray-950 rounded-lg p-4 font-mono text-xs text-green-400 whitespace-pre-wrap" id="log-content">
+              Lade Logs...
+            </div>
+          </div>
+          <div class="p-4 border-t border-gray-700 flex gap-2">
+            <button onclick="loadWhatsAppLogs()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm transition-all">
+              🔄 Aktualisieren
+            </button>
+            <button onclick="this.closest('.fixed').remove()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm transition-all">
+              Schließen
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      loadWhatsAppLogs();
+    }
+
+    async function loadWhatsAppLogs() {
+      const logEl = document.getElementById('log-content');
+      if (!logEl) return;
+
+      try {
+        const response = await fetch('/logs/whatsapp.log');
+        const text = await response.text();
+
+        if (text) {
+          // Letzte 50 Zeilen
+          const lines = text.split('\n').slice(-50);
+          logEl.textContent = lines.join('\n');
+        } else {
+          logEl.textContent = 'Keine Logs verfügbar';
+        }
+      } catch (error) {
+        logEl.textContent = `Fehler beim Laden der Logs: ${error.message}`;
+      }
+    }
+
+    // ===== Chat Selection & Import UI =====
+
+    let availableChats = [];
+    let selectedChatIds = new Set();
+
+    async function showChatSelection() {
+      const modal = document.getElementById('chat-selection-modal');
+      modal.classList.remove('hidden');
+
+      // Lade Chats vom WhatsApp Bridge
+      await loadAvailableChats();
+    }
+
+    function closeChatSelection() {
+      const modal = document.getElementById('chat-selection-modal');
+      modal.classList.add('hidden');
+    }
+
+    async function loadAvailableChats() {
+      const listEl = document.getElementById('chat-selection-list');
+      const statsEl = document.getElementById('chat-list-stats');
+      listEl.innerHTML = '<div class="text-xs text-gray-500 text-center py-4">Lade Chats...</div>';
+      statsEl.textContent = 'Laden...';
+
+      try {
+        console.log('[WhatsApp] Lade Chats von http://localhost:3001/api/whatsapp/chats');
+        const response = await fetch('http://localhost:3001/api/whatsapp/chats');
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('[WhatsApp] Chats geladen:', data.chats?.length || 0);
+
+        if (!data.chats || data.chats.length === 0) {
+          listEl.innerHTML = '<div class="text-xs text-gray-500 text-center py-4">Keine Chats gefunden</div>';
+          statsEl.textContent = '0 Chats';
+          return;
+        }
+
+        availableChats = data.chats;
+        statsEl.textContent = `${data.chats.length} Chats`;
+        console.log('[WhatsApp] Rendere Chat-Liste...');
+        renderChatList();
+        console.log('[WhatsApp] Chat-Liste gerendert');
+      } catch (error) {
+        console.error('[WhatsApp] Fehler beim Laden der Chats:', error);
+        listEl.innerHTML = `<div class="text-xs text-red-400 text-center py-4">Fehler: ${error.message}</div>`;
+        statsEl.textContent = 'Fehler';
+      }
+    }
+
+    function renderChatList() {
+      const listEl = document.getElementById('chat-selection-list');
+      const sortOrder = document.getElementById('chat-sort-order').value;
+
+      // Sortiere Chats
+      let sorted = [...availableChats];
+      if (sortOrder === 'activity') {
+        sorted.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      } else if (sortOrder === 'name') {
+        sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      } else if (sortOrder === 'messages') {
+        sorted.sort((a, b) => (b.unreadCount || 0) - (a.unreadCount || 0));
+      }
+
+      listEl.innerHTML = sorted.map(chat => {
+        const isSelected = selectedChatIds.has(chat.id);
+        const lastActivity = chat.timestamp ? new Date(chat.timestamp * 1000).toLocaleString('de-DE') : 'Unbekannt';
+        const chatType = chat.isGroup ? '👥 Gruppe' : '👤 Kontakt';
+
+        return `
+          <div class="flex items-center gap-2 p-2 bg-gray-800 rounded border ${isSelected ? 'border-green-500' : 'border-gray-700'} hover:bg-gray-750">
+            <input
+              type="checkbox"
+              ${isSelected ? 'checked' : ''}
+              onchange="toggleChatSelection('${chat.id}')"
+              class="w-4 h-4"
+            />
+            <div class="flex-1 text-xs">
+              <div class="font-semibold">${chat.name}</div>
+              <div class="text-gray-500">${chatType} · Letzte Aktivität: ${lastActivity}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      updateSelectedCount();
+    }
+
+    function toggleChatSelection(chatId) {
+      if (selectedChatIds.has(chatId)) {
+        selectedChatIds.delete(chatId);
+      } else {
+        selectedChatIds.add(chatId);
+      }
+      renderChatList();
+    }
+
+    function selectTopChats(count) {
+      selectedChatIds.clear();
+      // Sort by activity, take top N
+      const sorted = [...availableChats].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      sorted.slice(0, count).forEach(chat => selectedChatIds.add(chat.id));
+      renderChatList();
+    }
+
+    function selectRecentChats(days) {
+      selectedChatIds.clear();
+      const cutoff = Date.now() / 1000 - (days * 24 * 60 * 60);
+      availableChats.forEach(chat => {
+        if (chat.timestamp && chat.timestamp > cutoff) {
+          selectedChatIds.add(chat.id);
+        }
+      });
+      renderChatList();
+    }
+
+    function selectAllChats() {
+      availableChats.forEach(chat => selectedChatIds.add(chat.id));
+      renderChatList();
+    }
+
+    function deselectAllChats() {
+      selectedChatIds.clear();
+      renderChatList();
+    }
+
+    function sortChatList() {
+      renderChatList();
+    }
+
+    function updateSelectedCount() {
+      document.getElementById('selected-count').textContent = selectedChatIds.size;
+    }
+
+    async function startSelectedImport() {
+      if (selectedChatIds.size === 0) {
+        alert('Bitte wähle mindestens einen Chat aus!');
+        return;
+      }
+
+      const BULK_THRESHOLD = 20; // Muss mit Backend übereinstimmen
+      const isBulkImport = selectedChatIds.size >= BULK_THRESHOLD;
+
+      // Zeitfenster-Check nur bei Bulk-Import (20+ Chats)
+      if (isBulkImport) {
+        const now = new Date();
+        const hour = now.getHours();
+        if (hour < 9 || hour >= 22) {
+          alert(`Bulk-Import (${BULK_THRESHOLD}+ Chats) nur zwischen 09:00-22:00 Uhr erlaubt!\n\nAktuelle Zeit: ${now.toLocaleTimeString('de-DE')}\n\nDu hast ${selectedChatIds.size} Chats ausgewählt.\n\n💡 Tipp: Wähle weniger als ${BULK_THRESHOLD} Chats für Import ohne Zeitrestriktion.`);
+          return;
+        }
+      }
+
+      // Zeige Details der ausgewählten Chats
+      const selectedChats = availableChats.filter(chat => selectedChatIds.has(chat.id));
+      const chatNames = selectedChats.slice(0, 5).map(c => c.name).join(', ');
+      const moreText = selectedChats.length > 5 ? ` ... und ${selectedChats.length - 5} weitere` : '';
+
+      const timeInfo = isBulkImport
+        ? '⏰ Zeitfenster: 09:00-22:00 Uhr (Bulk-Schutz)\n'
+        : '✅ Keine Zeitrestriktion (< 20 Chats)\n';
+
+      if (!confirm(`${selectedChatIds.size} Chat(s) importieren?\n\nChats: ${chatNames}${moreText}\n\n✨ Features:\n- Smart Deduplication (keine Duplikate)\n- Rate-Limiting (3s zwischen Chats)\n${timeInfo}\n⚠️ Dies kann einige Minuten dauern!`)) {
+        return;
+      }
+
+      const button = document.getElementById('import-button');
+      const statusEl = document.getElementById('import-status');
+      const progressEl = document.getElementById('import-progress');
+
+      closeChatSelection();
+
+      try {
+        button.disabled = true;
+        button.textContent = '⏳ Import läuft...';
+        statusEl.innerHTML = `<div class="text-yellow-400">📥 Importiere ${selectedChatIds.size} ausgewählte Chat(s)...</div>`;
+        progressEl.classList.remove('hidden');
+
+        // Konvertiere Set zu Array
+        const chatIdsArray = Array.from(selectedChatIds);
+
+        console.log('[WhatsApp] Starte selektiven Import für:', chatIdsArray);
+
+        const response = await fetch('http://localhost:3001/api/whatsapp/import-selected-chats', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chatIds: chatIdsArray })
+        });
+
+        const data = await response.json();
+
+        progressEl.classList.add('hidden');
+
+        if (data.success) {
+          statusEl.innerHTML = `
+            <div class="text-green-400 space-y-1">
+              <div>🎉 Import abgeschlossen!</div>
+              <div>📊 ${data.total_chats} Chat(s) importiert</div>
+              <div>✨ ${data.new_messages || 0} neue Nachrichten</div>
+              <div>⏩ ${data.skipped_messages || 0} bereits vorhanden (übersprungen)</div>
+              ${data.errors > 0 ? `<div class="text-yellow-400">⚠️ ${data.errors} Fehler</div>` : ''}
+            </div>
+          `;
+
+          // Deselektiere alle Chats nach erfolgreichem Import
+          selectedChatIds.clear();
+        } else if (data.paused) {
+          statusEl.innerHTML = `
+            <div class="text-yellow-400 space-y-1">
+              <div>⏸️ Import pausiert: ${data.reason}</div>
+              <div>📊 Fortschritt: ${data.progress.chats_processed}/${data.progress.total_chats} Chats</div>
+              <div>✨ ${data.progress.new_messages} neue Nachrichten</div>
+              <div>⏩ ${data.progress.skipped_messages} übersprungen</div>
+              <div class="mt-2 text-xs">💡 Tipp: Import wird beim nächsten Durchlauf fortgesetzt</div>
+            </div>
+          `;
+        } else {
+          statusEl.innerHTML = `<div class="text-red-400">❌ Import fehlgeschlagen: ${data.error || 'Unbekannter Fehler'}</div>`;
+        }
+
+      } catch (error) {
+        progressEl.classList.add('hidden');
+        console.error('[WhatsApp] Import-Fehler:', error);
+        statusEl.innerHTML = `<div class="text-red-400">❌ Fehler: ${error.message}</div>`;
+      } finally {
+        button.disabled = false;
+        button.textContent = '📥 Alle Chats importieren';
+      }
+    }
+
+    // ===== Import Statistics =====
+
+    async function loadImportStats() {
+      const modal = document.getElementById('import-stats-modal');
+      const contentEl = document.getElementById('import-stats-content');
+
+      modal.classList.remove('hidden');
+      contentEl.innerHTML = '<div class="text-gray-500 text-center py-4">Lade Statistiken...</div>';
+
+      try {
+        const response = await fetch('http://localhost:8000/api/whatsapp/import-plan/stats');
+        const data = await response.json();
+
+        if (data.total_chats_tracked === 0) {
+          contentEl.innerHTML = `
+            <div class="text-center py-4 text-gray-500">
+              Noch keine Imports durchgeführt.
+            </div>
+          `;
+          return;
+        }
+
+        let html = `
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <div class="bg-gray-800 p-3 rounded">
+              <div class="text-gray-500 text-xs">Importierte Chats</div>
+              <div class="text-2xl font-bold text-green-400">${data.total_chats_tracked}</div>
+            </div>
+            <div class="bg-gray-800 p-3 rounded">
+              <div class="text-gray-500 text-xs">Total Nachrichten</div>
+              <div class="text-2xl font-bold text-blue-400">${data.total_messages_imported.toLocaleString('de-DE')}</div>
+            </div>
+          </div>
+
+          <h4 class="font-semibold mb-2">📋 Details pro Chat</h4>
+          <div class="space-y-2 max-h-96 overflow-y-auto">
+        `;
+
+        data.chats.forEach(chat => {
+          const lastImport = chat.last_imported_timestamp
+            ? new Date(chat.last_imported_timestamp * 1000).toLocaleString('de-DE')
+            : 'Nie';
+          const firstImport = chat.first_import_run
+            ? new Date(chat.first_import_run).toLocaleString('de-DE')
+            : 'Unbekannt';
+
+          html += `
+            <div class="bg-gray-800 p-3 rounded">
+              <div class="font-semibold mb-1">${chat.chat_id}</div>
+              <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
+                <div>📊 Nachrichten: ${chat.total_messages_imported}</div>
+                <div>🔄 Import-Runs: ${chat.import_runs}</div>
+                <div>📅 Erster Import: ${firstImport}</div>
+                <div>⏰ Letzter Import: ${lastImport}</div>
+              </div>
+            </div>
+          `;
+        });
+
+        html += '</div>';
+        contentEl.innerHTML = html;
+
+      } catch (error) {
+        contentEl.innerHTML = `<div class="text-red-400 text-center py-4">Fehler: ${error.message}</div>`;
+      }
+    }
+
+    function closeImportStats() {
+      const modal = document.getElementById('import-stats-modal');
+      modal.classList.add('hidden');
+    }
+  </script>
+</body>
+
+</html>

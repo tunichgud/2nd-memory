@@ -1,0 +1,91 @@
+# -------------------------------------------------------
+# Persönliche Daten – niemals einchecken
+# -------------------------------------------------------
+
+# Google Takeout Export (Fotos, Nachrichten, Bewertungen)
+takeout/
+
+# Lokale Datenbank (ChromaDB + SQLite)
+data/
+!data/.gitkeep
+
+# Sample-Liste (enthält keine Rohdaten, aber Dateinamen)
+# sample/photo_sample.json darf eingecheckt werden – nur Metadaten
+
+# Ältere Ergebnis-Dateien
+results.json
+
+# -------------------------------------------------------
+# Credentials & Tokens
+# -------------------------------------------------------
+config/credentials.json
+config/token.json
+
+# Lokale Konfiguration (enthält ggf. API-Keys, URLs)
+config.yaml
+# config.yaml.example wird eingecheckt als Vorlage
+
+# -------------------------------------------------------
+# Python
+# -------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+.venv/
+venv/
+.env
+.env.*
+dist/
+build/
+
+# -------------------------------------------------------
+# IDE & OS
+# -------------------------------------------------------
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# -------------------------------------------------------
+# Logs
+# -------------------------------------------------------
+*.log
+logs/
+.wwebjs_auth/session/Default/WebStorage/QuotaManager-journal
+
+# WhatsApp Web.js Session & Cache
+.wwebjs_auth/
+.wwebjs_cache/
+node_modules/
+
+# -------------------------------------------------------
+# Datenbanken
+# -------------------------------------------------------
+chroma_db/
+chromadb_data/
+*.db
+*.db-journal
+*.db-wal
+
+# Backups & Reports
+backups/
+reports/
+
+# Uploads
+uploads/
+!uploads/.gitkeep
+
+# Claude / Antigravity (intern)
+.claude/
+.antigravity/
+
+# Sample-Daten
+sample/
+
+# Backend chromadb
+backend/chromadb/

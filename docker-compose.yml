@@ -1,0 +1,167 @@
+# ==============================================================================
+# 2nd-memory Docker-Compose
+# ==============================================================================
+#
+# Privacy-First Personal Memory System
+#
+# Quick Start:
+#   1. cp .env.example .env
+#   2. cp config.yaml.example config.yaml
+#   3. docker-compose up
+#
+# Services:
+#   - backend: FastAPI Backend (Port 8000)
+#   - whatsapp: WhatsApp Web.js Bridge (Port 3001)
+#   - chromadb: Vector Database (Port 8001)
+#
+# ==============================================================================
+
+version: '3.8'
+
+services:
+  # ----------------------------------------------------------------------------
+  # Backend (FastAPI + Python)
+  # ----------------------------------------------------------------------------
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: 2nd-memory-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persistent Data
+      - ./data:/app/data
+      # Config (read-only)
+      - ./config.yaml:/app/config.yaml:ro
+      # Frontend (für Serving)
+      - ./frontend:/app/frontend:ro
+    environment:
+      # Environment aus .env Datei (siehe .env.example)
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000}
+      - DATABASE_PATH=${DATABASE_PATH:-data/2nd-memory.db}
+      - CHROMA_HOST=${CHROMA_HOST:-chromadb}
+      - CHROMA_PORT=${CHROMA_PORT:-8000}
+      - WHATSAPP_BRIDGE_HOST=${WHATSAPP_BRIDGE_HOST:-whatsapp}
+      - WHATSAPP_BRIDGE_PORT=${WHATSAPP_BRIDGE_PORT:-3001}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+      - AUTH_MODE=${AUTH_MODE:-none}
+
+      # LLM API Keys (optional - nur wenn du externe APIs nutzen willst)
+      # ⚠️  PRIVACY WARNING: Siehe .env.example
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+
+      # Ollama Host (wenn auf Host-Maschine läuft)
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+
+      # JWT (Phase 2)
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-15}
+      - REFRESH_TOKEN_EXPIRE_DAYS=${REFRESH_TOKEN_EXPIRE_DAYS:-7}
+    depends_on:
+      - chromadb
+    restart: unless-stopped
+    networks:
+      - 2nd_memory
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ----------------------------------------------------------------------------
+  # WhatsApp Bridge (Node.js + whatsapp-web.js)
+  # ----------------------------------------------------------------------------
+  whatsapp:
+    build:
+      context: .
+      dockerfile: Dockerfile.whatsapp
+    container_name: 2nd-memory-whatsapp
+    ports:
+      - "3001:3001"
+    volumes:
+      # WhatsApp Session Data (persistent)
+      - ./.wwebjs_auth:/app/.wwebjs_auth
+      - ./.wwebjs_cache:/app/.wwebjs_cache
+    environment:
+      - WHATSAPP_BOT_ENABLED=${WHATSAPP_BOT_ENABLED:-false}
+      - WHATSAPP_TEST_MODE=${WHATSAPP_TEST_MODE:-false}
+      - WHATSAPP_USER_CHAT_ID=${WHATSAPP_USER_CHAT_ID:-}
+      - BACKEND_URL=http://backend:8000
+    restart: unless-stopped
+    networks:
+      - 2nd_memory
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3001/api/whatsapp/status', (r) => process.exit(r.statusCode === 200 ? 0 : 1))\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ----------------------------------------------------------------------------
+  # ChromaDB (Vector Database)
+  # ----------------------------------------------------------------------------
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: 2nd-memory-chromadb
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./data/chroma:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=${CHROMA_ANONYMIZED_TELEMETRY:-FALSE}
+    restart: unless-stopped
+    networks:
+      - 2nd_memory
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ----------------------------------------------------------------------------
+  # Elasticsearch (optional - für advanced RAG)
+  # ----------------------------------------------------------------------------
+  # Uncomment wenn du Elasticsearch nutzen willst (benötigt ~2GB RAM)
+  #
+  # elasticsearch:
+  #   image: elasticsearch:8.12.0
+  #   container_name: 2nd-memory-elasticsearch
+  #   ports:
+  #     - "9200:9200"
+  #   volumes:
+  #     - ./data/elasticsearch:/usr/share/elasticsearch/data
+  #   environment:
+  #     - discovery.type=single-node
+  #     - xpack.security.enabled=false
+  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  #   restart: unless-stopped
+  #   networks:
+  #     - 2nd_memory
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 60s
+
+# ------------------------------------------------------------------------------
+# Networks
+# ------------------------------------------------------------------------------
+networks:
+  2nd_memory:
+    driver: bridge
+
+# ------------------------------------------------------------------------------
+# Volumes (optional - für named volumes statt bind mounts)
+# ------------------------------------------------------------------------------
+# volumes:
+#   2nd-memory-data:
+#   2nd-memory-chroma:
+#   2nd-memory-whatsapp:
