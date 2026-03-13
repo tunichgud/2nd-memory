@@ -1,6 +1,0 @@
-2026/03/13-22:32:47.278 a05d4 Reusing MANIFEST /home/bacher/prj/mabrains/memosaur/.wwebjs_auth/session/Default/Local Storage/leveldb/MANIFEST-000001
-2026/03/13-22:32:47.282 a05d4 Recovering log #3
-2026/03/13-22:32:47.282 a05d4 Reusing old log /home/bacher/prj/mabrains/memosaur/.wwebjs_auth/session/Default/Local Storage/leveldb/000003.log 
-2026/03/13-22:33:47.284 a05d6 Level-0 table #5: started
-2026/03/13-22:33:48.488 a05d6 Level-0 table #5: 19679 bytes OK
-2026/03/13-22:33:48.774 a05d6 Delete type=0 #3
