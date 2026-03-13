@@ -1,0 +1,129 @@
+{
+  "timestamp": "20260311_175514",
+  "test_cases": 3,
+  "models": 2,
+  "winner": "phi4",
+  "summaries": [
+    {
+      "model": "phi4",
+      "tested": 3,
+      "pass": 2,
+      "partial": 0,
+      "fail": 1,
+      "pass_rate": 0.667,
+      "partial_rate": 0.0,
+      "fail_rate": 0.333,
+      "overall_score": 0.633,
+      "avg_latency_ms": 7650
+    },
+    {
+      "model": "gemini:gemini-2.0-flash",
+      "tested": 3,
+      "pass": 0,
+      "partial": 0,
+      "fail": 3,
+      "pass_rate": 0.0,
+      "partial_rate": 0.0,
+      "fail_rate": 1.0,
+      "overall_score": 0.0,
+      "avg_latency_ms": 0
+    }
+  ],
+  "full_results": [
+    {
+      "model": "phi4",
+      "tested": 3,
+      "pass": 2,
+      "partial": 0,
+      "fail": 1,
+      "pass_rate": 0.667,
+      "partial_rate": 0.0,
+      "fail_rate": 0.333,
+      "overall_score": 0.633,
+      "avg_latency_ms": 7650,
+      "details": [
+        {
+          "test_id": "q_20260311_150705_0170df",
+          "query": "Wo treffe ich mich heute mit Marius?",
+          "answer": "In den bereitgestellten Nachrichten gibt es keine Angaben zu einem Treffpunkt mit Marius heute. Es fehlen konkrete Informationen zum Ort des Treffens. Daher lautet die Antwort: Ich habe dazu keine Einträge in deinen Daten. Die zuletzt relevanten Nachrichten zeigen, dass du nach einem Treffpunkt gefragt hast, aber eine Antwort oder der genaue Ort fehlt. [[1]], [[2]], [[3]]",
+          "golden": "Du triffst dich mit Marius um 12:15 Uhr beim Italiener, Villa Romana in Ahrensburg.",
+          "verdict": "FAIL",
+          "score": 0.0,
+          "embedding_sim": 0.521,
+          "missing_facts": [
+            "Villa Romana",
+            "12:15",
+            "Ahrensburg"
+          ],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort gibt an, dass keine Informationen über den Treffpunkt mit Marius vorhanden sind. Dies entspricht nicht den Pflicht-Fakten, die laut der Referenzantwort 'Villa Romana', '12:15' und 'Ahrensburg' sein sollten. Da alle wesentlichen Fakten fehlen und die Antwort komplett am Thema vorbei ist, wird das Verdict als 'FAIL' bewertet.",
+          "latency_ms": 10553
+        },
+        {
+          "test_id": "q_20260311_151849_8bf1fb",
+          "query": "Wo war ich mit Nora im letzten August?",
+          "answer": "Du warst im letzten August mit Nora in **München** [[1], [3], [5], [6]], **Hamburg** [[2]], und **Ahrensburg** [[4]]. Diese Orte wurden aus den Fotos mit Nora im August 2025 extrahiert.\n\n- In München gab es Aufenthalte in den Stadtteilen **München-Ost** [[1]], **Planegg** [[3]], **FernOst (Bruck)** [[5]], und **Zentrum** [[6]].\n- In Hamburg warst du im **Hamburg-Zentrum** [[2]] und im **Hamburg-Ost** (Stadtname **Ahrensburg**) [[4]].\n\nDie Orte sind basierend auf den Fotos mit Nora im August 2025 aufgelistet.",
+          "golden": "Im letzten August warst du mit Nora in München (München-Ost, München-FernOst/Bruck, München-Zentrum, Planegg), in Hamburg und in Ahrensburg.",
+          "verdict": "PASS",
+          "score": 0.95,
+          "embedding_sim": 0.7884,
+          "missing_facts": [],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält alle erforderlichen Orte aus der Referenzantwort: München, Ahrensburg und Hamburg. Die genannten Ortschaften in München (München-Ost, Planegg, FernOst/Bruck, München-Zentrum) stimmen ebenfalls mit der Referenz überein. Obwohl die Formulierungen leicht variieren (z. B. 'Hamburg-Zentrum' und 'Hamburg-Ost'), bleibt der inhaltliche Kern korrekt. Zudem werden in der generierten Antwort relevante Details bezüglich der Fotos aus dem August 2025 mit Nora genannt, was die Authentizität weiter bestätigt.",
+          "latency_ms": 6244
+        },
+        {
+          "test_id": "q_20260311_151907_f749db",
+          "query": "Wo war ich mit Nora im letzten Sommer?",
+          "answer": "Im letzten Sommer, also im Zeitraum von Juni bis August 2025, warst du mit Nora an folgenden Orten:\n\n1. **München** (inklusive der Stadtteile München-Ost, München-FernOst und Planegg) [[2], [4], [6]]\n2. **Hamburg** (inklusive Hamburg-Zentrum) [[5]]\n3. **Ahrensburg** [[3]]\n4. **Stepenitztal** in Mecklenburg-Vorpommern [[7]]\n\nDie meisten Fotos zeigen dich mit Nora in München in verschiedenen Stadtteilen [[2], [4], [6]]. Ein Foto stammt aus Ahrensburg [[3]], ein weiteres aus Hamburg [[5]], und eines aus Stepenitztal [[7]].",
+          "golden": "Im letzten Sommer warst du mit Nora in München (München-Ost, München-FernOst/Bruck, München-Zentrum, Planegg), in Hamburg, in Ahrensburg und in Stepenitztal (Wismar).",
+          "verdict": "PASS",
+          "score": 0.95,
+          "embedding_sim": 0.7901,
+          "missing_facts": [],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält alle wichtigen Fakten, die in der Referenzantwort gefordert sind: München, Ahrensburg und Stepenitztal. Zusätzlich wird Hamburg korrekt erwähnt, obwohl es in der Pflicht nicht aufgeführt war, was aber keinen Fehler darstellt. Die Stadtteile von München sind detailliert aufgeführt, was der Referenz entspricht. Es gibt keine falschen oder fehlenden Informationen im Vergleich zur Referenz.",
+          "latency_ms": 6154
+        }
+      ]
+    },
+    {
+      "model": "gemini:gemini-2.0-flash",
+      "tested": 3,
+      "pass": 0,
+      "partial": 0,
+      "fail": 3,
+      "pass_rate": 0.0,
+      "partial_rate": 0.0,
+      "fail_rate": 1.0,
+      "overall_score": 0.0,
+      "avg_latency_ms": 0,
+      "details": [
+        {
+          "test_id": "q_20260311_150705_0170df",
+          "query": "Wo treffe ich mich heute mit Marius?",
+          "verdict": "ERROR",
+          "score": 0.0,
+          "latency_ms": 0,
+          "error": "No module named 'google.generativeai'"
+        },
+        {
+          "test_id": "q_20260311_151849_8bf1fb",
+          "query": "Wo war ich mit Nora im letzten August?",
+          "verdict": "ERROR",
+          "score": 0.0,
+          "latency_ms": 0,
+          "error": "No module named 'google.generativeai'"
+        },
+        {
+          "test_id": "q_20260311_151907_f749db",
+          "query": "Wo war ich mit Nora im letzten Sommer?",
+          "verdict": "ERROR",
+          "score": 0.0,
+          "latency_ms": 0,
+          "error": "No module named 'google.generativeai'"
+        }
+      ]
+    }
+  ]
+}

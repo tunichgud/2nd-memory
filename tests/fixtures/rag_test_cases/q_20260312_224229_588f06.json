@@ -1,0 +1,93 @@
+{
+  "test_id": "q_20260312_224229_588f06",
+  "query": "Wann ist Jazz gestorben?",
+  "snapshot": {
+    "captured_at": "2026-03-12T22:42:29",
+    "sources": [
+      {
+        "id": "messages_wa_WhatsApp-Chat mit Sa_06620",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[23.01.21 15:00] Josh: Salz! Salz! Salz!\n[23.01.21 15:23] Sarah Ohnesorge: Habe Brot gekauft\n[24.01.21 14:37] Josh: Geht's Jazz gut?\n[24.01.21 14:37] Josh: Geht's dir gut?\n[24.01.21 14:37] Josh: Wir gehen noch eine Waffel essen.\n[24.01.21 14:37] Josh: War ein schöner Lauf.\n[24.01.21 14:41] Sarah Ohnesorge: Cool",
+        "metadata": {
+          "persons": "Sarah Ohnesorge,Josh",
+          "date_ts": 1611410400,
+          "timestamp": "2021-01-23T15:00:00",
+          "date_iso": "23.01.21 15:00",
+          "chat_name": "Sarah Ohnesorge",
+          "source": "whatsapp",
+          "user_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "score": 0.85
+      },
+      {
+        "id": "messages_wa_WhatsApp-Chat mit Mo_00160",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Monika Stoll Hebamme.txt':\n[06.02.21 17:40] Josh: Das war vor 10 Jahren.\n[06.02.21 18:07] Monika Stoll Hebamme: Ach Josh, stinknormal wirst du niemals sein.\ud83e\udd29 Aber solche Gedanken kommen nach einer so langen Zeit mit Hund. Ich habe auch noch ein paar schöne Bilder von Jazz aus Winningen, die schicke ich dir jetzt....\n[06.02.21 18:07] Monika Stoll Hebamme: <Medien ausgeschlossen>",
+        "metadata": {
+          "date_iso": "06.02.21 17:40",
+          "chat_name": "WhatsApp-Chat mit Monika Stoll Hebamme.txt",
+          "persons": "Josh,Monika Stoll Hebamme",
+          "date_ts": 1612629600,
+          "timestamp": "2021-02-06T17:40:00",
+          "source": "whatsapp",
+          "user_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "score": 0.85
+      },
+      {
+        "id": "messages_wa_WhatsApp-Chat mit Sa_07010",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Sarah Ohnesorge.txt':\n[01.03.21 13:34] Josh: Liegt einfach an meiner schlechten Nacht die ich hatte.\n[01.03.21 13:49] Sarah Ohnesorge: Ach so.. Du Armer.\n[01.03.21 13:50] Sarah Ohnesorge: Vllt musst Du ne Pause draußen in der Sonne machen?\n[01.03.21 13:50] Sarah Ohnesorge: Das tut Dir bestimmt gut...\n[01.03.21 18:05] Josh: Ich hab gerade Jazz abgeholt. Da bin ich so traurig geworden.\n[01.03.21 18:11] Sarah Ohnesorge: Ach mein Liebster...\n[01.03.21 18:11] Sarah Ohnesorge: Ich bin gleich bei Dir!!",
+        "metadata": {
+          "migration_source": "txt_import",
+          "chat_id": "491786838260@c.us",
+          "date_ts": 1614602040,
+          "chat_name": "Sarah Ohnesorge",
+          "timestamp": "2021-03-01T13:34:00",
+          "mentioned_persons": "Josh,Sarah Ohnesorge",
+          "persons": "Sarah Ohnesorge,Josh",
+          "source": "whatsapp",
+          "date_iso": "01.03.21 13:34",
+          "user_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "score": 0.85
+      },
+      {
+        "id": "messages_wa_WhatsApp-Chat mit Ma_00110",
+        "collection": "messages",
+        "document": "WhatsApp Chat 'WhatsApp-Chat mit Marius Mew.txt':\n[30.01.20 16:23] Josh: Jazz hatte von Montag auf Dienstag einen Schlaganfall, die will ich nicht in ein Auto packen.\n[30.01.20 16:25] Josh: Vielleicht passt Freitag?",
+        "metadata": {
+          "persons": "Josh,Marius Mew",
+          "date_iso": "30.01.20 16:23",
+          "date_ts": 1580397780,
+          "chat_name": "WhatsApp-Chat mit Marius Mew.txt",
+          "source": "whatsapp",
+          "timestamp": "2021-01-30T16:23:00",
+          "user_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "score": 0.85
+      }
+    ]
+  },
+  "golden": {
+    "answer": "Das genaue Todesdatum von Jazz ist in den Daten nicht explizit belegt. Letztes Lebenszeichen: 24. Januar 2021 ('Geht's Jazz gut?'). Am 1. März 2021 holte Josh Jazz ab und war sehr traurig — vermutlich handelt es sich um die Abholung der Urne. Das Sterbedatum liegt damit wahrscheinlich kurz vor dem 1. März 2021, lässt sich aber aus den Quellen nicht exakt bestimmen.",
+    "required_facts": [
+      "Jazz",
+      "Hund",
+      "24. Januar 2021",
+      "1. März 2021",
+      "kein genaues Datum",
+      "traurig",
+      "abgeholt"
+    ],
+    "forbidden_facts": [
+      "Birdland",
+      "Jazzclub",
+      "Musikstil",
+      "6. Februar 2021"
+    ],
+    "notes": "Monika Stoll Chunk vom 06.02.21 ist ein bekannter False Positive: Monika dachte irrtümlich, Jazz sei bereits eingeschläfert worden. Jazz starb nach Erinnerung des Users am 28.02.2021, was aus den Daten nicht hervorgeht. Dieser Fall testet ob das System Unsicherheit korrekt kommuniziert statt falsche Evidenz zu vertrauen.",
+    "set_by": "qs",
+    "set_at": "2026-03-12T22:42:29"
+  }
+}

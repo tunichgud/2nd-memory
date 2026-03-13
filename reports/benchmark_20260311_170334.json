@@ -1,0 +1,129 @@
+{
+  "timestamp": "20260311_170334",
+  "test_cases": 3,
+  "models": 2,
+  "winner": "phi4",
+  "summaries": [
+    {
+      "model": "phi4",
+      "tested": 3,
+      "pass": 2,
+      "partial": 0,
+      "fail": 1,
+      "pass_rate": 0.667,
+      "partial_rate": 0.0,
+      "fail_rate": 0.333,
+      "overall_score": 0.633,
+      "avg_latency_ms": 8874
+    },
+    {
+      "model": "qwen3:8b",
+      "tested": 3,
+      "pass": 0,
+      "partial": 0,
+      "fail": 3,
+      "pass_rate": 0.0,
+      "partial_rate": 0.0,
+      "fail_rate": 1.0,
+      "overall_score": 0.0,
+      "avg_latency_ms": 0
+    }
+  ],
+  "full_results": [
+    {
+      "model": "phi4",
+      "tested": 3,
+      "pass": 2,
+      "partial": 0,
+      "fail": 1,
+      "pass_rate": 0.667,
+      "partial_rate": 0.0,
+      "fail_rate": 0.333,
+      "overall_score": 0.633,
+      "avg_latency_ms": 8874,
+      "details": [
+        {
+          "test_id": "q_20260311_150705_0170df",
+          "query": "Wo treffe ich mich heute mit Marius?",
+          "answer": "Ich habe keine Informationen über einen Treffpunkt mit Marius heute, dem 11.03.2026, in deinen Daten. Die WhatsApp-Nachrichten aus deinem Kontext enthalten keine Details zu einem Ort. Deshalb kann ich nicht sagen, **wo** du dich mit Marius treffen wirst. Es gibt keine Aufzeichnungen oder Fotos, die einen Treffpunkt mit Marius für heute belegen. \n\nIch habe dazu keine Einträge in deinen Daten.",
+          "golden": "Du triffst dich mit Marius um 12:15 Uhr beim Italiener, Villa Romana in Ahrensburg.",
+          "verdict": "FAIL",
+          "score": 0.0,
+          "embedding_sim": 0.5872,
+          "missing_facts": [
+            "Villa Romana",
+            "12:15",
+            "Ahrensburg"
+          ],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält keine der erforderlichen Pflicht-Fakten ('Villa Romana', '12:15', 'Ahrensburg') und bietet keine Informationen über den Treffpunkt mit Marius. Außerdem werden keine der verbotenen Fakten ('Café Einstein', 'Café Grüner Baum') genannt, was jedoch keine Rolle spielt, da die Pflicht-Fakten fehlen. Daher ist die Antwort nicht inhaltlich korrekt.",
+          "latency_ms": 10758
+        },
+        {
+          "test_id": "q_20260311_151849_8bf1fb",
+          "query": "Wo war ich mit Nora im letzten August?",
+          "answer": "Um herauszufinden, wo du im letzten August mit Nora warst, betrachten wir die Fotos aus August 2025, die du mit ihr gemacht hast.\n\n1. **München-Ost** am 29. August 2025 [[1]].\n2. **Hamburg-Zentrum** am 29. August 2025 [[2]].\n3. **Planegg** am 31. August 2025 [[3]].\n4. **Ahrensburg** am 14. August 2025 [[4]].\n5. **Bruck** am 30. August 2025 [[5]].\n6. **München-Zentrum** am 31. August 2025 [[6]].\n\nSomit warst du mit Nora im August 2025 an den folgenden Orten: **München (Ost und Zentrum)**, **Planegg**, **Hamburg (Zentrum)** und **Ahrensburg** in Bayern sowie Schleswig-Holstein. In Bruck hast du ebenfalls ein Foto mit ihr gemacht [[5]].\n\n**Zusammengefasst: München (Ost, Zentrum), Planegg, Hamburg (Zentrum), Ahrensburg, Bruck.**",
+          "golden": "Im letzten August warst du mit Nora in München (München-Ost, München-FernOst/Bruck, München-Zentrum, Planegg), in Hamburg und in Ahrensburg.",
+          "verdict": "PASS",
+          "score": 0.95,
+          "embedding_sim": 0.5555,
+          "missing_facts": [],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält alle wichtigen Fakten der Referenzantwort. Es wurden die Orte 'München' (mit den Unterbereichen 'München-Ost', 'München-Zentrum' und 'Bruck') und 'Ahrensburg' korrekt genannt. Zudem wird Hamburg als Ort aufgeführt, was in der Referenz ebenfalls korrekt ist. Alle relevanten Informationen sind korrekt und vollständig wiedergegeben.",
+          "latency_ms": 7949
+        },
+        {
+          "test_id": "q_20260311_151907_f749db",
+          "query": "Wo war ich mit Nora im letzten Sommer?",
+          "answer": "Um herauszufinden, wo du im letzten Sommer mit Nora warst, suche ich nach Fotos mit beiden, die im Sommer 2025 aufgenommen wurden. \n\nSchritt 1: Ich identifiziere Fotos, die im Zeitraum von Juni bis August 2025 aufgenommen wurden und Nora enthalten.\n\nBeobachtungen aus den Fotos:\n- Foto vom 6. Juni 2025 in Ahrensburg [[3]]\n- Foto vom 29. August 2025 in München-Ost [[2]]\n- Foto vom 30. August 2025 in Bruck [[6]]\n- Foto vom 31. August 2025 in Planegg [[4]]\n- Foto vom 29. August 2025 in Hamburg-Zentrum [[5]]\n\nDie unterschiedlichen Orte, die in diesen Fotos genannt werden, sind:\n- **Ahrensburg** [[3]]\n- **München (München-Ost)** [[2]]\n- **Bruck** [[6]]\n- **Planegg** [[4]]\n- **Hamburg** [[5]]\n\nDaher warst du im letzten Sommer mit Nora in Ahrensburg, München, Bruck, Planegg und Hamburg.",
+          "golden": "Im letzten Sommer warst du mit Nora in München (München-Ost, München-FernOst/Bruck, München-Zentrum, Planegg), in Hamburg, in Ahrensburg und in Stepenitztal (Wismar).",
+          "verdict": "PASS",
+          "score": 0.95,
+          "embedding_sim": 0.5992,
+          "missing_facts": [],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält alle notwendigen Fakten ('München', 'Ahrensburg', 'Stepenitztal') im gewünschten Kontext. 'München' wird durch spezifische Teile wie 'München-Ost', 'Bruck' und 'Planegg' abgedeckt, was inhaltlich korrekt ist. Der Ort 'Stepenitztal' fehlt zwar explizit, kann aber durch 'Wismar' abgedeckt werden, da Stepenitztal ein Teil von Wismar ist und somit die inhaltliche Präzision gewahrt bleibt. Die Orte 'Ahrensburg' und 'Hamburg' sind korrekt aufgeführt. Die Antwort ist also umfassend und zutreffend.",
+          "latency_ms": 7916
+        }
+      ]
+    },
+    {
+      "model": "qwen3:8b",
+      "tested": 3,
+      "pass": 0,
+      "partial": 0,
+      "fail": 3,
+      "pass_rate": 0.0,
+      "partial_rate": 0.0,
+      "fail_rate": 1.0,
+      "overall_score": 0.0,
+      "avg_latency_ms": 0,
+      "details": [
+        {
+          "test_id": "q_20260311_150705_0170df",
+          "query": "Wo treffe ich mich heute mit Marius?",
+          "verdict": "ERROR",
+          "score": 0.0,
+          "latency_ms": 0,
+          "error": "Unbekannter LLM-Provider: qwen3"
+        },
+        {
+          "test_id": "q_20260311_151849_8bf1fb",
+          "query": "Wo war ich mit Nora im letzten August?",
+          "verdict": "ERROR",
+          "score": 0.0,
+          "latency_ms": 0,
+          "error": "Unbekannter LLM-Provider: qwen3"
+        },
+        {
+          "test_id": "q_20260311_151907_f749db",
+          "query": "Wo war ich mit Nora im letzten Sommer?",
+          "verdict": "ERROR",
+          "score": 0.0,
+          "latency_ms": 0,
+          "error": "Unbekannter LLM-Provider: qwen3"
+        }
+      ]
+    }
+  ]
+}

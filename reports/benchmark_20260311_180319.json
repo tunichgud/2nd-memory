@@ -1,0 +1,133 @@
+{
+  "timestamp": "20260311_180319",
+  "test_cases": 3,
+  "models": 2,
+  "winner": "phi4",
+  "summaries": [
+    {
+      "model": "phi4",
+      "tested": 3,
+      "pass": 0,
+      "partial": 1,
+      "fail": 2,
+      "pass_rate": 0.0,
+      "partial_rate": 0.333,
+      "fail_rate": 0.667,
+      "overall_score": 0.417,
+      "avg_latency_ms": 6427
+    },
+    {
+      "model": "gemini:gemini-2.5-flash-preview-04-17",
+      "tested": 3,
+      "pass": 0,
+      "partial": 0,
+      "fail": 3,
+      "pass_rate": 0.0,
+      "partial_rate": 0.0,
+      "fail_rate": 1.0,
+      "overall_score": 0.0,
+      "avg_latency_ms": 304
+    }
+  ],
+  "full_results": [
+    {
+      "model": "phi4",
+      "tested": 3,
+      "pass": 0,
+      "partial": 1,
+      "fail": 2,
+      "pass_rate": 0.0,
+      "partial_rate": 0.333,
+      "fail_rate": 0.667,
+      "overall_score": 0.417,
+      "avg_latency_ms": 6427,
+      "details": [
+        {
+          "test_id": "q_20260311_150705_0170df",
+          "query": "Wo treffe ich mich heute mit Marius?",
+          "answer": "Für heute, den 11.03.2026, gibt es in deinen Daten keine Informationen über ein Treffen mit Marius. Die WhatsApp-Nachrichten zeigen an, dass du dich nach dem Treffpunkt erkundigt hast, aber es fehlen konkrete Details zu einem Treffen oder einem Ort. Daher habe ich dazu keine Einträge in deinen Daten. Die zuletzt gefundenen relevanten Daten zeigen deine Anfragen nach dem Treffpunkt, aber keine Antworten oder genaue Informationen [[1]][[2]][[3]].\n\n---\n\nOrte: Keine Orte vorhanden.\n\nEs gibt keine Einträge für heute.",
+          "golden": "Du triffst dich mit Marius um 12:15 Uhr beim Italiener, Villa Romana in Ahrensburg.",
+          "verdict": "FAIL",
+          "score": 0.0,
+          "embedding_sim": 0.4147,
+          "missing_facts": [
+            "Villa Romana",
+            "12:15",
+            "Ahrensburg"
+          ],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält keinerlei der geforderten Pflicht-Fakten ('Villa Romana', '12:15', 'Ahrensburg') und beinhaltet keine verbotenen Fakten. Daher fehlen alle relevanten Informationen vollständig, was zu einer Beurteilung als 'FAIL' führt.",
+          "latency_ms": 4187
+        },
+        {
+          "test_id": "q_20260311_151849_8bf1fb",
+          "query": "Wo war ich mit Nora im letzten August?",
+          "answer": "Du warst im letzten August mit Nora in **München**, **Hamburg**, **Planegg** und **Bruck**. \n\nIn München hast du Fotos in den Stadtteilen München-Ost [[1]], München-FernOst [[5]] und München-Zentrum [[6]] gemacht. In Hamburg warst du im Zentrum [[2]] und in Ahrensburg [[4]]. In Planegg [[3]] und Bruck [[5]] hast du ebenfalls Fotos gemacht. \n\nAuf diesen Fotos sind Nora und, an einigen Orten, auch Sarah zu sehen. \n\n---\n\n[1] - Foto, 29.08.2025, München-Ost  \n[2] - Foto, 29.08.2025, Hamburg-Zentrum  \n[3] - Foto, 31.08.2025, Planegg  \n[4] - Foto, 14.08.2025, Ahrensburg  \n[5] - Foto, 30.08.2025, Bruck  \n[6] - Foto, 31.08.2025, München-Zentrum",
+          "golden": "Im letzten August warst du mit Nora in München (München-Ost, München-FernOst/Bruck, München-Zentrum, Planegg), in Hamburg und in Ahrensburg.",
+          "verdict": "PARTIAL",
+          "score": 0.75,
+          "embedding_sim": 0.7817,
+          "missing_facts": [
+            "München-FernOst/Bruck"
+          ],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort erwähnt alle relevanten Orte: München, Hamburg, Planegg, Bruck und Ahrensburg. Sie enthält jedoch spezifische Orte innerhalb Münchens (München-Ost, München-FernOst, München-Zentrum), die nicht vollständig wiedergegeben werden, da 'München-FernOst/Bruck' als zusammengefasster Ort in der Referenzantwort erscheint. Die Pflicht-Fakten 'München' und 'Ahrensburg' sind korrekt enthalten.",
+          "latency_ms": 7365
+        },
+        {
+          "test_id": "q_20260311_151907_f749db",
+          "query": "Wo war ich mit Nora im letzten Sommer?",
+          "answer": "Um herauszufinden, wo du mit Nora im letzten Sommer (Sommer 2025) warst, suche ich nach Fotos mit beiden Personen aus diesem Zeitraum. Die Sommermonate sind Juni, Juli und August.\n\n- **Juni 2025**: Ein Foto wurde am 6. Juni 2025 in **Ahrensburg**, Schleswig-Holstein, aufgenommen [[3]].\n- **August 2025**: Mehrere Fotos wurden aufgenommen:\n  - 29. August 2025 in **München** (Ost) und **Hamburg** (Zentrum) [[2], [5]]\n  - 30. August 2025 in **München** (FernOst) bzw. **Bruck** [[6]]\n  - 31. August 2025 in **Planegg**, Bayern [[4]]\n\nDaher warst du im letzten Sommer mit Nora in den Städten **Ahrensburg**, **München**, **Hamburg**, **Bruck** und **Planegg**. [[2], [3], [4], [5], [6]]",
+          "golden": "Im letzten Sommer warst du mit Nora in München (München-Ost, München-FernOst/Bruck, München-Zentrum, Planegg), in Hamburg, in Ahrensburg und in Stepenitztal (Wismar).",
+          "verdict": "FAIL",
+          "score": 0.5,
+          "embedding_sim": 0.5719,
+          "missing_facts": [
+            "Stepenitztal"
+          ],
+          "wrong_facts": [],
+          "reasoning": "Die Antwort enthält die Pflicht-Fakten 'München' und 'Ahrensburg', jedoch fehlt der Ort 'Stepenitztal'. Da alle geforderten Orte genannt werden müssen, um den Antwortanforderungen zu entsprechen, ist die Antwort nicht vollständig. Daher wird das Urteil 'FAIL' ausgesprochen.",
+          "latency_ms": 7730
+        }
+      ]
+    },
+    {
+      "model": "gemini:gemini-2.5-flash-preview-04-17",
+      "tested": 3,
+      "pass": 0,
+      "partial": 0,
+      "fail": 3,
+      "pass_rate": 0.0,
+      "partial_rate": 0.0,
+      "fail_rate": 1.0,
+      "overall_score": 0.0,
+      "avg_latency_ms": 304,
+      "details": [
+        {
+          "test_id": "q_20260311_150705_0170df",
+          "query": "Wo treffe ich mich heute mit Marius?",
+          "verdict": "ERROR",
+          "score": 0.0,
+          "latency_ms": 663,
+          "error": "404 models/gemini-2.5-flash-preview-04-17 is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+        },
+        {
+          "test_id": "q_20260311_151849_8bf1fb",
+          "query": "Wo war ich mit Nora im letzten August?",
+          "verdict": "ERROR",
+          "score": 0.0,
+          "latency_ms": 110,
+          "error": "404 models/gemini-2.5-flash-preview-04-17 is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+        },
+        {
+          "test_id": "q_20260311_151907_f749db",
+          "query": "Wo war ich mit Nora im letzten Sommer?",
+          "verdict": "ERROR",
+          "score": 0.0,
+          "latency_ms": 138,
+          "error": "404 models/gemini-2.5-flash-preview-04-17 is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+        }
+      ]
+    }
+  ]
+}

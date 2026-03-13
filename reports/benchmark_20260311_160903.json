@@ -1,0 +1,85 @@
+{
+  "timestamp": "20260311_160903",
+  "test_cases": 3,
+  "models": 1,
+  "winner": "config-default",
+  "summaries": [
+    {
+      "model": "config-default",
+      "tested": 3,
+      "pass": 0,
+      "partial": 1,
+      "fail": 2,
+      "pass_rate": 0.0,
+      "partial_rate": 0.333,
+      "fail_rate": 0.667,
+      "overall_score": 0.2,
+      "avg_latency_ms": 6250
+    }
+  ],
+  "full_results": [
+    {
+      "model": "config-default",
+      "tested": 3,
+      "pass": 0,
+      "partial": 1,
+      "fail": 2,
+      "pass_rate": 0.0,
+      "partial_rate": 0.333,
+      "fail_rate": 0.667,
+      "overall_score": 0.2,
+      "avg_latency_ms": 6250,
+      "details": [
+        {
+          "test_id": "q_20260311_150705_0170df",
+          "query": "Wo treffe ich mich heute mit Marius?",
+          "answer": "Um herauszufinden, wo du dich heute mit Marius triffst, benötigen wir eine Nachricht von ihm, die den Treffpunkt angibt. Laut den Kontextdaten gibt es keine direkte Antwort von Marius bezüglich des Treffpunkts in den Nachrichten, die du zitiert hast. \n\nIch würde daher vorschlagen, deine WhatsApp-Konversation erneut zu überprüfen, um zu sehen, ob eine Antwort von Marius fehlt oder du einen anderen Eingangspunkt für die Informationen hast.\n\n**Zusammenfassend:** Auf Basis der verfügbaren Informationen aus den Nachrichten wurde der Treffpunkt nicht festgelegt. Daher kann ich keine genaue Antwort geben, wo der Treffpunkt ist. Überprüfe bitte deine WhatsApp-Nachrichten erneut auf eine Antwort von Marius.",
+          "golden": "Du triffst dich mit Marius um 12:15 Uhr beim Italiener, Villa Romana in Ahrensburg.",
+          "verdict": "FAIL",
+          "score": 0.0,
+          "embedding_sim": 0.6,
+          "missing_facts": [
+            "Villa Romana",
+            "12:15",
+            "Ahrensburg"
+          ],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält keine der erforderlichen Informationen über den Treffpunkt. Weder der Name 'Villa Romana', die Uhrzeit '12:15', noch der Ort 'Ahrensburg' sind erwähnt. Außerdem beinhaltet die Antwort keine verbotenen Fakten, da die verbotenen Orte 'Café Einstein' und 'Café Grüner Baum' fehlen. Da keine der wichtigen Fakten enthalten ist, wird die Antwort als 'FAIL' bewertet.",
+          "latency_ms": 4976
+        },
+        {
+          "test_id": "q_20260311_151849_8bf1fb",
+          "query": "Wo war ich mit Nora im letzten August?",
+          "answer": "**Wo warst du im letzten August mit Nora?**\n\nDu warst im letzten August mit Nora mehrfach in **München**. Die Fotos zeigen Aufenthalte in München-Ost am 29. August 2025 [[1]], in Planegg am 31. August 2025 [[3]], in München-FernOst in Bruck am 30. August 2025 [[5]] und in München-Zentrum am 31. August 2025 [[6]]. Diese Orte in und um München waren im August 2025 deine Reiseziele mit Nora.",
+          "golden": "Im letzten August warst du mit Nora in München (München-Ost, München-FernOst/Bruck, München-Zentrum, Planegg) und in Ahrensburg.",
+          "verdict": "PARTIAL",
+          "score": 0.6,
+          "embedding_sim": 0.8068,
+          "missing_facts": [
+            "Ahrensburg"
+          ],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält alle relevanten Orte in München, die in der Referenzantwort angegeben sind. Allerdings fehlt der Ort 'Ahrensburg', was ein Pflicht-Fakt ist. Daher ist die Antwort nicht vollständig.",
+          "latency_ms": 5065
+        },
+        {
+          "test_id": "q_20260311_151907_f749db",
+          "query": "Wo war ich mit Nora im letzten Sommer?",
+          "answer": "Um den Ort zu finden, an dem du mit Nora im letzten Sommer (Juni bis August 2025) warst, suche ich gezielt nach Fotos mit Nora in diesem Zeitraum. \n\n### Aktionen und Beobachtungen:\n\n1. **Suche nach Fotos von Nora im Sommer 2025:**\n   - Ich finde Fotos, die Nora in den Monaten Juni, Juli und August 2025 zeigen.\n\n2. **Auswertung der Fotos:**\n   - **[3] Foto vom 06.06.2025:** Ort: Ahrensburg (Hamburg-Heim) [[3]]\n   - **[2] Foto vom 29.08.2025:** Ort: München-Ost [[2]]\n   - **[6] Foto vom 30.08.2025:** Ort: München-FernOst (Bruck) [[6]]\n   - **[4] Foto vom 31.08.2025:** Ort: Planegg (München) [[4]]\n\n3. **Zusammenfassung der Orte:**\n   - Du warst in Ahrensburg, München-Ost, München-FernOst (Bruck) und Planegg mit Nora im letzten Sommer. \n\n### Antwort:\nDu warst im letzten Sommer 2025 mit Nora in **Ahrensburg**, **München (Ost und FernOst, Bruck)** und **Planegg** [[2]], [[3]], [[4]], [[6]].",
+          "golden": "Im letzten Sommer warst du mit Nora in München, in Ahrensburg und in Stepenitztal (Wismar).",
+          "verdict": "FAIL",
+          "score": 0.0,
+          "embedding_sim": 0.6698,
+          "missing_facts": [
+            "Stepenitztal"
+          ],
+          "wrong_facts": [
+            "Planegg"
+          ],
+          "reasoning": "Die generierte Antwort enthält die Orte Ahrensburg und München, was korrekt ist. Allerdings fehlt der Ort Stepenitztal, der ein erforderlicher Fakt ist. Stattdessen wird der Ort Planegg erwähnt, der nicht in der Referenzantwort vorkommt. Daher erfüllt die Antwort die Anforderungen nicht vollständig.",
+          "latency_ms": 8710
+        }
+      ]
+    }
+  ]
+}

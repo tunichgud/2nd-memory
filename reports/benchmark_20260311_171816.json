@@ -1,0 +1,149 @@
+{
+  "timestamp": "20260311_171816",
+  "test_cases": 3,
+  "models": 2,
+  "winner": "phi4",
+  "summaries": [
+    {
+      "model": "phi4",
+      "tested": 3,
+      "pass": 1,
+      "partial": 1,
+      "fail": 1,
+      "pass_rate": 0.333,
+      "partial_rate": 0.333,
+      "fail_rate": 0.333,
+      "overall_score": 0.567,
+      "avg_latency_ms": 5196
+    },
+    {
+      "model": "qwen3:8b",
+      "tested": 3,
+      "pass": 1,
+      "partial": 0,
+      "fail": 2,
+      "pass_rate": 0.333,
+      "partial_rate": 0.0,
+      "fail_rate": 0.667,
+      "overall_score": 0.317,
+      "avg_latency_ms": 21911
+    }
+  ],
+  "full_results": [
+    {
+      "model": "phi4",
+      "tested": 3,
+      "pass": 1,
+      "partial": 1,
+      "fail": 1,
+      "pass_rate": 0.333,
+      "partial_rate": 0.333,
+      "fail_rate": 0.333,
+      "overall_score": 0.567,
+      "avg_latency_ms": 5196,
+      "details": [
+        {
+          "test_id": "q_20260311_150705_0170df",
+          "query": "Wo treffe ich mich heute mit Marius?",
+          "answer": "Auf Basis der bereitgestellten Informationen aus deiner Datenbank gibt es keine genannten Orte, an denen du dich heute mit Marius triffst. Alle verfügbaren Nachrichten enthalten lediglich Anfragen bezüglich des Treffpunkts, aber keinen konkreten Ort [[1]][[2]][[3]]. Daher habe ich dazu keine Einträge in deinen Daten.",
+          "golden": "Du triffst dich mit Marius um 12:15 Uhr beim Italiener, Villa Romana in Ahrensburg.",
+          "verdict": "FAIL",
+          "score": 0.0,
+          "embedding_sim": 0.4315,
+          "missing_facts": [
+            "Villa Romana",
+            "12:15",
+            "Ahrensburg"
+          ],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält keine der Pflicht-Fakten 'Villa Romana', '12:15', 'Ahrensburg'. Daher fehlen alle wichtigen Informationen, die in der Referenzantwort enthalten sein müssen. Zusätzlich wurden keine falschen Fakten gegeben, aber das Fehlen der korrekten Informationen führt zu einem Scheitern der Bewertung.",
+          "latency_ms": 3405
+        },
+        {
+          "test_id": "q_20260311_151849_8bf1fb",
+          "query": "Wo war ich mit Nora im letzten August?",
+          "answer": "Du warst im letzten August (2025) mit Nora in folgenden Orten: **München (Ost)** [[1]], **Hamburg (Zentrum)** [[2]], **Ahrensburg** [[4]], **Bruck** [[5]], **Planegg** [[3]] und **München (FernOst)** [[5]]. Diese Orte sind basierend auf den Fotos mit Nora in deinen Daten aufgelistet.",
+          "golden": "Im letzten August warst du mit Nora in München (München-Ost, München-FernOst/Bruck, München-Zentrum, Planegg), in Hamburg und in Ahrensburg.",
+          "verdict": "PASS",
+          "score": 0.95,
+          "embedding_sim": 0.617,
+          "missing_facts": [],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält alle wesentlichen Fakten der Referenzantwort. Die Orte 'München', 'Ahrensburg', sowie 'Hamburg' und weitere spezifizierte Teile Münchens (Ost, FernOst, Bruck, Planegg) sind korrekt aufgeführt. Die Anfrage forderte mindestens 'München' und 'Ahrensburg', was in der Antwort enthalten ist.",
+          "latency_ms": 4841
+        },
+        {
+          "test_id": "q_20260311_151907_f749db",
+          "query": "Wo war ich mit Nora im letzten Sommer?",
+          "answer": "Um herauszufinden, wo du im letzten Sommer mit Nora warst, suchen wir nach Fotos im Sommer 2025 (1. Juni bis 31. August) mit Nora als Person. Die relevanten Einträge sind:\n\n- **Foto vom 6. Juni 2025**: Ort ist **Ahrensburg** [[3]].\n- **Foto vom 29. August 2025**: Ort ist **München** [[2]], und ein weiteres Foto am selben Tag zeigt **Hamburg** [[5]].\n- **Foto vom 30. August 2025**: Ort ist **Bruck** [[6]].\n- **Foto vom 31. August 2025**: Ort ist **Planegg** [[4]].\n\nDu warst also im letzten Sommer mit Nora in den Städten **Ahrensburg**, **München**, **Hamburg**, **Bruck** und **Planegg**. \n\n[1], [2], [3], [4], [5], [6]",
+          "golden": "Im letzten Sommer warst du mit Nora in München (München-Ost, München-FernOst/Bruck, München-Zentrum, Planegg), in Hamburg, in Ahrensburg und in Stepenitztal (Wismar).",
+          "verdict": "PARTIAL",
+          "score": 0.75,
+          "embedding_sim": 0.5592,
+          "missing_facts": [
+            "Stepenitztal"
+          ],
+          "wrong_facts": [
+            "Hamburg",
+            "Bruck",
+            "Planegg"
+          ],
+          "reasoning": "Die generierte Antwort erwähnt die Orte Ahrensburg und München korrekt, die auch in der Referenzantwort enthalten sind. Allerdings fehlt der Ort Stepenitztal vollständig, der als Pflicht-Fakt erforderlich ist. Zudem erwähnt die generierte Antwort zusätzlich Hamburg, Bruck und Planegg, die in der Referenz nicht als relevante Orte aufgeführt sind. Dementsprechend sind wichtige Fakten fehlerhaft oder unvollständig dargestellt.",
+          "latency_ms": 7343
+        }
+      ]
+    },
+    {
+      "model": "qwen3:8b",
+      "tested": 3,
+      "pass": 1,
+      "partial": 0,
+      "fail": 2,
+      "pass_rate": 0.333,
+      "partial_rate": 0.0,
+      "fail_rate": 0.667,
+      "overall_score": 0.317,
+      "avg_latency_ms": 21911,
+      "details": [
+        {
+          "test_id": "q_20260311_150705_0170df",
+          "query": "Wo treffe ich mich heute mit Marius?",
+          "answer": "Du hast heute (11.03.2026) **keine Einträge** zu einem Treffen mit Marius in deinen Daten. Die Nachrichten zeigen nur, dass du mehrfach die Frage stelltest, aber keine Antwort oder Ort wurde genannt [[1]], [[2]], [[3]].",
+          "golden": "Du triffst dich mit Marius um 12:15 Uhr beim Italiener, Villa Romana in Ahrensburg.",
+          "verdict": "FAIL",
+          "score": 0.0,
+          "embedding_sim": 0.4733,
+          "missing_facts": [
+            "Villa Romana",
+            "12:15",
+            "Ahrensburg"
+          ],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält keine der relevanten Pflicht-Fakten ('Villa Romana', '12:15', 'Ahrensburg') und behauptet fälschlicherweise, dass keine Daten zu einem Treffen vorhanden sind, während die Referenzantwort spezifische Details liefert. Somit ist die generierte Antwort inhaltlich falsch.",
+          "latency_ms": 15273
+        },
+        {
+          "test_id": "q_20260311_151849_8bf1fb",
+          "query": "Wo war ich mit Nora im letzten August?",
+          "answer": "Du warst im August 2025 mit Nora in **München (Ost, Zentrum)**, **Hamburg (Zentrum, Ost)**, **Planegg**, **Ahrensburg** und **Bruck** [[1]][[2]][[3]][[4]][[5]]. Die Fotos zeigen euch am 29.08.2025 in München-Ost, 31.08.2025 in Planegg und Ahrensburg sowie am 30.08.2025 in Bruck [[1]][[3]][[4]][[5]].",
+          "golden": "Im letzten August warst du mit Nora in München (München-Ost, München-FernOst/Bruck, München-Zentrum, Planegg), in Hamburg und in Ahrensburg.",
+          "verdict": "PASS",
+          "score": 0.95,
+          "embedding_sim": 0.7473,
+          "missing_facts": [],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält alle wichtigen Fakten, die in der Referenzantwort gefordert waren: 'München' und 'Ahrensburg'. Zusätzlich werden noch weitere Orte genannt, die jedoch die geforderten Informationen nicht verfälschen. Die Ortsbezeichnungen in der generierten Antwort sind leicht unterschiedlich, aber die Orte selbst stimmen. Daher ist die Antwort inhaltlich korrekt.",
+          "latency_ms": 25383
+        },
+        {
+          "test_id": "q_20260311_151907_f749db",
+          "query": "Wo war ich mit Nora im letzten Sommer?",
+          "verdict": "ERROR",
+          "score": 0.0,
+          "latency_ms": 25077,
+          "error": "an error was encountered while running the model: read tcp 127.0.0.1:63991->127.0.0.1:63977: wsarecv: An existing connection was forcibly closed by the remote host. (status code: 500)"
+        }
+      ]
+    }
+  ]
+}

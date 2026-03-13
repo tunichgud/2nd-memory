@@ -26,14 +26,29 @@ client.on('qr', (qr) => {
 let BOT_CONFIG = {
     user_chat_id: null,  // Die WhatsApp-ID des Users
     bot_enabled: true,
-    test_mode: false
+    test_mode: false,
+    stt_enabled: true
 };
+
+/**
+ * Wirft einen Fehler wenn chatId nicht der eigene User-Chat ist.
+ * @param {string} chatId - Ziel-Chat-ID
+ * @param {object} config - BOT_CONFIG
+ */
+function assertSendAllowed(chatId, config) {
+    if (!config.user_chat_id) {
+        throw new Error('Safety: user_chat_id nicht konfiguriert');
+    }
+    if (chatId !== config.user_chat_id) {
+        throw new Error(`Safety: Send an ${chatId} blockiert — nur ${config.user_chat_id} erlaubt`);
+    }
+}
 
 // Lädt Bot-Config aus dem Backend (ChromaDB)
 async function loadBotConfig() {
     try {
         const response = await axios.get(`${BACKEND_URL}/api/whatsapp/config`);
-        BOT_CONFIG = response.data;
+        BOT_CONFIG = { ...BOT_CONFIG, ...response.data };
         console.log('[WhatsApp] Bot-Config geladen:', BOT_CONFIG);
 
         if (BOT_CONFIG.user_chat_id) {
@@ -104,6 +119,71 @@ async function saveMessageToBackend(msg, chatName = null) {
     }
 }
 
+/**
+ * Transkribiert eine eingehende Sprachnachricht und sendet die Zusammenfassung an den Selbst-Chat.
+ * @param {import('whatsapp-web.js').Client} client
+ * @param {import('whatsapp-web.js').Message} msg
+ * @param {object} config - BOT_CONFIG
+ */
+async function handleVoiceMessage(client, msg, config) {
+    const chat = await msg.getChat();
+    const contact = await msg.getContact();
+    const sender = contact.pushname || contact.name || msg.from;
+    const chatName = chat.name || msg.from;
+
+    console.log(`[STT] ▶ handleVoiceMessage gestartet`);
+    console.log(`[STT]   type=${msg.type} | fromMe=${msg.fromMe} | from=${msg.from}`);
+    console.log(`[STT]   sender="${sender}" | chat="${chatName}"`);
+    console.log(`[STT]   user_chat_id=${config.user_chat_id}`);
+
+    try {
+        console.log(`[STT] 📥 Lade Audio herunter...`);
+        const media = await msg.downloadMedia();
+        if (!media || !media.data) {
+            throw new Error('Kein Audio-Inhalt herunterladbar');
+        }
+        const audioBuffer = Buffer.from(media.data, 'base64');
+        console.log(`[STT] ✅ Audio geladen: ${audioBuffer.length} bytes | mimetype=${media.mimetype}`);
+
+        const FormData = require('form-data');
+        const form = new FormData();
+        form.append('audio', audioBuffer, { filename: 'voice.ogg', contentType: media.mimetype });
+        form.append('chat_id', msg.from);
+        form.append('chat_name', chatName);
+        form.append('sender', sender);
+        form.append('timestamp', String(msg.timestamp));
+        form.append('message_id', msg.id._serialized);
+
+        console.log(`[STT] 🚀 Sende an Backend: POST ${BACKEND_URL}/api/v1/stt/transcribe`);
+        const response = await axios.post(
+            `${BACKEND_URL}/api/v1/stt/transcribe`,
+            form,
+            { headers: form.getHeaders(), timeout: 120000 }
+        );
+        console.log(`[STT] ✅ Backend-Antwort: status=${response.data.status} | language=${response.data.language}`);
+        console.log(`[STT]   transcript="${(response.data.transcript || '').substring(0, 80)}..."`);
+
+        const { formatted_message } = response.data;
+        console.log(`[STT] 📤 Sende Zusammenfassung an ${config.user_chat_id}...`);
+        assertSendAllowed(config.user_chat_id, config);
+        await client.sendMessage(config.user_chat_id, formatted_message);
+        console.log(`[STT] ✅ Zusammenfassung gesendet.`);
+
+    } catch (err) {
+        console.error(`[STT] ❌ Fehler: ${err.message}`);
+        if (err.response) {
+            console.error(`[STT]   HTTP ${err.response.status}: ${JSON.stringify(err.response.data)}`);
+        }
+        const errMsg = `[STT Fehler] Sprachnachricht von ${sender} (Chat: ${chatName}) konnte nicht verarbeitet werden.`;
+        try {
+            assertSendAllowed(config.user_chat_id, config);
+            await client.sendMessage(config.user_chat_id, errMsg);
+        } catch (sendErr) {
+            console.error(`[STT] ❌ Fehlerbenachrichtigung konnte nicht gesendet werden: ${sendErr.message}`);
+        }
+    }
+}
+
 // Fängt alle Nachrichten ab (eingehend & selbst gesendet)
 client.on('message_create', async msg => {
     // Kurzes Logging
@@ -123,8 +203,8 @@ client.on('message_create', async msg => {
         messageHistory.pop();
     }
 
-    // WICHTIG: Ignoriere Bot-Antworten (beginnen mit 🦕)
-    if (msg.body.startsWith('🦕')) {
+    // WICHTIG: Ignoriere Bot-Antworten (beginnen mit 🦕) und STT-Nachrichten (Loop Prevention)
+    if (msg.body.startsWith('🦕') || msg.body.startsWith('[STT]') || msg.body.startsWith('[STT Fehler]')) {
         console.log(`[WhatsApp] Ignoriere Bot-Nachricht (Loop Prevention)`);
         return;
     }
@@ -134,6 +214,18 @@ client.on('message_create', async msg => {
     saveMessageToBackend(msg).catch(err => {
         console.error(`[WhatsApp] Fehler bei Live-Ingestion:`, err.message);
     });
+
+    // --- Voice Message STT ---
+    // ALLE Sprachnachrichten (egal ob fromMe oder nicht) → STT → Zusammenfassung → Selbst-Chat
+    // Niemals durch den Bot-Webhook
+    if (msg.type === 'ptt' || msg.type === 'audio') {
+        if (BOT_CONFIG.stt_enabled) {
+            await handleVoiceMessage(client, msg, BOT_CONFIG);
+        } else {
+            console.log(`[WhatsApp] ⏭️  Ignoriere Audio-Nachricht (STT deaktiviert)`);
+        }
+        return;
+    }
 
     // SICHERHEIT STUFE 1: Bot muss aktiviert sein
     if (!BOT_CONFIG.bot_enabled) {
@@ -147,10 +239,10 @@ client.on('message_create', async msg => {
         return;
     }
 
-    // SICHERHEIT STUFE 3: Nur Nachrichten AN den User (im User-Chat) verarbeiten
-    // msg.from ist der Chat, in dem die Nachricht geschrieben wurde
-    if (msg.from !== BOT_CONFIG.user_chat_id) {
-        console.log(`[WhatsApp] ⏭️  Ignoriere Nachricht aus anderem Chat: ${msg.from}`);
+    // SICHERHEIT STUFE 3: Nur Nachrichten im Selbst-Chat verarbeiten
+    // Bedingung: msg.from === ich UND chat (msg.id.remote) === ich
+    if (msg.from !== BOT_CONFIG.user_chat_id || msg.id.remote !== BOT_CONFIG.user_chat_id) {
+        console.log(`[WhatsApp] ⏭️  Ignoriere Nachricht (from=${msg.from}, chat=${msg.id.remote})`);
         return;
     }
 
@@ -751,3 +843,5 @@ const PORT = process.env.WHATSAPP_PORT || 3001;
 app.listen(PORT, () => {
     console.log(`WhatsApp API listening on http://localhost:${PORT}`);
 });
+
+module.exports = { assertSendAllowed };

@@ -1,0 +1,84 @@
+{
+  "timestamp": "20260311_162637",
+  "test_cases": 3,
+  "models": 1,
+  "winner": "config-default",
+  "summaries": [
+    {
+      "model": "config-default",
+      "tested": 3,
+      "pass": 1,
+      "partial": 1,
+      "fail": 1,
+      "pass_rate": 0.333,
+      "partial_rate": 0.333,
+      "fail_rate": 0.333,
+      "overall_score": 0.55,
+      "avg_latency_ms": 4993
+    }
+  ],
+  "full_results": [
+    {
+      "model": "config-default",
+      "tested": 3,
+      "pass": 1,
+      "partial": 1,
+      "fail": 1,
+      "pass_rate": 0.333,
+      "partial_rate": 0.333,
+      "fail_rate": 0.333,
+      "overall_score": 0.55,
+      "avg_latency_ms": 4993,
+      "details": [
+        {
+          "test_id": "q_20260311_150705_0170df",
+          "query": "Wo treffe ich mich heute mit Marius?",
+          "answer": "Ich habe keine Informationen über einen Treffpunkt mit Marius heute, dem 11. März 2026. In den Nachrichten von heute gibt es keine spezifischen Details zum Ort des Treffens. Daher habe ich dazu keine Einträge in deinen Daten.",
+          "golden": "Du triffst dich mit Marius um 12:15 Uhr beim Italiener, Villa Romana in Ahrensburg.",
+          "verdict": "FAIL",
+          "score": 0.0,
+          "embedding_sim": 0.5366,
+          "missing_facts": [
+            "Villa Romana",
+            "12:15",
+            "Ahrensburg"
+          ],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält keinerlei der erforderlichen Fakten: 'Villa Romana', '12:15', und 'Ahrensburg'. Die Antwort ist daher inhaltlich komplett am Thema vorbei und enthält keine der notwendigen Informationen. Es gibt auch keine verbotenen Fakten, aber das fehlen der notwendigen Informationen reicht bereits aus, um ein 'FAIL' zu bewerten.",
+          "latency_ms": 2847
+        },
+        {
+          "test_id": "q_20260311_151849_8bf1fb",
+          "query": "Wo war ich mit Nora im letzten August?",
+          "answer": "Du warst im letzten August mit Nora in den folgenden Orten:\n\n- **München** [[1]], [[3]], [[5]], [[6]]\n- **Hamburg** [[2]], [[4]]\n\nDie genauen Standorte in München sind München-Ost, Planegg und Bruck. In Hamburg waren die Standorte Hamburg-Zentrum und Ahrensburg [[1]-[6]].",
+          "golden": "Im letzten August warst du mit Nora in München (München-Ost, München-FernOst/Bruck, München-Zentrum, Planegg) und in Ahrensburg.",
+          "verdict": "PARTIAL",
+          "score": 0.7,
+          "embedding_sim": 0.8744,
+          "missing_facts": [
+            "München-FernOst/Bruck",
+            "München-Zentrum"
+          ],
+          "wrong_facts": [
+            "Hamburg"
+          ],
+          "reasoning": "Die Antwort erwähnt zwar einige der genannten Orte in München, jedoch fehlen 'München-FernOst/Bruck' und 'München-Zentrum'. Zudem wird 'Hamburg' fälschlicherweise als besuchter Ort aufgeführt, obwohl es in der Referenzantwort nicht erwähnt wird. Daher ist die Antwort nur teilweise korrekt.",
+          "latency_ms": 4404
+        },
+        {
+          "test_id": "q_20260311_151907_f749db",
+          "query": "Wo war ich mit Nora im letzten Sommer?",
+          "answer": "Um herauszufinden, wo du im letzten Sommer mit Nora warst, schauen wir uns die Fotos im Zeitraum vom 01.06.2025 bis zum 31.08.2025 an.\n\n- **Stadtname/Ort:** Ahrensburg (06.06.2025) [[3]]\n- **Stadtname/Ort:** Stepenitztal (29.06.2025) [[7]]\n- **Stadtname/Ort:** München-Ost (29.08.2025) [[2]]\n- **Stadtname/Ort:** Hamburg (29.08.2025) [[5]]\n- **Stadtname/Ort:** Planegg (31.08.2025) [[4]]\n- **Stadtname/Ort:** Bruck (30.08.2025) [[6]]\n\n**Du warst im letzten Sommer mit Nora in Ahrensburg, Stepenitztal, München-Ost, Hamburg, Planegg und Bruck.** [[3], [7], [2], [5], [4], [6]]",
+          "golden": "Im letzten Sommer warst du mit Nora in München (München-Ost, München-FernOst/Bruck, München-Zentrum, Planegg), in Hamburg, in Ahrensburg und in Stepenitztal (Wismar).",
+          "verdict": "PASS",
+          "score": 0.95,
+          "embedding_sim": 0.7285,
+          "missing_facts": [],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält alle Pflicht-Fakten ('München', 'Ahrensburg', 'Stepenitztal'), die in der Referenzantwort vorgegeben wurden. 'München' wird durch die Angabe von 'München-Ost' und 'Planegg' abgedeckt, was Teil von München ist. Die Orte 'Ahrensburg' und 'Stepenitztal' sind explizit genannt. Daher sind alle wichtigen Fakten korrekt und vollständig vorhanden.",
+          "latency_ms": 7728
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "timestamp": "20260311_162807",
+  "test_cases": 3,
+  "models": 1,
+  "winner": "config-default",
+  "summaries": [
+    {
+      "model": "config-default",
+      "tested": 3,
+      "pass": 2,
+      "partial": 0,
+      "fail": 1,
+      "pass_rate": 0.667,
+      "partial_rate": 0.0,
+      "fail_rate": 0.333,
+      "overall_score": 0.633,
+      "avg_latency_ms": 5046
+    }
+  ],
+  "full_results": [
+    {
+      "model": "config-default",
+      "tested": 3,
+      "pass": 2,
+      "partial": 0,
+      "fail": 1,
+      "pass_rate": 0.667,
+      "partial_rate": 0.0,
+      "fail_rate": 0.333,
+      "overall_score": 0.633,
+      "avg_latency_ms": 5046,
+      "details": [
+        {
+          "test_id": "q_20260311_150705_0170df",
+          "query": "Wo treffe ich mich heute mit Marius?",
+          "answer": "In den vorhandenen Nachrichten gibt es keine Informationen über den Treffpunkt mit Marius. Du hast mehrmals nach dem Treffpunkt gefragt, jedoch ohne eine Antwort zu erhalten, die den Ort spezifiziert. Daher habe ich dazu keine Einträge in deinen Daten [[1]], [[2]], [[3]].",
+          "golden": "Du triffst dich mit Marius um 12:15 Uhr beim Italiener, Villa Romana in Ahrensburg.",
+          "verdict": "FAIL",
+          "score": 0.0,
+          "embedding_sim": 0.548,
+          "missing_facts": [
+            "Villa Romana",
+            "12:15",
+            "Ahrensburg"
+          ],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält keine der notwendigen Pflicht-Fakten ('Villa Romana', '12:15', 'Ahrensburg'). Die Antwort gibt an, dass keine Informationen über den Treffpunkt vorhanden sind, was die Pflicht-Fakten vollständig auslässt.",
+          "latency_ms": 3017
+        },
+        {
+          "test_id": "q_20260311_151849_8bf1fb",
+          "query": "Wo war ich mit Nora im letzten August?",
+          "answer": "Du warst im letzten August mit Nora in folgenden Orten: **München (Ost)**, **Hamburg (Zentrum)**, **Ahrensburg**, **Bruck**, und **Planegg** [[1]][[2]][[3]][[4]][[5]][[6]]. Diese Orte stammen aus Fotos, die während des Augusts 2025 aufgenommen wurden.",
+          "golden": "Im letzten August warst du mit Nora in München (München-Ost, München-FernOst/Bruck, München-Zentrum, Planegg), in Hamburg und in Ahrensburg.",
+          "verdict": "PASS",
+          "score": 0.95,
+          "embedding_sim": 0.6356,
+          "missing_facts": [],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält alle wichtigen Fakten: 'München', 'Ahrensburg' und ergänzt mit spezifischen Orten in München, die im Sinne des Beispiels die geforderten Orte abdecken. Es werden keine falschen Fakten genannt, und der Zeitbezug zum letzten August stimmt.",
+          "latency_ms": 4722
+        },
+        {
+          "test_id": "q_20260311_151907_f749db",
+          "query": "Wo war ich mit Nora im letzten Sommer?",
+          "answer": "Um herauszufinden, wo du im letzten Sommer mit Nora warst, suche ich nach Fotos mit euch beiden im Zeitraum von Juni bis August 2025. Hier sind die relevanten Orte aus den gefundenen Fotos:\n\n1. **München (Planegg)** - Foto vom 31.08.2025 [[4]]\n2. **München (Ost)** - Foto vom 29.08.2025 [[2]]\n3. **Hamburg (Zentrum)** - Foto vom 29.08.2025 [[5]]\n4. **München (Bruck)** - Foto vom 30.08.2025 [[6]]\n5. **Ahrensburg** - Foto vom 06.06.2025 [[3]]\n6. **Stepenitztal** - Foto vom 29.06.2025 [[7]]\n\nDu warst also im letzten Sommer mit Nora in München (Planegg), München (Ost), Hamburg (Zentrum), München (Bruck), Ahrensburg und Stepenitztal.",
+          "golden": "Im letzten Sommer warst du mit Nora in München (München-Ost, München-FernOst/Bruck, München-Zentrum, Planegg), in Hamburg, in Ahrensburg und in Stepenitztal (Wismar).",
+          "verdict": "PASS",
+          "score": 0.95,
+          "embedding_sim": 0.5745,
+          "missing_facts": [],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält alle in der Referenzantwort genannten wichtigen Orte: München, Ahrensburg und Stepenitztal. Zusätzlich werden weitere relevante Orte genannt, die jedoch nicht im Widerspruch zur Referenzantwort stehen. Die wesentlichen Orte aus der Referenz sind korrekt und vollständig enthalten, daher erfüllt die generierte Antwort die Kriterien.",
+          "latency_ms": 7399
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "timestamp": "20260311_160537",
+  "test_cases": 3,
+  "models": 1,
+  "winner": "config-default",
+  "summaries": [
+    {
+      "model": "config-default",
+      "tested": 3,
+      "pass": 0,
+      "partial": 1,
+      "fail": 2,
+      "pass_rate": 0.0,
+      "partial_rate": 0.333,
+      "fail_rate": 0.667,
+      "overall_score": 0.25,
+      "avg_latency_ms": 7861
+    }
+  ],
+  "full_results": [
+    {
+      "model": "config-default",
+      "tested": 3,
+      "pass": 0,
+      "partial": 1,
+      "fail": 2,
+      "pass_rate": 0.0,
+      "partial_rate": 0.333,
+      "fail_rate": 0.667,
+      "overall_score": 0.25,
+      "avg_latency_ms": 7861,
+      "details": [
+        {
+          "test_id": "q_20260311_150705_0170df",
+          "query": "Wo treffe ich mich heute mit Marius?",
+          "answer": "Basierend auf den Nachrichten aus dem Kontext gibt es keine Informationen darüber, wo du dich mit Marius heute, dem 11. März 2026, triffst. Du hast mehrfach gefragt, aber es scheint keine Antwort darauf im Kontext zu geben. Es wäre sinnvoll, Marius direkt zu kontaktieren, um den Treffpunkt zu klären.",
+          "golden": "Du triffst dich mit Marius um 12:15 Uhr beim Italiener, Villa Romana in Ahrensburg.",
+          "verdict": "FAIL",
+          "score": 0.0,
+          "embedding_sim": 0.6052,
+          "missing_facts": [
+            "Villa Romana",
+            "12:15",
+            "Ahrensburg"
+          ],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält keine der erforderlichen Pflicht-Fakten ('Villa Romana', '12:15', 'Ahrensburg'). Darüber hinaus fehlen auch verbotene Fakten, was jedoch aufgrund des Fehlens der erforderlichen Informationen irrelevant ist. Die generierte Antwort ist demnach nicht inhaltlich korrekt.",
+          "latency_ms": 9974
+        },
+        {
+          "test_id": "q_20260311_151849_8bf1fb",
+          "query": "Wo war ich mit Nora im letzten August?",
+          "answer": "Du warst im August 2025 mit Nora mehrmals in **München** und **Hamburg**. Konkret waren die Aufenthalte in:\n\n1. **München-Ost** am 29. August 2025 [[1]].\n2. **Planegg** (München) am 31. August 2025 [[3]].\n3. **Bruck** (München-FernOst) am 30. August 2025 [[5]].\n4. **Hamburg-Ost** (Ahrensburg) am 14. August 2025 [[4]].\n5. **Hamburg-Zentrum** am 29. August 2025 [[2]].\n\nEs gab also mehrere Aufenthalte in München sowie einen in Hamburg im letzten August mit Nora.",
+          "golden": "Im letzten August warst du mit Nora in München (München-Ost, München-FernOst/Bruck, München-Zentrum, Planegg) und in Ahrensburg.",
+          "verdict": "PARTIAL",
+          "score": 0.75,
+          "embedding_sim": 0.6821,
+          "missing_facts": [
+            "Ahrensburg"
+          ],
+          "wrong_facts": [
+            "Hamburg",
+            "Hamburg-Ost"
+          ],
+          "reasoning": "Die generierte Antwort erwähnt Besuche in Hamburg und Hamburg-Ost, die in der Referenzantwort nicht vorkommen. Stattdessen sollte 'Ahrensburg' explizit als Ort erwähnt werden. München wird korrekt genannt, aber das vollständige Set der wichtigen Fakten ist nicht abgedeckt.",
+          "latency_ms": 5741
+        },
+        {
+          "test_id": "q_20260311_151907_f749db",
+          "query": "Wo war ich mit Nora im letzten Sommer?",
+          "answer": "Um herauszufinden, wo du mit Nora im letzten Sommer warst, müssen wir zunächst definieren, was der \"letzte Sommer\" bedeutet. Da wir uns aktuell im Jahr 2026 befinden, bezieht sich der letzte Sommer auf den Sommer 2025.\n\nNun suche ich gezielt nach Fotos mit Nora aus dem Zeitraum vom 21. Juni bis 23. September 2025.\n\nDie folgenden Fotos sind relevant:\n\n1. Foto vom 29. August 2025, Ort: München-Ost [[2]].\n2. Foto vom 31. August 2025, Ort: Planegg [[4]].\n3. Foto vom 30. August 2025, Ort: Bruck, München-FernOst [[6]].\n4. Foto vom 29. August 2025, Ort: Hamburg-Zentrum [[5]].\n\nDa mehrere Fotos aus München und Umgebung gefunden wurden, insbesondere in München-Ost und Bruck (München-FernOst), scheint München der Hauptort deines Aufenthalts mit Nora im letzten Sommer gewesen zu sein.\n\n**Du warst mit Nora im letzten Sommer hauptsächlich in München [[2]],[[4]],[[6]].**",
+          "golden": "Im letzten Sommer warst du mit Nora in München, in Ahrensburg und in Stepenitztal (Wismar).",
+          "verdict": "FAIL",
+          "score": 0.0,
+          "embedding_sim": 0.5909,
+          "missing_facts": [
+            "Ahrensburg",
+            "Stepenitztal"
+          ],
+          "wrong_facts": [
+            "München"
+          ],
+          "reasoning": "Die generierte Antwort nennt nur München als Ort, an dem der Nutzer mit Nora war, während die Pflicht-Fakten München, Ahrensburg und Stepenitztal umfassen müssen. Daher fehlen Ahrensburg und Stepenitztal vollständig, und das Fehlen dieser Orte macht die Antwort unvollständig und damit falsch.",
+          "latency_ms": 7869
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "timestamp": "20260311_180213",
+  "test_cases": 3,
+  "models": 2,
+  "winner": "phi4",
+  "summaries": [
+    {
+      "model": "phi4",
+      "tested": 3,
+      "pass": 2,
+      "partial": 0,
+      "fail": 1,
+      "pass_rate": 0.667,
+      "partial_rate": 0.0,
+      "fail_rate": 0.333,
+      "overall_score": 0.633,
+      "avg_latency_ms": 7282
+    },
+    {
+      "model": "gemini:gemini-2.0-flash",
+      "tested": 3,
+      "pass": 0,
+      "partial": 0,
+      "fail": 3,
+      "pass_rate": 0.0,
+      "partial_rate": 0.0,
+      "fail_rate": 1.0,
+      "overall_score": 0.0,
+      "avg_latency_ms": 519
+    }
+  ],
+  "full_results": [
+    {
+      "model": "phi4",
+      "tested": 3,
+      "pass": 2,
+      "partial": 0,
+      "fail": 1,
+      "pass_rate": 0.667,
+      "partial_rate": 0.0,
+      "fail_rate": 0.333,
+      "overall_score": 0.633,
+      "avg_latency_ms": 7282,
+      "details": [
+        {
+          "test_id": "q_20260311_150705_0170df",
+          "query": "Wo treffe ich mich heute mit Marius?",
+          "answer": "Für heute, den 11.03.2026, gibt es keine Einträge in deinen Daten, die den Treffpunkt mit Marius angeben. In deinen Nachrichten von heute um 14:15:45, 14:21:56 und 15:06:58 fragst du, wo du dich heute mit Marius trefft, aber ohne eine spezifische Antwort oder Ortsangabe in den Nachrichten. Daher kann ich den Ort des Treffens nicht aus den verfügbaren Daten bestimmen. Du hast dazu keine Einträge in deinen Daten.",
+          "golden": "Du triffst dich mit Marius um 12:15 Uhr beim Italiener, Villa Romana in Ahrensburg.",
+          "verdict": "FAIL",
+          "score": 0.0,
+          "embedding_sim": 0.6241,
+          "missing_facts": [
+            "Villa Romana",
+            "12:15",
+            "Ahrensburg"
+          ],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält keine der Pflicht-Fakten ('Villa Romana', '12:15', 'Ahrensburg'), die zur Bestätigung des Treffpunkts mit Marius erforderlich sind. Stattdessen gibt die Antwort an, dass keine Einträge über einen Treffpunkt in den verfügbaren Daten vorhanden sind. Deshalb ist die Antwort inhaltlich nicht korrekt.",
+          "latency_ms": 10773
+        },
+        {
+          "test_id": "q_20260311_151849_8bf1fb",
+          "query": "Wo war ich mit Nora im letzten August?",
+          "answer": "Du warst im August 2025 mit Nora in den folgenden Orten:\n\n- **München-Ost** [[1]]\n- **Hamburg-Zentrum** [[2]]\n- **Planegg** [[3]]\n- **Ahrensburg** [[4]]\n- **München-FernOst (Bruck)** [[5]]\n- **München-Zentrum** [[6]]\n\nDie Fotos zeigen, dass ihr an verschiedenen Daten in München und Hamburg unterwegs wart. Es scheint, dass ihr hauptsächlich in München Zeit verbracht habt, aber auch einen Aufenthalt in Ahrensburg hattet.",
+          "golden": "Im letzten August warst du mit Nora in München (München-Ost, München-FernOst/Bruck, München-Zentrum, Planegg), in Hamburg und in Ahrensburg.",
+          "verdict": "PASS",
+          "score": 0.95,
+          "embedding_sim": 0.7956,
+          "missing_facts": [],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält alle wichtigen Fakten: Sie nennt München (mit den Unterbereichen München-Ost, München-FernOst/Bruck, München-Zentrum, Planegg) und Ahrensburg, was den Pflicht-Fakten entspricht. Die Antwort ist inhaltlich korrekt und vollständig.",
+          "latency_ms": 5572
+        },
+        {
+          "test_id": "q_20260311_151907_f749db",
+          "query": "Wo war ich mit Nora im letzten Sommer?",
+          "answer": "Du warst im letzten Sommer (2025) mit Nora an folgenden Orten:\n\n- **München (Ost)** [[2]]\n- **Ahrensburg** [[3]]\n- **München (Planegg)** [[4]]\n- **Hamburg (Zentrum)** [[5]]\n- **München (Bruck)** [[6]]\n- **Stepenitztal (Wismar)** [[7]]\n\nDiese Orte wurden aus den Fotos und deren Metadaten extrahiert, die Nora und dich in der Zeit zwischen Juni und August 2025 zeigen.",
+          "golden": "Im letzten Sommer warst du mit Nora in München (München-Ost, München-FernOst/Bruck, München-Zentrum, Planegg), in Hamburg, in Ahrensburg und in Stepenitztal (Wismar).",
+          "verdict": "PASS",
+          "score": 0.95,
+          "embedding_sim": 0.5744,
+          "missing_facts": [],
+          "wrong_facts": [],
+          "reasoning": "Die generierte Antwort enthält alle Pflicht-Fakten: München, Ahrensburg und Stepenitztal, die im letzten Sommer besucht wurden. Es gibt leichte Abweichungen in der Formulierung und Ortsangaben, aber diese sind irrelevant, da die exakte Formulierung nicht entscheidend ist. Die Orte München-Ost, München-Planegg und München-Bruck decken sich mit den angegebenen Orten in München, was die Richtigkeit sicherstellt. Daher erfüllt die Antwort die Anforderungen.",
+          "latency_ms": 5501
+        }
+      ]
+    },
+    {
+      "model": "gemini:gemini-2.0-flash",
+      "tested": 3,
+      "pass": 0,
+      "partial": 0,
+      "fail": 3,
+      "pass_rate": 0.0,
+      "partial_rate": 0.0,
+      "fail_rate": 1.0,
+      "overall_score": 0.0,
+      "avg_latency_ms": 519,
+      "details": [
+        {
+          "test_id": "q_20260311_150705_0170df",
+          "query": "Wo treffe ich mich heute mit Marius?",
+          "verdict": "ERROR",
+          "score": 0.0,
+          "latency_ms": 1162,
+          "error": "404 This model models/gemini-2.0-flash is no longer available to new users. Please update your code to use a newer model for the latest features and improvements."
+        },
+        {
+          "test_id": "q_20260311_151849_8bf1fb",
+          "query": "Wo war ich mit Nora im letzten August?",
+          "verdict": "ERROR",
+          "score": 0.0,
+          "latency_ms": 190,
+          "error": "404 This model models/gemini-2.0-flash is no longer available to new users. Please update your code to use a newer model for the latest features and improvements."
+        },
+        {
+          "test_id": "q_20260311_151907_f749db",
+          "query": "Wo war ich mit Nora im letzten Sommer?",
+          "verdict": "ERROR",
+          "score": 0.0,
+          "latency_ms": 206,
+          "error": "404 This model models/gemini-2.0-flash is no longer available to new users. Please update your code to use a newer model for the latest features and improvements."
+        }
+      ]
+    }
+  ]
+}

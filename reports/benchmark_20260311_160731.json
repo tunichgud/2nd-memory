@@ -1,0 +1,54 @@
+{
+  "timestamp": "20260311_160731",
+  "test_cases": 1,
+  "models": 1,
+  "winner": "config-default",
+  "summaries": [
+    {
+      "model": "config-default",
+      "tested": 1,
+      "pass": 0,
+      "partial": 0,
+      "fail": 1,
+      "pass_rate": 0.0,
+      "partial_rate": 0.0,
+      "fail_rate": 1.0,
+      "overall_score": 0.0,
+      "avg_latency_ms": 12038
+    }
+  ],
+  "full_results": [
+    {
+      "model": "config-default",
+      "tested": 1,
+      "pass": 0,
+      "partial": 0,
+      "fail": 1,
+      "pass_rate": 0.0,
+      "partial_rate": 0.0,
+      "fail_rate": 1.0,
+      "overall_score": 0.0,
+      "avg_latency_ms": 12038,
+      "details": [
+        {
+          "test_id": "q_20260311_151907_f749db",
+          "query": "Wo war ich mit Nora im letzten Sommer?",
+          "answer": "Um den Ort zu ermitteln, an dem du im letzten Sommer mit Nora warst, suche ich nach Fotos, die Nora und das Datum der letzten Sommermonate (Juni bis August 2025) enthalten.\n\n**Schritt 1:** Suche nach Fotos mit Nora im Zeitraum Juni bis August 2025.\n\n**Beobachtungen aus der Datenbank:**\n\n- **[3 – Foto | 32%]**: 06.06.2025, Ort: Hamburg-Heim, GPS: 53.664°N, 10.234°E, Personen: Nora\n- **[2 – Foto | 34%]**: 29.08.2025, Ort: München-Ost, GPS: 48.140°N, 11.555°E, Personen: Nora, Sarah\n- **[4 – Foto | 32%]**: 31.08.2025, Ort: München, GPS: 48.106°N, 11.417°E, Personen: Nora\n- **[5 – Foto | 32%]**: 29.08.2025, Ort: Hamburg-Zentrum, GPS: 53.644°N, 10.188°E, Personen: Nora\n- **[6 – Foto | 31%]**: 30.08.2025, Ort: München-FernOst, GPS: 48.056°N, 11.924°E, Personen: Nora, Sarah\n\n**Schlussfolgerung:** Im letzten Sommer hattest du mehrere Aufenthalte mit Nora in München und Hamburg. Du warst mit Nora in **München** (verschiedene Orte, wie München-Ost und München-FernOst) und in **Hamburg** (Hamburg-Heim und Hamburg-Zentrum).\n\n**Antwort:** Du warst im letzten Sommer mit Nora in **München** und **Hamburg**. In München hast du mit Nora unter anderem im Bereich **München-Ost** und **München-FernOst** verbracht, in Hamburg im **Hamburg-Heim** und **Hamburg-Zentrum** [[2], [3], [4], [5], [6]].",
+          "golden": "Im letzten Sommer warst du mit Nora in München, in Ahrensburg und in Stepenitztal (Wismar).",
+          "verdict": "FAIL",
+          "score": 0.0,
+          "embedding_sim": 0.6109,
+          "missing_facts": [
+            "Ahrensburg",
+            "Stepenitztal"
+          ],
+          "wrong_facts": [
+            "Hamburg"
+          ],
+          "reasoning": "Die generierte Antwort nennt die Orte München und Hamburg, aber nicht die in der Referenzantwort geforderten Orte Ahrensburg und Stepenitztal. Stattdessen wird Hamburg erwähnt, das in der Referenzantwort nicht vorkommt.",
+          "latency_ms": 12038
+        }
+      ]
+    }
+  ]
+}

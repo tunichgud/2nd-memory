@@ -120,6 +120,7 @@ from backend.api.v1.webhook     import router as v1_webhook_router
 from backend.api.v1.validation  import router as v1_validation_router
 from backend.api.v1.whatsapp    import router as v1_whatsapp_router
 from backend.api.v1.query_logs  import router as v1_query_logs_router
+from backend.api.v1.stt         import router as v1_stt_router
 
 app.include_router(v1_users_router)
 app.include_router(v1_sync_router)
@@ -133,6 +134,7 @@ app.include_router(v1_webhook_router)
 app.include_router(v1_validation_router)
 app.include_router(v1_whatsapp_router)
 app.include_router(v1_query_logs_router)
+app.include_router(v1_stt_router)
 
 # ---------------------------------------------------------------------------
 # Frontend (statische Dateien)
