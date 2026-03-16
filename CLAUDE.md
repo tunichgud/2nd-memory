@@ -27,7 +27,6 @@ A:
 - `backend/api/v1/` — REST Endpoints (webhook, entities, media, validation)
 - `backend/rag/` — RAG Pipeline (retriever_v2.py, store.py)
 - `backend/ingestion/` — Import-Logik (photos.py, google_maps.py)
-- `backend/auth/` — OAuth + lokale Auth
 - `backend/llm/` — LLM Provider-Abstraktion
 
 **Q: Welche ChromaDB-Collections gibt es?**
@@ -152,7 +151,6 @@ A: `data/photos/` (Originale), `data/thumbnails/` (300px), ChromaDB unter `chrom
 |-------|--------|
 | `INSTALL.md` | Installation & Setup |
 | `SETUP.md` | Erste Schritte |
-| `AUTH_README.md` | OAuth & Authentifizierung |
 | `DOCKER_README.md` | Docker-Setup |
 | `docs/ARCHITECTURE_DECISIONS.md` | Architekturentscheidungen |
 | `docs/STREAMING_ARCHITECTURE.md` | Streaming-Implementierung |

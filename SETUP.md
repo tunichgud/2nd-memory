@@ -8,11 +8,10 @@ Vollständige Installations- und Konfigurationsanleitung für memosaur.
 
 1. [Systemvoraussetzungen](#systemvoraussetzungen)
 2. [Installation](#installation)
-3. [OAuth-Konfiguration (Google Sign-In)](#oauth-konfiguration-google-sign-in)
-4. [Umgebungsvariablen](#umgebungsvariablen)
-5. [Services starten](#services-starten)
-6. [Erste Schritte](#erste-schritte)
-7. [Troubleshooting](#troubleshooting)
+3. [Umgebungsvariablen](#umgebungsvariablen)
+4. [Services starten](#services-starten)
+5. [Erste Schritte](#erste-schritte)
+6. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -86,78 +85,6 @@ curl http://localhost:9200
 
 ---
 
-## OAuth-Konfiguration (Google Sign-In)
-
-memosaur verwendet **Google OAuth 2.0** für die Authentifizierung. Ohne diese Konfiguration erhalten User beim Login den Fehler:
-
-```
-Fehler 401: invalid_client
-```
-
-### Schritt 1: Google Cloud Console öffnen
-
-1. Gehe zu: https://console.cloud.google.com
-2. **Neues Projekt erstellen** (oder bestehendes wählen):
-   - Name: `memosaur` (oder beliebig)
-   - Projekt-ID wird automatisch generiert
-
-### Schritt 2: OAuth Consent Screen konfigurieren
-
-1. **APIs & Services** → **OAuth consent screen**
-2. **User Type**: `Internal` (nur für Google Workspace) oder `External`
-3. **App-Informationen**:
-   - App name: `memosaur`
-   - User support email: Deine E-Mail
-   - Developer contact: Deine E-Mail
-4. **Scopes**: Standard (keine zusätzlichen Scopes nötig)
-5. **Test users** (bei External): Deine E-Mail hinzufügen
-6. **Speichern**
-
-### Schritt 3: OAuth 2.0 Credentials erstellen
-
-1. **APIs & Services** → **Credentials** → **+ CREATE CREDENTIALS**
-2. Wähle: **OAuth client ID**
-3. **Application type**: `Web application`
-4. **Name**: `memosaur-oauth`
-5. **Authorized JavaScript origins**:
-   ```
-   http://localhost:8000
-   http://127.0.0.1:8000
-   ```
-
-   **Für Production** (falls deployed):
-   ```
-   https://yourdomain.com
-   ```
-
-6. **Authorized redirect URIs**:
-   ```
-   http://localhost:8000/api/auth/google/callback
-   ```
-
-   **Für Production**:
-   ```
-   https://yourdomain.com/api/auth/google/callback
-   ```
-
-7. **CREATE** klicken
-
-### Schritt 4: Client ID & Secret kopieren
-
-Nach der Erstellung wird ein Popup angezeigt:
-
-```
-Your Client ID
-123456789-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com
-
-Your Client Secret
-GOCSPX-xyz123abc456def789
-```
-
-**⚠️ WICHTIG**: Client Secret sicher aufbewahren! Er wird nur einmal angezeigt.
-
----
-
 ## Umgebungsvariablen
 
 ### Option A: `.env` Datei (Empfohlen)
@@ -166,14 +93,6 @@ Erstelle eine `.env` Datei im Projekt-Root:
 
 ```bash
 # /home/bacher/prj/mabrains/memosaur/.env
-
-# === Google OAuth (PFLICHT für Login) ===
-GOOGLE_CLIENT_ID="123456789-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET="GOCSPX-xyz123abc456def789"
-OAUTH_REDIRECT_URI="http://localhost:8000/api/auth/google/callback"
-
-# === Frontend URL ===
-FRONTEND_URL="http://localhost:8000"
 
 # === CORS Origins (Optional, für Development) ===
 CORS_ORIGINS="http://localhost:8000,http://127.0.0.1:8000"
@@ -189,16 +108,6 @@ CORS_ORIGINS="http://localhost:8000,http://127.0.0.1:8000"
 ```
 
 **⚠️ SECURITY**: `.env` sollte in `.gitignore` stehen (ist bereits konfiguriert)!
-
-### Option B: Export in Shell (Temporär)
-
-```bash
-export GOOGLE_CLIENT_ID="123456789-abc...apps.googleusercontent.com"
-export GOOGLE_CLIENT_SECRET="GOCSPX-xyz123..."
-export OAUTH_REDIRECT_URI="http://localhost:8000/api/auth/google/callback"
-```
-
-**Nachteil**: Muss bei jedem Terminal-Neustart wiederholt werden.
 
 ---
 
@@ -225,9 +134,6 @@ INFO:     Application startup complete.
 ```bash
 curl http://localhost:8000/health
 # {"status":"ok","app":"memosaur","version":"2.0.0"}
-
-curl http://localhost:8000/api/auth/config
-# {"google_client_id":"123456...","oauth_configured":true,"passkey_enabled":false}
 ```
 
 ### 2. WhatsApp Service starten (Node.js)
@@ -253,14 +159,9 @@ WhatsApp-Brücke ist online!
 
 ## Erste Schritte
 
-### 1. Login testen
+### 1. Browser öffnen
 
-1. Browser öffnen: http://localhost:8000
-2. Du wirst zu `/login.html` redirected
-3. Klick auf **"Mit Google anmelden"**
-4. Google OAuth-Popup öffnet sich
-5. Wähle deinen Google-Account
-6. Nach erfolgreichem Login: Redirect zu `/` (Hauptseite)
+Browser öffnen: http://localhost:8000 — die App startet direkt.
 
 ### 2. Daten importieren
 
@@ -294,34 +195,6 @@ Nach dem Import kannst du natürliche Fragen stellen:
 ---
 
 ## Troubleshooting
-
-### Problem: `Fehler 401: invalid_client` beim Login
-
-**Ursache**: Google OAuth Credentials nicht konfiguriert oder falsch.
-
-**Lösung**:
-1. Prüfe `.env` Datei: `GOOGLE_CLIENT_ID` und `GOOGLE_CLIENT_SECRET` gesetzt?
-2. Prüfe Backend-Log beim Start:
-   ```bash
-   curl http://localhost:8000/api/auth/config
-   # Sollte zeigen: "oauth_configured": true
-   ```
-3. Prüfe Google Cloud Console:
-   - Authorized JavaScript origins korrekt? (`http://localhost:8000`)
-   - Authorized redirect URIs korrekt? (`http://localhost:8000/api/auth/google/callback`)
-4. Backend neu starten (lädt `.env` beim Start)
-
----
-
-### Problem: `GET /login.html` → 404 Not Found
-
-**Ursache**: Backend-Route fehlt (sollte in v2 behoben sein).
-
-**Lösung**:
-- Prüfe `backend/main.py` Zeile ~139: Route `/login.html` existiert?
-- Backend neu starten mit `--reload`
-
----
 
 ### Problem: Backend startet nicht - `no such table: schema_migrations`
 
@@ -397,7 +270,7 @@ tail -f logs/backend.log
 **Wichtige Log-Meldungen:**
 - ✅ `Application startup complete` → Backend läuft
 - ✅ `Elasticsearch erreichbar` → RAG-Suche funktioniert
-- ✅ `Migration 002 erfolgreich angewendet` → Datenbank OK
+- ✅ `Migration erfolgreich angewendet` → Datenbank OK
 - ❌ `ERROR` → Fehler im Log analysieren
 
 ### WhatsApp-Logs
@@ -426,32 +299,15 @@ tail -f logs/whatsapp.log
 ### ⚠️ Für Development (localhost)
 
 - HTTP ist OK für `localhost`
-- OAuth redirect URIs: `http://localhost:8000/...`
 
 ### 🔒 Für Production (deployed)
 
-1. **HTTPS ist PFLICHT**:
-   ```
-   FRONTEND_URL="https://yourdomain.com"
-   OAUTH_REDIRECT_URI="https://yourdomain.com/api/auth/google/callback"
-   ```
-
-2. **Google Cloud Console**:
-   - Authorized origins: `https://yourdomain.com`
-   - Redirect URIs: `https://yourdomain.com/api/auth/google/callback`
-
-3. **Cookies auf `secure` setzen**:
-   - In `backend/auth/oauth.py` Zeile ~185:
-     ```python
-     secure=True,  # HTTPS erforderlich
-     ```
-
-4. **CORS einschränken**:
+1. **CORS einschränken**:
    ```bash
    CORS_ORIGINS="https://yourdomain.com"
    ```
 
-5. **Secrets schützen**:
+2. **Secrets schützen**:
    - `.env` niemals in Git committen
    - Environment Variables auf Server (z.B. systemd, Docker Compose)
 

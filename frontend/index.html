@@ -736,13 +736,10 @@
       </div>
     </div>
 
-    <!-- User-Info & Logout -->
+    <!-- User-Info -->
     <div class="bg-gray-900 rounded-xl border border-gray-800 p-5">
       <h2 class="font-semibold mb-3">ℹ️ Benutzer-Information</h2>
       <div id="user-info" class="text-sm text-gray-400 mb-4">Lädt…</div>
-      <button onclick="logout()" class="bg-red-700 hover:bg-red-600 text-sm px-4 py-2 rounded-lg transition-all">
-        🚪 Abmelden
-      </button>
     </div>
 
     <!-- WhatsApp Integration -->
@@ -954,41 +951,11 @@
   <script src="/static/entities.js"></script>
   <script src="/static/validation.js"></script>
   <script>
-    // Aktueller User (wird nach Auth-Check gesetzt)
-    window._userId = null;
-
-    // Auth-Check: Prüft ob User eingeloggt ist
-    async function checkAuth() {
-      try {
-        const res = await fetch('/api/auth/status');
-        const data = await res.json();
-
-        if (!data.authenticated) {
-          // Nicht eingeloggt → Redirect zu Login
-          console.log('[Auth] Nicht eingeloggt, redirecte zu /login.html');
-          window.location.href = '/login.html';
-          return false;
-        }
-
-        // User-ID setzen
-        window._userId = data.user.id;
-        console.log('[Auth] Eingeloggt als:', data.user.display_name);
-        return true;
-
-      } catch (err) {
-        console.error('[Auth] Status-Check fehlgeschlagen:', err);
-        // Bei Fehler: Redirect zu Login (sicherer Fallback)
-        window.location.href = '/login.html';
-        return false;
-      }
-    }
+    // Default-User (Single-User Modus)
+    window._userId = '00000000-0000-0000-0000-000000000001';
 
     // App-Initialisierung
-    async function initApp() {
-      // WICHTIG: Erst Auth-Check, dann Rest laden
-      const authenticated = await checkAuth();
-      if (!authenticated) return;  // Redirect läuft bereits
-
+    function initApp() {
       loadStatus();
       loadUserInfo();
     }
@@ -1109,27 +1076,6 @@
         setTimeout(() => {
           element.classList.add('hidden');
         }, 3000);
-      }
-    }
-
-    // -------------------------------------------------------------------------
-    // Logout
-    // -------------------------------------------------------------------------
-    async function logout() {
-      if (!confirm('Möchtest du dich wirklich abmelden?')) return;
-
-      try {
-        const res = await fetch('/api/auth/logout', { method: 'POST' });
-        if (res.ok) {
-          console.log('[Auth] Logout erfolgreich');
-          window.location.href = '/login.html';
-        } else {
-          console.error('[Auth] Logout fehlgeschlagen');
-          alert('Logout fehlgeschlagen');
-        }
-      } catch (err) {
-        console.error('[Auth] Logout-Fehler:', err);
-        alert('Verbindungsfehler');
       }
     }
 

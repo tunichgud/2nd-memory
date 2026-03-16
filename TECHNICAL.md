@@ -33,12 +33,12 @@
 ┌──────────────────────────────────────────────────────────────────┐
 │              FastAPI Backend – /api/v0/ + /api/v1/               │
 │                                                                    │
-│  /v1/query  /v1/ingest  /v1/sync  /v1/consent  /v1/entities    │
+│  /v1/query  /v1/ingest  /v1/sync  /v1/entities                 │
 │                                                                    │
 │  ┌──────────────┐   ┌──────────────────┐   ┌──────────────────┐  │
 │  │   ChromaDB   │   │  SQLite          │   │  Ollama          │  │
 │  │   / ES       │   │  users           │   │  qwen3:8b Chat   │  │
-│  │              │   │  consents        │   │  gemma3:12b      │  │
+│  │              │   │                  │   │  gemma3:12b      │  │
 │  │  user-scoped │   │  sync_blobs      │   │  Vision          │  │
 │  └──────────────┘   └──────────────────┘   └──────────────────┘  │
 └──────────────────────────────────────────────────────────────────┘
@@ -46,7 +46,7 @@
 
 Zwei API-Generationen laufen parallel:
 - **v0** (`/api/*`): Original-API mit Klarnamen, bleibt für Rückwärtskompatibilität erhalten.
-- **v1** (`/api/v1/*`): Aktuelle API (user-scoped, DSGVO-konform).
+- **v1** (`/api/v1/*`): Aktuelle API (user-scoped).
 
 ---
 
@@ -140,11 +140,6 @@ Der Privacy-Aspekt wird dadurch gewahrt, dass die gesamte Anwendung (Backend + D
 -- Nutzer (Basis für Multi-User)
 users (id TEXT PK, display_name TEXT, created_at INT, is_active INT)
 
--- DSGVO-Einwilligungen Art. 9
--- scope: 'biometric_photos' | 'gps' | 'messages'
-consents (user_id TEXT FK, scope TEXT, granted INT,
-          granted_at INT, ip_hint TEXT, PRIMARY KEY(user_id, scope))
-
 -- Verschlüsselte Sync-Blobs
 sync_blobs (id INT PK AUTOINCREMENT, user_id TEXT FK,
             device_hint TEXT, blob BLOB, iv TEXT,
@@ -154,7 +149,6 @@ sync_blobs (id INT PK AUTOINCREMENT, user_id TEXT FK,
 **Default-User** wird beim ersten Start automatisch angelegt:
 - `id`: `00000000-0000-0000-0000-000000000001`
 - `display_name`: `ManfredMustermann`
-- Alle Consents initial auf `false`
 
 ### ChromaDB Collections (v2-Schema)
 
@@ -259,20 +253,17 @@ retrieve_v2(query, user_id, ...)
 
 Die Suche erfolgt quellenübergreifend. Der Agent entscheidet, welche Tools (`search_photos`, `search_messages`, etc.) mit welchen Parametern (Personennamen, Orte, Zeiträume) aufgerufen werden.
 
-### `backend/api/v1/ingest.py` – Consent-Gate
+### `backend/api/v1/ingest.py`
 
 Foto-Ingestion ist zweistufig:
 
 ```
 Schritt 1: POST /api/v1/ingest/photos/describe
-  → Consent "biometric_photos" prüfen
   → Ollama Vision → Bildbeschreibung generieren
 
 Schritt 2: POST /api/v1/ingest/photos/submit
   → Metadaten und Beschreibung werden in ChromaDB gespeichert
 ```
-
-Nachrichten-Ingestion prüft Consent `"messages"` vor dem Upload.
 
 ### `backend/api/v1/entities.py`
 
@@ -335,19 +326,17 @@ POST /api/query
 | `GET` | `/api/locations` | GPS-Punkte für Karte |
 | `GET` | `/api/media/{filename}` | Bild-Thumbnail |
 
-### v1 (Current – user-scoped, GDPR compliant)
+### v1 (Current – user-scoped)
 
-#### User & Consent
+#### User
 
 | Methode | Pfad | Beschreibung |
 |---|---|---|
 | `GET` | `/api/v1/users` | Alle Nutzer auflisten |
 | `POST` | `/api/v1/users` | Neuen Nutzer anlegen |
 | `GET` | `/api/v1/users/{user_id}` | Nutzer-Details |
-| `GET` | `/api/v1/consent/{user_id}` | Consent-Status lesen |
-| `POST` | `/api/v1/consent/{user_id}` | Consent setzen (Audit-Trail) |
 
-#### Ingestion (mit Consent-Gate)
+#### Ingestion
 
 | Methode | Pfad | Beschreibung |
 |---|---|---|
@@ -434,7 +423,7 @@ server:
 | `fastapi` | ≥0.111 | Web-Framework |
 | `uvicorn[standard]` | ≥0.29 | ASGI-Server |
 | `python-multipart` | ≥0.0.9 | Datei-Uploads |
-| `aiosqlite` | ≥0.19 | Async SQLite (User, Consent, Sync) |
+| `aiosqlite` | ≥0.19 | Async SQLite (User, Sync) |
 | `chromadb` | ≥0.5 | Vektordatenbank |
 | `sentence-transformers` | ≥3.0 | Lokale Embeddings (multilingual) |
 | `ollama` | ≥0.2 | Ollama Python-Client |

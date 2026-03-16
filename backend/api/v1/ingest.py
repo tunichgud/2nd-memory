@@ -3,8 +3,6 @@ ingest.py – /api/v1/ingest/*
 
 Token-aware Ingestion. Texte (Nachrichten, Bildbeschreibungen) kommen
 bereits maskiert vom Browser. GPS und Datums-Metadaten bleiben unverändert.
-
-Consent-Gate: Fotos/GPS nur mit expliziter Nutzereinwilligung.
 """
 from __future__ import annotations
 
@@ -25,19 +23,6 @@ router = APIRouter(prefix="/api/v1/ingest", tags=["v1/ingest"])
 
 
 # ---------------------------------------------------------------------------
-# Hilfs: Consent prüfen
-# ---------------------------------------------------------------------------
-
-async def _check_consent(db: aiosqlite.Connection, user_id: str, scope: str) -> bool:
-    cursor = await db.execute(
-        "SELECT granted FROM consents WHERE user_id = ? AND scope = ?",
-        (user_id, scope),
-    )
-    row = await cursor.fetchone()
-    return bool(row and row["granted"])
-
-
-# ---------------------------------------------------------------------------
 # Status
 # ---------------------------------------------------------------------------
 
@@ -52,7 +37,7 @@ async def get_status_v1(user_id: str, db: aiosqlite.Connection = Depends(get_db)
 
 
 # ---------------------------------------------------------------------------
-# Fotos – mit Consent-Gate für Biometrie + GPS
+# Fotos
 # ---------------------------------------------------------------------------
 
 class PhotoIngestRequest(BaseModel):
@@ -94,14 +79,6 @@ async def describe_photo_v1(
     Server gibt die KI-Bildbeschreibung (Klartext) zurück.
     Das Frontend maskiert sie und ruft dann /photos/submit auf.
     """
-    # Consent: Biometrie-Verarbeitung
-    if not await _check_consent(db, req.user_id, "biometric_photos"):
-        raise HTTPException(
-            status_code=403,
-            detail="Keine Einwilligung zur Bildverarbeitung (Art. 9 DSGVO). "
-                   "Bitte Einwilligung im Einstellungen-Dialog erteilen.",
-        )
-
     from backend.ingestion.photos import _find_photo_in_dir, _find_photo_in_zips
     from backend.llm.connector import describe_image, get_cfg
     import yaml
@@ -136,11 +113,6 @@ async def submit_photo_v1(
     """
     Schritt 2: Speichert das Foto mit bereits maskierter Beschreibung in ChromaDB.
     """
-    # Consent prüfen
-    if req.lat != 0.0 or req.lon != 0.0:
-        if not await _check_consent(db, req.user_id, "gps"):
-            raise HTTPException(status_code=403, detail="Keine Einwilligung zur GPS-Verarbeitung.")
-
     from backend.rag.store_v2 import upsert_documents_v2
     from backend.rag.embedder import embed_single
 
@@ -234,7 +206,7 @@ async def ingest_saved_v1(user_id: str, reset: bool = False, db: aiosqlite.Conne
 
 
 # ---------------------------------------------------------------------------
-# Nachrichten – Consent + bereits maskierter Text
+# Nachrichten – bereits maskierter Text
 # ---------------------------------------------------------------------------
 
 @router.post("/messages")
@@ -250,13 +222,6 @@ async def ingest_messages_v1(
     Nimmt bereits maskierten Text entgegen.
     Das Frontend hat NER ausgeführt und Klarnamen durch Tokens ersetzt.
     """
-    if not await _check_consent(db, user_id, "messages"):
-        raise HTTPException(
-            status_code=403,
-            detail="Keine Einwilligung zur Nachrichtenverarbeitung. "
-                   "Bitte Einwilligung erteilen.",
-        )
-
     content = await file.read()
     suffix = ".json" if source_type == "signal" else ".txt"
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:

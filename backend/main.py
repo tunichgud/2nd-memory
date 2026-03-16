@@ -2,7 +2,7 @@
 main.py – FastAPI Hauptanwendung für memosaur.
 
 v0-Endpunkte (/api/*) bleiben erhalten (Rückwärtskompatibilität).
-v1-Endpunkte (/api/v1/*) sind token-aware und user-scoped.
+v1-Endpunkte (/api/v1/*) sind user-scoped.
 
 Start: python -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
 """
@@ -23,7 +23,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 # ⚠️  WICHTIG: .env laden BEVOR andere Module importiert werden!
-# Sonst sind ENV-Variablen in oauth.py, connector.py etc. nicht verfügbar
+# Sonst sind ENV-Variablen in connector.py etc. nicht verfügbar
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(dotenv_path=BASE_DIR / ".env")
 
@@ -61,7 +61,7 @@ if "*" in ALLOWED_ORIGINS:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=True,  # Für JWT Cookies (Phase 2)
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -93,16 +93,6 @@ app.include_router(ingest_router)
 app.include_router(query_router)
 app.include_router(map_router)
 app.include_router(media_router)
-
-# ---------------------------------------------------------------------------
-# Auth-Router
-# ---------------------------------------------------------------------------
-
-from backend.auth.oauth import router as oauth_router
-from backend.auth.local import router as local_router
-
-app.include_router(oauth_router)
-app.include_router(local_router)
 
 # ---------------------------------------------------------------------------
 # v1-Router (token-aware, user-scoped)
@@ -147,11 +137,6 @@ if FRONTEND_DIR.exists():
     @app.get("/")
     async def serve_frontend() -> FileResponse:
         return FileResponse(str(FRONTEND_DIR / "index.html"))
-
-    @app.get("/login.html")
-    async def serve_login() -> FileResponse:
-        """Serve login page for OAuth authentication."""
-        return FileResponse(str(FRONTEND_DIR / "login.html"))
 
 # Logs-Verzeichnis für WhatsApp-Logs
 LOGS_DIR = BASE_DIR / "logs"

@@ -2,7 +2,7 @@
 
 **Privacy-First Persönliches Gedächtnis-System** – vereint Fotos, Nachrichten und Geodaten zu einer durchsuchbaren Wissensbasis, die du per natürlicher Sprache abfragen kannst. Alle persönlichen Daten werden lokal verarbeitet und verbleiben in deiner eigenen Infrastruktur.
 
-> **🚀 Neu hier?** Starte mit der [SETUP.md](SETUP.md) für eine vollständige Installations- und Konfigurationsanleitung inkl. Google OAuth.
+> **🚀 Neu hier?** Starte mit der [SETUP.md](SETUP.md) für eine vollständige Installations- und Konfigurationsanleitung.
 
 ---
 
@@ -45,13 +45,6 @@ memosaur ist eine lokal laufende KI-Anwendung, die deine persönlichen Daten aus
 - **Quellenübergreifend**: Eine Frage wird gleichzeitig gegen Fotos, Nachrichten, Bewertungen und gespeicherte Orte gesucht.
 - **Adaptive Agenten**: Ein KI-Agent plant die Suche (z.B. erst Ort finden, dann Nachrichten aus dem Zeitraum laden).
 
-### DSGVO-Einwilligungen (Art. 9)
-- Beim ersten Start erscheint ein Consent-Dialog.
-- **Fotos & KI**: Opt-in erforderlich (Bilder werden lokal analysiert, Beschreibungen im Browser verarbeitet).
-- **GPS-Daten**: Separates Opt-in (Koordinaten gehen an Nominatim/OpenStreetMap für Reverse Geocoding).
-- **Nachrichten**: Separates Opt-in (Texte werden lokal indexiert).
-- Ohne Einwilligung sind die jeweiligen Features deaktiviert.
-
 ### Quellen-Transparenz
 - Jede Antwort zeigt die verwendeten Quellen direkt:
   - **Fotos**: Thumbnail, Datum, Ort, Personen, erste Zeilen der KI-Beschreibung – klickbar für Vollbild (Lightbox)
@@ -71,7 +64,7 @@ memosaur ist eine lokal laufende KI-Anwendung, die deine persönlichen Daten aus
 - Filter nach Quelle und Zeitraum
 
 ### Multi-User vorbereitet
-- SQLite-Datenbank mit User-Tabelle, Consent-Audit-Trail und Sync-Blob-Versionierung
+- SQLite-Datenbank mit User-Tabelle und Sync-Blob-Versionierung
 - Alle Dokumente sind mit `user_id` versehen
 - Aktuell: ein Default-User `ManfredMustermann`, weitere können per API angelegt werden
 
@@ -118,7 +111,7 @@ cp config.yaml.example config.yaml
 open http://localhost:8000
 ```
 
-**📖 Detaillierte Anleitung**: [SETUP.md](SETUP.md) (Installation, OAuth-Konfiguration, Troubleshooting)
+**📖 Detaillierte Anleitung**: [SETUP.md](SETUP.md) (Installation, Troubleshooting)
 
 ---
 
@@ -147,7 +140,7 @@ open http://localhost:8000
 | Vektordatenbank | ChromaDB / Elasticsearch (lokal, persistent) |
 | Embeddings | sentence-transformers (lokal, multilingual) |
 | LLM | Ollama (`qwen3:8b` Chat, `gemma3:12b` Vision) |
-| Relationale DB | SQLite via aiosqlite (User, Consent, Sync) |
+| Relationale DB | SQLite via aiosqlite (User, Sync) |
 | Karten | Leaflet.js / OpenStreetMap |
 | Entity-Speicher | IndexedDB (Browser-lokal) |
 | Verschlüsselung | Web Crypto API (AES-256-GCM, PBKDF2) |

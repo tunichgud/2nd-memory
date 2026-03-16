@@ -211,17 +211,6 @@ Beim ersten Besuch läuft folgende Sequenz automatisch ab:
 ### 1. Initialisierung
 Die App lädt notwendige Komponenten aus der lokalen Datenbank.
 
-### 2. DSGVO-Einwilligungsdialog
-Beim allerersten Start erscheint ein Dialog für die Einwilligungen nach Art. 9 DSGVO:
-
-| Feature | Was wird verarbeitet |
-|---|---|
-| **Fotos & KI-Bilderkennung** | Bilder werden an Ollama (lokal) gesendet für die Analyse (GPS, Personen, Beschreibungen). |
-| **GPS-Standortdaten** | GPS-Koordinaten gehen an OpenStreetMap/Nominatim für Reverse Geocoding. |
-| **Nachrichten** | Chat-Texte werden lokal indexiert, um sie für dich durchsuchbar zu machen. |
-
-Ohne Einwilligung sind die jeweiligen Features deaktiviert. Die Einstellung kann jederzeit im **Einstellungen-Tab** geändert werden.
-
 ---
 
 ## Schritt 8 – Daten importieren
@@ -238,7 +227,7 @@ Klick auf **"Alles einlesen"** startet den Import in drei Phasen:
 | Gespeicherte Orte (210 Einträge) | ~2 Min. | Nur Embeddings, kein LLM |
 | 50 Sample-Fotos | ~15–25 Min. | Vision-LLM + Reverse Geocoding pro Foto |
 
-> **Foto-Ingestion via v2-API (mit Consent):**
+> **Foto-Ingestion:**
 > Jedes Foto durchläuft:
 > 1. Server ruft Ollama Vision auf → generiert Bildbeschreibung.
 > 2. Geocoding-Service ermittelt den Ortsnamen aus den Koordinaten.
@@ -262,8 +251,6 @@ Wo habe ich im September Fotos gemacht?
 ---
 
 ## Messenger-Daten hinzufügen (optional)
-
-Messenger-Daten benötigen die Einwilligung **"Nachrichten"** im Consent-Dialog.
 
 ### WhatsApp
 
