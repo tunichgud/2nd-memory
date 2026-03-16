@@ -1,8 +1,10 @@
 """
 store_v2.py – ChromaDB Interface mit user_id-Unterstützung.
 
-Alle Operationen filtern implizit auf user_id, so dass Daten verschiedener
-Nutzer sauber getrennt sind (auch wenn sie in derselben Collection liegen).
+DEPRECATED: Diese Datei wird nicht mehr aktiv genutzt.
+Alle Schreib- und Leseoperationen laufen jetzt über store_es.py (Elasticsearch).
+Diese Datei bleibt vorhanden damit bestehende Tests und Imports nicht brechen.
+Neue Funktionen NICHT hier hinzufügen — store_es.py verwenden.
 """
 from __future__ import annotations
 import logging

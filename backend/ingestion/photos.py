@@ -254,17 +254,19 @@ def ingest_photos(
     """
     from backend.llm.connector import describe_image
     from backend.rag.embedder import embed_single
-    from backend.rag.store import upsert_documents, reset_collection, get_indexed_ids
+    from backend.rag.es_store import reset_es_index
 
     cfg = _load_config()
     photos_dir = BASE_DIR / cfg["paths"]["photos_dir"]
     takeout_root = BASE_DIR / "takeout"
-    
+
     # 1. Bereits indexierte IDs laden (falls kein Reset)
     indexed_ids = set()
     if not reset:
         try:
-            indexed_ids = get_indexed_ids("photos")
+            from backend.rag.es_store import get_all_documents_es
+            hits = get_all_documents_es(collection_name="photos", user_id=user_id)
+            indexed_ids = {h["id"] for h in hits}
             logger.info("Bereits %d Fotos in DB vorhanden (Skip-Modus aktiv).", len(indexed_ids))
         except Exception:
             pass
@@ -299,8 +301,8 @@ def ingest_photos(
 
     total = len(final_list)
     if reset:
-        reset_collection("photos")
-        logger.info("Photos-Collection zurückgesetzt.")
+        reset_es_index("photos")
+        logger.info("Photos-Index zurückgesetzt.")
 
     stats = {"total": total, "success": 0, "skipped": 0, "errors": 0}
     ids, documents, embeddings, metadatas = [], [], [], []
@@ -424,14 +426,5 @@ def ingest_photos(
 
 
 def _flush_to_stores(ids, documents, embeddings, metadatas, first_batch_reset):
-    from backend.rag.store import upsert_documents
-    from backend.rag.es_store import upsert_documents_es, reset_es_index
-    
-    if first_batch_reset:
-        # Falls reset=True, haben wir ChromaDB schon oben geleert, 
-        # aber ES machen wir hier paketweise (oder einmalig)
-        # reset_es_index("photos") # Eher oben einmalig
-        pass
-        
-    upsert_documents("photos", ids, documents, embeddings, metadatas)
-    upsert_documents_es("photos", ids, documents, embeddings, metadatas)
+    from backend.rag.store_es import upsert_documents_v2
+    upsert_documents_v2("photos", ids, documents, embeddings, metadatas)

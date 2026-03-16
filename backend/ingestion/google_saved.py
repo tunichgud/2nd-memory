@@ -73,9 +73,10 @@ def ingest_saved_places(
     progress_callback: Callable[[int, int, str], None] | None = None,
     reset: bool = False,
 ) -> dict:
-    """Liest alle gespeicherten Google Maps Orte und speichert sie in ChromaDB."""
+    """Liest alle gespeicherten Google Maps Orte und speichert sie in Elasticsearch."""
     from backend.rag.embedder import embed_single
-    from backend.rag.store import upsert_documents, reset_collection
+    from backend.rag.store_es import upsert_documents_v2
+    from backend.rag.es_store import reset_es_index
 
     cfg = _load_config()
     saved_path = BASE_DIR / cfg["paths"]["saved_places_file"]
@@ -90,7 +91,7 @@ def ingest_saved_places(
     logger.info("%d gespeicherte Orte gefunden.", total)
 
     if reset:
-        reset_collection("saved_places")
+        reset_es_index("saved_places")
 
     stats = {"total": total, "success": 0, "errors": 0}
     ids, documents, embeddings, metadatas = [], [], [], []
@@ -154,7 +155,7 @@ def ingest_saved_places(
         stats["success"] += 1
 
     if ids:
-        upsert_documents("saved_places", ids, documents, embeddings, metadatas)
+        upsert_documents_v2("saved_places", ids, documents, embeddings, metadatas)
 
     logger.info("Gespeicherte-Orte-Ingestion abgeschlossen: %s", stats)
     return stats

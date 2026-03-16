@@ -104,7 +104,7 @@ def ingest_whatsapp(
     reset: bool = False,
     user_id: str = "00000000-0000-0000-0000-000000000001",
 ) -> dict:
-    """Importiert einen WhatsApp-Chat in ChromaDB.
+    """Importiert einen WhatsApp-Chat in Elasticsearch.
 
     Args:
         chat_file: Pfad zur exportierten _chat.txt Datei
@@ -114,7 +114,8 @@ def ingest_whatsapp(
         user_id: ID des Benutzers
     """
     from backend.rag.embedder import embed_single
-    from backend.rag.store import upsert_documents, reset_collection
+    from backend.rag.store_es import upsert_documents_v2
+    from backend.rag.es_store import reset_es_index
 
     if not chat_file.exists():
         logger.error("WhatsApp-Export nicht gefunden: %s", chat_file)
@@ -126,7 +127,7 @@ def ingest_whatsapp(
     logger.info("%d WhatsApp-Nachrichten in '%s' gefunden.", total, name)
 
     if reset:
-        reset_collection("messages")
+        reset_es_index("messages")
 
     stats = {"total": total, "success": 0, "errors": 0}
     ids, documents, embeddings, metadatas = [], [], [], []
@@ -165,7 +166,7 @@ def ingest_whatsapp(
             logger.warning("Personen-Extraktion fehlgeschlagen: %s", exc)
             mentioned = senders
 
-        chroma_meta = {
+        meta = {
             "source": "whatsapp",
             "chat_name": name,
             "date_ts": first_ts,
@@ -180,31 +181,16 @@ def ingest_whatsapp(
         ids.append(f"wa_{name[:20]}_{chunk_idx:05d}")
         documents.append(doc_text)
         embeddings.append(embedding)
-        metadatas.append(chroma_meta)
+        metadatas.append(meta)
         stats["success"] += len(chunk)
 
         # In Batches speichern (100 Chunks = 1000 Nachrichten pro Batch)
         if len(ids) >= 100:
-            from backend.rag.store import upsert_documents
-            from backend.rag.es_store import upsert_documents_es, reset_es_index
-            
-            if reset:
-                reset_es_index("messages")
-                reset = False # Nur einmal beim ersten Batch
-                
-            upsert_documents("messages", ids, documents, embeddings, metadatas)
-            upsert_documents_es("messages", ids, documents, embeddings, metadatas)
+            upsert_documents_v2("messages", ids, documents, embeddings, metadatas)
             ids, documents, embeddings, metadatas = [], [], [], []
 
     if ids:
-        from backend.rag.store import upsert_documents
-        from backend.rag.es_store import upsert_documents_es, reset_es_index
-        
-        if reset:
-            reset_es_index("messages")
-            
-        upsert_documents("messages", ids, documents, embeddings, metadatas)
-        upsert_documents_es("messages", ids, documents, embeddings, metadatas)
+        upsert_documents_v2("messages", ids, documents, embeddings, metadatas)
 
     logger.info("WhatsApp-Ingestion abgeschlossen: %s", stats)
     return stats

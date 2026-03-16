@@ -55,7 +55,7 @@ async def whatsapp_webhook(
         # 1. Nachricht in DB indexieren (Live-Ingestion)
         # Wir indexieren ALLES, um den vollen Chat-Verlauf im Gedächtnis zu haben.
         from backend.rag.embedder import embed_single
-        from backend.rag.store_v2 import upsert_documents_v2
+        from backend.rag.store_es import upsert_documents_v2
         from datetime import datetime
         import uuid
 

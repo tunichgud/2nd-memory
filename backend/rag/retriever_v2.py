@@ -11,8 +11,7 @@ import logging
 from datetime import datetime, timezone, timedelta
 
 from backend.rag.embedder import embed_single
-from backend.rag.store_v2 import query_collection_v2
-from backend.rag.store import COLLECTIONS, SEARCHABLE_COLLECTIONS
+from backend.rag.store import SEARCHABLE_COLLECTIONS
 
 logger = logging.getLogger(__name__)
 
@@ -134,146 +133,32 @@ def retrieve_v2(
         query[:60], effective_persons, effective_locations, sorted(relevant),
     )
 
-    # --- NEU: Elasticsearch Integration ---
+    # --- Elasticsearch Retrieval ---
     from backend.rag.es_store import query_es as _query_es
-    try:
-        es_results = []
-        for col_name in collections:
-            is_relevant = col_name in (relevant or [])
+    all_results: list[dict] = []
+    for col_name in relevant:
+        is_relevant = True
+        try:
             es_hits = _query_es(
                 collection_name=col_name,
                 query_vector=query_embedding,
                 user_id=user_id,
                 n_results=n_per_collection,
-                person_names=resolved_person_identifiers, # Nutze aufgelöste IDs
+                person_names=resolved_person_identifiers,
                 location_names=effective_locations,
                 date_from=date_from,
-                date_to=date_to
+                date_to=date_to,
             )
             if es_hits:
                 logger.debug("  [%s] Elasticsearch Treffer: %d", col_name, len(es_hits))
                 for h in es_hits:
                     h["is_relevant"] = is_relevant
-                es_results.extend(es_hits)
-        
-        if es_results:
-            es_results.sort(key=lambda r: (r.get("is_relevant", False), r.get("score", 0)), reverse=True)
-            logger.info("v2 ES retrieve GESAMT: %d Ergebnisse", len(es_results))
-            return es_results
-            
-    except Exception as exc:
-        logger.warning("Elasticsearch Suche fehlgeschlagen, Fallback auf ChromaDB: %s", exc)
+                all_results.extend(es_hits)
+        except Exception as exc:
+            logger.warning("  [%s] Elasticsearch Suche fehlgeschlagen: %s", col_name, exc)
 
-    # --- ALT: ChromaDB + Python Post-Filtering (Fallback) ---
-    all_results: list[dict] = []
-
-    for col_name in SEARCHABLE_COLLECTIONS:
-        is_relevant = col_name in relevant
-        threshold = min_score if is_relevant else _FALLBACK_MIN_SCORE
-
-        where = _build_token_filter(date_from, date_to)
-
-        logger.info("  [%s] relevant=%s | where=%s", col_name, is_relevant, where)
-
-        fetch_n = n_per_collection
-        if (effective_locations or effective_persons):
-            # Da ChromaDB substring checks ($contains) nicht unterstützt,
-            # holen wir einen vergrößerten semantischen Pool und filtern via Python
-            fetch_n = 50
-
-        raw = query_collection_v2(
-            collection_name=col_name,
-            query_embeddings=[query_embedding],
-            n_results=fetch_n,
-            where=where,
-            user_id=user_id,
-        )
-
-        if not raw["ids"] or not raw["ids"][0]:
-            logger.info("  [%s] → 0 Treffer (Collection leer oder Filter schlägt zu restriktiv an)", col_name)
-            continue
-
-        col_hits = []
-        for i, doc_id in enumerate(raw["ids"][0]):
-            score = 1.0 - raw["distances"][0][i]
-            col_hits.append({
-                "id": doc_id,
-                "document": raw["documents"][0][i],
-                "metadata": raw["metadatas"][0][i],
-                "score": round(score, 4),
-                "collection": col_name,
-                "is_relevant": is_relevant,
-            })
-
-        # --- Post-Filter für Personen ---
-        if effective_persons and col_name in ("photos", "messages"):
-            pers_lower = [n.lower() for n in resolved_person_identifiers] # Nutze aufgelöste IDs
-            filtered_by_person = []
-            for h in col_hits:
-                meta = h["metadata"]
-                search_text = (
-                    str(meta.get("persons", "")) + " " + 
-                    str(meta.get("mentioned_persons", "")) + " " + 
-                    str(meta.get("people", "")) + " " +
-                    str(meta.get("cluster_id", "")) + " " + # WICHTIG: cluster_id aus vision
-                    h["document"]
-                ).lower()
-                
-                if any(p in search_text for p in pers_lower):
-                    filtered_by_person.append(h)
-                    
-            if filtered_by_person:
-                logger.info("  [%s] person-Post-Filter: %d → %d Treffer (Identifier=%s)",
-                            col_name, len(col_hits), len(filtered_by_person), resolved_person_identifiers)
-                col_hits = filtered_by_person
-            else:
-                logger.info("  [%s] person-Post-Filter ohne Treffer (Identifier=%s) – verwerfe alle!",
-                            col_name, resolved_person_identifiers)
-                col_hits = []
-
-        # --- Post-Filter für Orte ---
-        if effective_locations and col_name in ("photos", "reviews", "saved_places"):
-            loc_lower = [n.lower() for n in effective_locations]
-            filtered_by_loc = []
-            for h in col_hits:
-                meta = h["metadata"]
-                search_text = (
-                    str(meta.get("cluster", "")) + " " + 
-                    str(meta.get("address", "")) + " " + 
-                    str(meta.get("name", "")) + " " +
-                    str(meta.get("place_name", "")) + " " +
-                    h["document"]
-                ).lower()
-                
-                if any(loc in search_text for loc in loc_lower):
-                    filtered_by_loc.append(h)
-                    
-            if filtered_by_loc:
-                logger.info("  [%s] loc-Post-Filter: %d → %d Treffer (Namen=%s)",
-                            col_name, len(col_hits), len(filtered_by_loc), location_names)
-                col_hits = filtered_by_loc
-            else:
-                logger.info("  [%s] loc-Post-Filter ohne Treffer (Namen=%s) – verwerfe alle!",
-                            col_name, location_names)
-                col_hits = []
-
-        # Kürzen auf n_per_collection, falls wir vorher fetch_n hochgesetzt haben
-        if len(col_hits) > n_per_collection:
-            col_hits = col_hits[:n_per_collection]
-
-        # Scores loggen
-        score_summary = [(h["id"][:30], h["score"]) for h in col_hits[:5]]
-        logger.info("  [%s] → %d Treffer, Top-Scores: %s (threshold=%.2f)",
-                    col_name, len(col_hits), score_summary, threshold)
-
-        if is_relevant:
-            all_results.extend(col_hits[:2])
-            all_results.extend([h for h in col_hits[2:] if h["score"] >= threshold])
-        else:
-            all_results.extend([h for h in col_hits if h["score"] >= threshold])
-
-    all_results.sort(key=lambda r: (r["is_relevant"], r["score"]), reverse=True)
-    logger.info("v2 retrieve GESAMT: %d Ergebnisse für '%s'", len(all_results), query[:40])
+    all_results.sort(key=lambda r: (r.get("is_relevant", False), r.get("score", 0)), reverse=True)
+    logger.info("v2 ES retrieve GESAMT: %d Ergebnisse für '%s'", len(all_results), query[:40])
     return all_results
 
 
@@ -512,10 +397,11 @@ def answer_v2(
         # Phase 2: Keyword-Suche wenn schluesselwoerter angegeben
         # Ergänzt Ergebnisse die per Similarity NICHT gefunden werden (z.B. Eigennamen)
         if schluesselwoerter:
-            from backend.rag.store import keyword_search
-            kw_results = keyword_search(
+            from backend.rag.store_es import keyword_search_v2
+            kw_results = keyword_search_v2(
                 collection_name="messages",
-                keywords=schluesselwoerter,
+                query=" ".join(schluesselwoerter),
+                user_id=user_id,
                 n_results=15,
                 date_from=von_datum,
                 date_to=bis_datum,
@@ -787,10 +673,11 @@ async def answer_v2_stream(
 
         # Phase 2: Keyword-Suche für Eigennamen/spezifische Begriffe
         if schluesselwoerter:
-            from backend.rag.store import keyword_search
-            kw_results = keyword_search(
+            from backend.rag.store_es import keyword_search_v2
+            kw_results = keyword_search_v2(
                 collection_name="messages",
-                keywords=schluesselwoerter,
+                query=" ".join(schluesselwoerter),
+                user_id=user_id,
                 n_results=15,
                 date_from=von_datum,
                 date_to=bis_datum,

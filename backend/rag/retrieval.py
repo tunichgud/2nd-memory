@@ -51,7 +51,7 @@ def retrieve(
         üblicherweise compress_sources(semantic, keyword_sources=keyword).
     """
     from backend.rag.retriever_v2 import retrieve_v2
-    from backend.rag.store import keyword_search
+    from backend.rag.store_es import keyword_search_v2 as keyword_search
 
     date_from: str | None = params.get("date_from")
     date_to: str | None = params.get("date_to")
@@ -98,7 +98,9 @@ def retrieve(
         existing_ids = {s["id"] for s in semantic_sources}
         kw_results = keyword_search(
             collection_name="messages",
-            keywords=keywords,
+            query=" ".join(keywords),
+            user_id=user_id,
+            n_results=20,
             date_from=date_from,
             date_to=date_to,
         )

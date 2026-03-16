@@ -1,6 +1,11 @@
 """
 store.py – ChromaDB Interface für memosaur.
 
+DEPRECATED: Ingestion und Retrieval laufen jetzt über store_es.py (Elasticsearch).
+Diese Datei wird noch für COLLECTIONS/SEARCHABLE_COLLECTIONS Konstanten und
+keyword_search (falls noch von Tests referenziert) verwendet.
+Neue Funktionen NICHT hier hinzufügen — store_es.py verwenden.
+
 Verwaltet Collections:
   - photos         : Fotos mit GPS, Personen, KI-Beschreibung
   - reviews        : Google Maps Bewertungen

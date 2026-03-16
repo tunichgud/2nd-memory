@@ -102,7 +102,7 @@ def _save_to_chromadb(
         metadata: Metadaten fuer das Dokument.
     """
     from backend.rag.embedder import embed_single
-    from backend.rag.store_v2 import upsert_documents_v2
+    from backend.rag.store_es import upsert_documents_v2
     embedding = embed_single(doc_text)
     upsert_documents_v2(
         "messages",
@@ -111,7 +111,7 @@ def _save_to_chromadb(
         [embedding],
         [metadata],
     )
-    logger.info("[STT] Transkript in ChromaDB gespeichert: %s", chroma_id)
+    logger.info("[STT] Transkript in Elasticsearch gespeichert: %s", chroma_id)
 
 
 def _save_audio_file(audio_bytes: bytes, audio_path: Path) -> None:

@@ -84,9 +84,10 @@ def ingest_reviews(
     progress_callback: Callable[[int, int, str], None] | None = None,
     reset: bool = False,
 ) -> dict:
-    """Liest alle Google Maps Bewertungen und speichert sie in ChromaDB."""
+    """Liest alle Google Maps Bewertungen und speichert sie in Elasticsearch."""
     from backend.rag.embedder import embed_single
-    from backend.rag.store import upsert_documents, reset_collection
+    from backend.rag.store_es import upsert_documents_v2
+    from backend.rag.es_store import reset_es_index
 
     cfg = _load_config()
     reviews_path = BASE_DIR / cfg["paths"]["reviews_file"]
@@ -101,7 +102,7 @@ def ingest_reviews(
     logger.info("%d Bewertungen gefunden.", total)
 
     if reset:
-        reset_collection("reviews")
+        reset_es_index("reviews")
 
     stats = {"total": total, "success": 0, "errors": 0}
     ids, documents, embeddings, metadatas = [], [], [], []
@@ -160,7 +161,7 @@ def ingest_reviews(
         stats["success"] += 1
 
     if ids:
-        upsert_documents("reviews", ids, documents, embeddings, metadatas)
+        upsert_documents_v2("reviews", ids, documents, embeddings, metadatas)
 
     logger.info("Bewertungs-Ingestion abgeschlossen: %s", stats)
     return stats

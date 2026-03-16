@@ -34,7 +34,8 @@ def ingest_signal(
         Statistiken: total, success, errors
     """
     from backend.rag.embedder import embed_single
-    from backend.rag.store import upsert_documents, reset_collection
+    from backend.rag.store_es import upsert_documents_v2
+    from backend.rag.es_store import reset_es_index
 
     # messages.json finden
     if export_path.is_dir():
@@ -56,7 +57,7 @@ def ingest_signal(
     logger.info("%d Signal-Nachrichten in %d Konversationen.", total_msgs, len(conversations))
 
     if reset:
-        reset_collection("messages")
+        reset_es_index("messages")
 
     stats = {"total": total_msgs, "success": 0, "errors": 0}
     ids, documents, embeddings, metadatas = [], [], [], []
@@ -134,7 +135,7 @@ def ingest_signal(
             processed += len(chunk)
 
     if ids:
-        upsert_documents("messages", ids, documents, embeddings, metadatas)
+        upsert_documents_v2("messages", ids, documents, embeddings, metadatas)
 
     logger.info("Signal-Ingestion abgeschlossen: %s", stats)
     return stats
