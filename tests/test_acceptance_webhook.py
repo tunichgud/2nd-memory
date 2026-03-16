@@ -122,7 +122,7 @@ def test_at_rag_041_bot_message_not_answered(client):
 
 
 def test_at_rag_041_bot_message_indexed(client, monkeypatch):
-    """AT-RAG-041: Bot-Nachricht wird trotzdem in ChromaDB indexiert."""
+    """AT-RAG-041: Bot-Nachricht wird trotzdem in ES indexiert."""
     indexed_docs = []
 
     def _capture_upsert(collection, ids, documents, embeddings, metadatas):
@@ -133,7 +133,7 @@ def test_at_rag_041_bot_message_indexed(client, monkeypatch):
         })
 
     monkeypatch.setattr(
-        "backend.rag.store_v2.upsert_documents_v2",
+        "backend.rag.store_es.upsert_documents_v2",
         _capture_upsert,
     )
 
@@ -147,7 +147,7 @@ def test_at_rag_041_bot_message_indexed(client, monkeypatch):
 
     # Muss mindestens einen Indexierungs-Aufruf gegeben haben
     assert len(indexed_docs) > 0, (
-        "Bot-Nachricht muss in ChromaDB indexiert werden"
+        "Bot-Nachricht muss in ES indexiert werden"
     )
 
 
@@ -174,7 +174,7 @@ def test_at_rag_042_outgoing_message_not_answered(client):
 
 
 def test_at_rag_042_outgoing_message_indexed(client, monkeypatch):
-    """AT-RAG-042: Ausgehende Nachricht wird trotzdem in ChromaDB indexiert."""
+    """AT-RAG-042: Ausgehende Nachricht wird trotzdem in ES indexiert."""
     indexed_docs = []
 
     def _capture_upsert(collection, ids, documents, embeddings, metadatas):
@@ -184,7 +184,7 @@ def test_at_rag_042_outgoing_message_indexed(client, monkeypatch):
         })
 
     monkeypatch.setattr(
-        "backend.rag.store_v2.upsert_documents_v2",
+        "backend.rag.store_es.upsert_documents_v2",
         _capture_upsert,
     )
 
@@ -197,5 +197,5 @@ def test_at_rag_042_outgoing_message_indexed(client, monkeypatch):
     client.post("/api/v1/webhook", json=payload)
 
     assert len(indexed_docs) > 0, (
-        "Ausgehende Nachricht muss in ChromaDB indexiert werden"
+        "Ausgehende Nachricht muss in ES indexiert werden"
     )

@@ -280,6 +280,7 @@ def log_thinking_iteration(
     challenger_output: str = "",
     decider_decision: str = "",
     decider_reasoning: str = "",
+    decider_retrieval_focus: str | None = None,
     retrieval_keywords: list | None = None,
     retrieval_date_from: str | None = None,
     retrieval_date_to: str | None = None,
@@ -309,6 +310,26 @@ def log_thinking_iteration(
             ))
     except Exception as exc:
         logger.warning("log_thinking_iteration fehlgeschlagen: %s", exc)
+
+
+def get_thinking_trace(query_id: str) -> list[dict]:
+    """Lädt alle Thinking-Trace-Rows für eine Query (geordnet nach Iteration)."""
+    _init_once()
+    with _get_conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM thinking_traces WHERE query_id = ? ORDER BY iteration ASC",
+            (query_id,),
+        ).fetchall()
+    result = []
+    for row in rows:
+        d = dict(row)
+        if d.get("retrieval_keywords"):
+            try:
+                d["retrieval_keywords"] = json.loads(d["retrieval_keywords"])
+            except Exception:
+                pass
+        result.append(d)
+    return result
 
 
 def get_latest_eval(query_id: str) -> dict | None:
