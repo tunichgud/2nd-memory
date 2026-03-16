@@ -244,6 +244,14 @@ def compress_sources(
     # Sortiere nach Relevanz (Score)
     sorted_sources = sorted(sources, key=lambda s: s.get("score", 0), reverse=True)
 
+    # Dynamisches per-Source Budget: verteile available_tokens gleichmäßig,
+    # mit sinnvollen Unter- und Obergrenzen
+    n = max(1, len(sorted_sources))
+    per_source_budget = available_tokens // n
+    full_max   = max(400,  min(4000, per_source_budget))
+    compact_max = max(150, min(1500, per_source_budget // 2))
+    minimal_max = max(50,  min(400,  per_source_budget // 6))
+
     parts = []
     used_tokens = 0
 
@@ -251,13 +259,13 @@ def compress_sources(
         # Bestimme Compression Mode basierend auf Ranking
         if i <= top_n_full:
             mode = CompressionMode.FULL
-            max_doc_tokens = 400  # Pro Quelle
+            max_doc_tokens = full_max
         elif i <= top_n_full + 10:
             mode = CompressionMode.COMPACT
-            max_doc_tokens = 150
+            max_doc_tokens = compact_max
         else:
             mode = CompressionMode.MINIMAL
-            max_doc_tokens = 50
+            max_doc_tokens = minimal_max
 
         # Baue Quelle
         meta = src["metadata"]

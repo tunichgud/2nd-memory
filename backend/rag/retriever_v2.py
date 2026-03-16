@@ -178,8 +178,8 @@ def retrieve_v2(
             chat_name=chat_name,
             timestamp_ms=int(ts_sec) * 1000,
             user_id=user_id,
-            n_before=1,
-            n_after=1,
+            n_before=2,
+            n_after=2,
             exclude_ids=existing_ids,
         )
         for nb in new_neighbors:
@@ -247,7 +247,7 @@ def _format_sources_for_llm(sources: list[dict], use_compression: bool = False) 
         # Nutze intelligente Context-Kompression (seit v2.1)
         from backend.rag.context_manager import compress_sources, ContextBudget
         budget = ContextBudget()
-        return compress_sources(sources, budget=budget, top_n_full=5)
+        return compress_sources(sources, budget=budget, top_n_full=15)
 
     # Legacy-Formatierung (für Kompatibilität)
     SOURCE_LABELS = {
@@ -351,7 +351,7 @@ def answer_v2(
     trace.log_retrieval(sources)
 
     # Nutze Kompression wenn viele Quellen (ab 10 statt 15 für bessere Qualität)
-    use_compression = len(sources) > 10
+    use_compression = True  # immer Budget-aware Compression nutzen
     context = _format_sources_for_llm(sources, use_compression=use_compression)
 
     # Definition der spezialisierten Agenten-Tools
@@ -392,7 +392,7 @@ def answer_v2(
                 sources.append(s)
                 existing_ids.add(s["id"])
         # Nutze Kompression wenn viele Quellen (ab 10 statt 15)
-        use_compression = len(res) > 10
+        use_compression = True  # immer Budget-aware Compression nutzen
         return _format_sources_for_llm(res, use_compression=use_compression)
 
     def search_messages(
@@ -454,7 +454,7 @@ def answer_v2(
                 sources.append(s)
                 existing_ids.add(s["id"])
         # Nutze Kompression wenn viele Quellen (ab 10 statt 15)
-        use_compression = len(res) > 10
+        use_compression = True  # immer Budget-aware Compression nutzen
         return _format_sources_for_llm(res, use_compression=use_compression)
 
     # Zusammenfassung für User/Prompt
@@ -660,7 +660,7 @@ async def answer_v2_stream(
                 existing_ids.add(s["id"])
         
         # Nutze Kompression für Tool-Results (ab 10 statt 15)
-        use_compression = len(res) > 10
+        use_compression = True  # immer Budget-aware Compression nutzen
         return json.dumps({"new_sources": new_sources, "formatted_context": _format_sources_for_llm(res, use_compression=use_compression)})
 
     def search_messages(
@@ -733,7 +733,7 @@ async def answer_v2_stream(
                 existing_ids.add(s["id"])
 
         # Nutze Kompression für Tool-Results (ab 10 statt 15)
-        use_compression = len(res) > 10
+        use_compression = True  # immer Budget-aware Compression nutzen
         return json.dumps({"new_sources": new_sources, "formatted_context": _format_sources_for_llm(res, use_compression=use_compression)})
 
     def search_places(
@@ -764,11 +764,11 @@ async def answer_v2_stream(
                 existing_ids.add(s["id"])
                 
         # Nutze Kompression für Tool-Results (ab 10 statt 15)
-        use_compression = len(res) > 10
+        use_compression = True  # immer Budget-aware Compression nutzen
         return json.dumps({"new_sources": new_sources, "formatted_context": _format_sources_for_llm(res, use_compression=use_compression)})
 
     # Nutze Kompression wenn viele Quellen (ab 10 statt 15 für bessere Qualität)
-    use_compression = len(sources) > 10
+    use_compression = True  # immer Budget-aware Compression nutzen
     context = _format_sources_for_llm(sources, use_compression=use_compression)
 
     filter_parts = []
