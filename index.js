@@ -289,6 +289,22 @@ const WWEBJS_CACHE_DIR = path.join(__dirname, '.wwebjs_cache');
 const WWEBJS_AUTH_DIR  = path.join(__dirname, '.wwebjs_auth');
 
 /**
+ * Beendet verwaiste Chrome/Chromium-Prozesse, die den wwebjs_auth-Pfad halten.
+ * Muss vor jedem client.initialize()-Versuch aufgerufen werden, damit
+ * "The browser is already running for .wwebjs_auth/session" nicht auftreten kann.
+ */
+function killZombieChrome() {
+    try {
+        const { execSync } = require('child_process');
+        // Alle Chrome/Chromium-Prozesse killen, die den session-Pfad halten
+        execSync(`pkill -f "${WWEBJS_AUTH_DIR}" 2>/dev/null || true`, { stdio: 'ignore' });
+        console.log('[WhatsApp] Zombie-Chrome-Prozesse beendet (falls vorhanden)');
+    } catch (e) {
+        // ignore — pkill gibt exit code 1 wenn kein Prozess gefunden
+    }
+}
+
+/**
  * Löscht den .wwebjs_cache-Ordner rekursiv (veralterter Cache → "Execution context destroyed").
  */
 function clearWwebjsCache() {
@@ -310,13 +326,17 @@ function clearWwebjsAuth() {
 
 /**
  * Startet client.initialize() mit bis zu maxAttempts Versuchen.
- * Vor jedem Retry (nicht vor dem ersten) wird der Cache geleert.
+ * Vor jedem Versuch (auch dem ersten) werden Zombie-Chrome-Prozesse beendet.
+ * Vor jedem Retry wird zusätzlich der Cache geleert.
  * @param {number} maxAttempts - Maximale Anzahl Versuche (Standard: 3)
  */
 async function initializeWithRetry(maxAttempts = 3) {
     const delays = [5000, 10000, 20000];
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
+            // Zombie-Chrome vor JEDEM Versuch killen (auch vor dem ersten),
+            // damit "browser is already running" nicht auftreten kann
+            killZombieChrome();
             console.log(`[WhatsApp] client.initialize() — Versuch ${attempt}/${maxAttempts}`);
             await client.initialize();
             console.log('[WhatsApp] client.initialize() erfolgreich.');

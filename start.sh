@@ -57,6 +57,8 @@ python -m uvicorn backend.main:app \
   --host 0.0.0.0 \
   --port 8000 \
   --reload \
+  --reload-dir backend \
+  --reload-dir frontend \
   --app-dir "$(pwd)" \
   > logs/backend.log 2>&1 &
 BACKEND_PID=$!
