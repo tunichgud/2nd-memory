@@ -93,6 +93,10 @@ def _print_es_error(hosts: list):
     print(" 3. Kontrolliere die 'hosts' in deiner config.yaml.")
     print("\n" + "="*80 + "\n")
 
+# Collections die ein geo_point-Feld "location" haben
+_GEO_COLLECTIONS = {"photos", "reviews", "saved_places"}
+
+
 def get_index_name(collection_name: str) -> str:
     cfg = _get_config()
     prefix = cfg.get("elasticsearch", {}).get("index_prefix", "memosaur_")
@@ -278,8 +282,9 @@ def query_es(
     if location_names:
         from backend.rag.geo_utils import get_bounding_box
         geo_filters = []
+        has_geo = collection_name in _GEO_COLLECTIONS
         for loc_name in location_names:
-            bbox = get_bounding_box(loc_name)
+            bbox = get_bounding_box(loc_name) if has_geo else None
             if bbox:
                 geo_filters.append({
                     "geo_bounding_box": {
@@ -289,12 +294,12 @@ def query_es(
                         }
                     }
                 })
-            else:
-                # Fallback auf Textsuche (keyword) falls keine Bounding-Box gefunden
-                geo_filters.append({"term": {"place_name.keyword": loc_name.lower()}})
-        
+            elif has_geo:
+                # Geo-Collection aber keine BBox → Textfallback auf place_name
+                geo_filters.append({"match": {"place_name": loc_name}})
+            # messages: kein geo_point → Location-Filter weglassen (Volltext findet Orte im Text)
+
         if geo_filters:
-            # Mindestens einer der Orte muss matchen (OR)
             must_filters.append({"bool": {"should": geo_filters, "minimum_should_match": 1}})
 
     if date_from or date_to:
@@ -374,8 +379,9 @@ def keyword_search_es(
     if location_names:
         from backend.rag.geo_utils import get_bounding_box
         geo_filters = []
+        has_geo = collection_name in _GEO_COLLECTIONS
         for loc_name in location_names:
-            bbox = get_bounding_box(loc_name)
+            bbox = get_bounding_box(loc_name) if has_geo else None
             if bbox:
                 geo_filters.append({
                     "geo_bounding_box": {
@@ -385,8 +391,9 @@ def keyword_search_es(
                         }
                     }
                 })
-            else:
-                geo_filters.append({"term": {"place_name.keyword": loc_name.lower()}})
+            elif has_geo:
+                geo_filters.append({"match": {"place_name": loc_name}})
+            # messages: kein geo_point → Location-Filter weglassen
         if geo_filters:
             must_filters.append({"bool": {"should": geo_filters, "minimum_should_match": 1}})
 
