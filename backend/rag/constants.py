@@ -52,8 +52,22 @@ MAX_SOURCES_DISPLAY: int = 20
 # Context Compression
 # ---------------------------------------------------------------------------
 
-DEFAULT_TOKEN_BUDGET: int = 8_000
-"""Token-Budget für den Kontext (sicheres Limit für die meisten Modelle)."""
+def _load_context_length_from_config() -> int:
+    """Liest context_length aus config.yaml (einmalig beim Modul-Load).
+
+    Fallback: 8000 Tokens falls config.yaml nicht lesbar oder context_length fehlt.
+    """
+    try:
+        from backend.llm.connector import get_cfg
+        cfg = get_cfg()
+        value = cfg.get("llm", {}).get("context_length", 8_000)
+        return int(value)
+    except Exception:
+        return 8_000
+
+
+DEFAULT_TOKEN_BUDGET: int = _load_context_length_from_config()
+"""Token-Budget für den Kontext — wird aus config.yaml llm.context_length geladen."""
 
 TOP_N_FULL: int = 5
 """Anzahl der Top-Quellen die ungekürzt (FULL, ~400 Tokens) übergeben werden."""

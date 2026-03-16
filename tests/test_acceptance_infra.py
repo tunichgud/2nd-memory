@@ -122,3 +122,68 @@ def test_at_inf_020_config_loader_unit():
     assert "llm" in cfg, "config.yaml muss 'llm'-Sektion enthalten"
     assert "provider" in cfg["llm"], "llm-Sektion muss 'provider' enthalten"
     assert "paths" in cfg, "config.yaml muss 'paths'-Sektion enthalten"
+
+
+# ---------------------------------------------------------------------------
+# AT-INF-030: context_length aus config.yaml wird in ContextBudget verwendet
+# ---------------------------------------------------------------------------
+
+def test_at_inf_030_default_token_budget_from_config():
+    """AT-INF-030: DEFAULT_TOKEN_BUDGET entspricht config.yaml llm.context_length."""
+    from backend.llm.connector import get_cfg
+    from backend.rag.constants import DEFAULT_TOKEN_BUDGET
+
+    cfg = get_cfg()
+    expected = cfg.get("llm", {}).get("context_length", 8_000)
+
+    assert DEFAULT_TOKEN_BUDGET == expected, (
+        f"DEFAULT_TOKEN_BUDGET={DEFAULT_TOKEN_BUDGET} stimmt nicht mit "
+        f"config.yaml context_length={expected} ueberein!"
+    )
+
+
+def test_at_inf_030_context_budget_uses_config_value():
+    """AT-INF-030: ContextBudget() ohne Parameter nutzt config.yaml context_length."""
+    from backend.rag.context_manager import ContextBudget
+    from backend.llm.connector import get_cfg
+
+    budget = ContextBudget()
+    cfg = get_cfg()
+    expected = cfg.get("llm", {}).get("context_length", 8_000)
+
+    assert budget.max_tokens == expected, (
+        f"ContextBudget().max_tokens={budget.max_tokens} sollte "
+        f"config.yaml context_length={expected} sein!"
+    )
+
+
+def test_at_inf_030_context_budget_greater_than_8000():
+    """AT-INF-030: Regression Guard — ContextBudget().max_tokens > 8000.
+
+    Wenn jemand wieder ContextBudget(max_tokens=8000) als Default hardcodet,
+    wird dieser Test rot (solange config.yaml context_length > 8000 hat).
+    """
+    from backend.rag.context_manager import ContextBudget
+    from backend.llm.connector import get_cfg
+
+    cfg = get_cfg()
+    config_value = cfg.get("llm", {}).get("context_length", 8_000)
+
+    # Nur testen wenn config tatsaechlich > 8000 ist
+    if config_value > 8_000:
+        budget = ContextBudget()
+        assert budget.max_tokens > 8_000, (
+            f"ContextBudget().max_tokens={budget.max_tokens} ist <= 8000, "
+            f"aber config.yaml hat context_length={config_value}. "
+            f"Wurde max_tokens wieder hardcoded?"
+        )
+
+
+def test_at_inf_030_context_budget_explicit_override():
+    """AT-INF-030: Expliziter max_tokens-Wert ueberschreibt den Config-Default."""
+    from backend.rag.context_manager import ContextBudget
+
+    budget = ContextBudget(max_tokens=4000)
+    assert budget.max_tokens == 4000, (
+        "Expliziter max_tokens=4000 sollte nicht ueberschrieben werden!"
+    )

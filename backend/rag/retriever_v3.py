@@ -673,7 +673,7 @@ def answer_v3(
                 "no_results": True
             }
 
-        context = compress_sources(sources, budget=ContextBudget(max_tokens=8000), top_n_full=5)
+        context = compress_sources(sources, budget=ContextBudget(), top_n_full=5)
 
         messages = [
             {"role": "system", "content": _get_system_prompt_v3()},
@@ -693,7 +693,7 @@ def answer_v3(
     logger.info("Nutze Chain-of-Thought für komplexe Query (type=%s, %d Sub-Queries)",
                 analyzed.query_type, len(analyzed.sub_queries))
 
-    progressive_ctx = ProgressiveContext(budget=ContextBudget(max_tokens=8000))
+    progressive_ctx = ProgressiveContext(budget=ContextBudget())
     reasoning_steps = []
 
     for i, sub_query in enumerate(analyzed.sub_queries, 1):
@@ -711,7 +711,7 @@ def answer_v3(
     # Finale Antwort mit gesammeltem Kontext
     all_context = compress_sources(
         progressive_ctx.all_sources,
-        budget=ContextBudget(max_tokens=8000),
+        budget=ContextBudget(),
         top_n_full=5
     )
 

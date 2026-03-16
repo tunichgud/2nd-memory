@@ -66,10 +66,19 @@ class CompressionMode(Enum):
 
 @dataclass
 class ContextBudget:
-    """Budget-Management für Context Window."""
-    max_tokens: int = 8000  # Sicheres Limit für die meisten Modelle
+    """Budget-Management für Context Window.
+
+    max_tokens wird aus config.yaml (llm.context_length) geladen,
+    sofern kein expliziter Wert übergeben wird.
+    """
+    max_tokens: int = 0  # 0 = wird in __post_init__ aus config geladen
     system_prompt_tokens: int = 500
     user_prompt_base_tokens: int = 200
+
+    def __post_init__(self) -> None:
+        if self.max_tokens == 0:
+            from backend.rag.constants import DEFAULT_TOKEN_BUDGET
+            self.max_tokens = DEFAULT_TOKEN_BUDGET
 
     @property
     def available_for_sources(self) -> int:
@@ -206,7 +215,7 @@ def compress_sources(
 
     Args:
         sources: Liste von Source-Dicts mit 'document', 'metadata', 'score', 'collection'
-        budget: ContextBudget (default: 8k tokens total)
+        budget: ContextBudget (default: aus config.yaml llm.context_length)
         top_n_full: Wie viele Top-Quellen bekommen Volltext?
         use_llm_summary: LLM-basierte Summarization für lange Texte (langsam!)
         keyword_sources: Keyword-Treffer — chronologisch sortiert, kompakt,

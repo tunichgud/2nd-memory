@@ -326,7 +326,7 @@ def _format_sources_for_llm(sources: list[dict], use_compression: bool = False) 
     if use_compression:
         # Nutze intelligente Context-Kompression (seit v2.1)
         from backend.rag.context_manager import compress_sources, ContextBudget
-        budget = ContextBudget(max_tokens=8000)  # Sicheres Limit für Chain-of-Thought
+        budget = ContextBudget()
         return compress_sources(sources, budget=budget, top_n_full=5)
 
     # Legacy-Formatierung (für Kompatibilität)
