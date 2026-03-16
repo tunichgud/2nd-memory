@@ -393,6 +393,13 @@ app.post('/api/whatsapp/send', async (req, res) => {
             return res.status(400).json({ error: 'chatId and message required' });
         }
 
+        try {
+            assertSendAllowed(chatId, BOT_CONFIG);
+        } catch (guardErr) {
+            console.error(`[WhatsApp] /api/whatsapp/send BLOCKED: ${guardErr.message}`);
+            return res.status(403).json({ error: guardErr.message });
+        }
+
         const chat = await client.getChatById(chatId);
         await chat.sendMessage(message);
 
