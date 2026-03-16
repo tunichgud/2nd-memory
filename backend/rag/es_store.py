@@ -163,10 +163,10 @@ def ensure_index(collection_name: str, dim: int = 384):
         mappings["properties"]["address"] = {"type": "text", "analyzer": "german"}
         mappings["properties"]["category"] = {"type": "keyword"}
     elif collection_name == "faces":
-        # Faces use 128-dim embeddings (face recognition), not 384-dim (sentence embeddings)
+        # Faces use 512-dim embeddings (face_recognition library), not 384-dim (sentence embeddings)
         mappings["properties"]["embedding"] = {
             "type": "dense_vector",
-            "dims": 128,
+            "dims": 512,
             "index": True,
             "similarity": "cosine",
         }
@@ -197,8 +197,8 @@ def upsert_documents_es(
         doc = {
             "id": ids[i],
             "user_id": meta.get("user_id"),
-            "content": documents[i],
-            "embedding": embeddings[i],
+            "content": documents[i] if documents else "",
+            "embedding": embeddings[i] if embeddings else None,
             "timestamp": meta.get("date_ts") * 1000 if meta.get("date_ts") else None, # ES nutzt ms
             "source": meta.get("source"),
             "metadata": meta

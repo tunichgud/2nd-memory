@@ -70,16 +70,40 @@ def export_collection(collection_name: str) -> int:
     offset = 0
 
     while offset < total:
-        data = col.get(
-            limit=BATCH_SIZE,
-            offset=offset,
-            include=["documents", "metadatas", "embeddings"],
-        )
+        try:
+            data = col.get(
+                limit=BATCH_SIZE,
+                offset=offset,
+                include=["documents", "metadatas", "embeddings"],
+            )
+        except Exception as batch_err:
+            logger.warning(
+                "Batch [%d:%d] in '%s' mit Embeddings fehlgeschlagen (%s) — "
+                "retry ohne Embeddings...",
+                offset, offset + BATCH_SIZE, collection_name, batch_err,
+            )
+            try:
+                data = col.get(
+                    limit=BATCH_SIZE,
+                    offset=offset,
+                    include=["documents", "metadatas"],
+                )
+            except Exception as retry_err:
+                logger.error(
+                    "Batch [%d:%d] in '%s' endgültig übersprungen: %s",
+                    offset, offset + BATCH_SIZE, collection_name, retry_err,
+                )
+                offset += BATCH_SIZE
+                continue
 
         ids = data.get("ids", [])
-        documents = data.get("documents", []) or [""] * len(ids)
-        embeddings = data.get("embeddings", []) or []
-        metadatas = data.get("metadatas", []) or [{}] * len(ids)
+        raw_docs = data.get("documents")
+        documents = raw_docs if raw_docs is not None else [""] * len(ids)
+        raw_emb = data.get("embeddings")
+        # raw_emb kann ein numpy-Array sein → expliziter None-Check statt bool()
+        embeddings = raw_emb.tolist() if hasattr(raw_emb, "tolist") else (raw_emb if raw_emb is not None else [])
+        raw_meta = data.get("metadatas")
+        metadatas = raw_meta if raw_meta is not None else [{}] * len(ids)
 
         # Fehlende Embeddings auffüllen (z.B. faces-Collection hat andere Embedding-Dims)
         if not embeddings:
