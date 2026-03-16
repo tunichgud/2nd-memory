@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 _client: Optional[Elasticsearch] = None
 _config: Optional[Dict[str, Any]] = None
+_es_available: Optional[bool] = None  # None = noch nicht geprueft; True/False nach erstem Check
 
 def _get_config() -> Dict[str, Any]:
     global _config
@@ -26,34 +27,57 @@ def _get_config() -> Dict[str, Any]:
     return _config
 
 def get_es_client() -> Elasticsearch:
+    """Gibt den gecachten Elasticsearch-Client zurueck.
+
+    Wenn verify_elasticsearch() beim Start gemeldet hat, dass ES nicht
+    erreichbar ist (_es_available == False), wird kein erneuter Verbindungsversuch
+    unternommen — der Client wird trotzdem zurueckgegeben, aber Aufrufer wie
+    query_es() pruefen _es_available selbst und kehren fruehzeitig zurueck.
+    """
     global _client
     if _client is None:
         cfg = _get_config()
         hosts = cfg.get("elasticsearch", {}).get("hosts", ["http://localhost:9200"])
         _client = Elasticsearch(hosts)
-        # Kurzer Connection-Check (nur Logging)
-        if not _client.ping():
-            logger.warning("Elasticsearch ist aktuell nicht erreichbar unter %s", hosts)
-        else:
-            logger.info("Elasticsearch Client initialisiert: %s", hosts)
+        if _es_available is None:
+            # verify_elasticsearch() wurde noch nicht aufgerufen (z.B. im Test)
+            if not _client.ping():
+                logger.warning("Elasticsearch ist aktuell nicht erreichbar unter %s", hosts)
+            else:
+                logger.info("Elasticsearch Client initialisiert: %s", hosts)
+        # Wenn _es_available bereits gesetzt ist, verzichten wir auf erneutes Ping
     return _client
 
 
 def verify_elasticsearch():
-    """Prüft beim Systemstart, ob Elasticsearch läuft. Nur Warning, kein Exit."""
+    """Prueft beim Systemstart, ob Elasticsearch laeuft. Nur Warning, kein Exit.
+
+    Setzt das Modul-Flag _es_available, damit spaetere Aufrufe (query_es,
+    get_es_client) nicht erneut versuchen, ES zu erreichen, wenn es beim
+    Start bereits nicht erreichbar war.
+    """
+    global _es_available
     cfg = _get_config()
     hosts = cfg.get("elasticsearch", {}).get("hosts", ["http://localhost:9200"])
     client = Elasticsearch(hosts)
 
     try:
         if not client.ping():
-            logger.warning("⚠️  Elasticsearch nicht erreichbar unter %s - läuft im Fallback-Modus (ChromaDB only)", hosts)
+            logger.warning(
+                "Elasticsearch nicht erreichbar unter %s - laeuft im Fallback-Modus (ChromaDB only)",
+                hosts,
+            )
+            _es_available = False
             return
     except Exception as e:
-        logger.warning("⚠️  Elasticsearch nicht verfügbar: %s - läuft im Fallback-Modus (ChromaDB only)", e)
+        logger.warning(
+            "Elasticsearch nicht verfuegbar: %s - laeuft im Fallback-Modus (ChromaDB only)", e
+        )
+        _es_available = False
         return
 
-    logger.info("✅ Elasticsearch erreichbar: %s", hosts)
+    _es_available = True
+    logger.info("Elasticsearch erreichbar: %s", hosts)
 
 
 def _print_es_error(hosts: list):
@@ -197,7 +221,14 @@ def query_es(
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
-    """Hybride Suche in Elasticsearch (Vektor + Filter)."""
+    """Hybride Suche in Elasticsearch (Vektor + Filter).
+
+    Gibt sofort eine leere Liste zurueck wenn Elasticsearch beim Start als
+    nicht erreichbar markiert wurde (_es_available == False), um wiederholte
+    Verbindungsversuche und Log-Spam zu vermeiden.
+    """
+    if _es_available is False:
+        return []
     client = get_es_client()
     index_name = get_index_name(collection_name)
     

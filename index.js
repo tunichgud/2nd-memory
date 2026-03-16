@@ -302,6 +302,17 @@ function killZombieChrome() {
     } catch (e) {
         // ignore — pkill gibt exit code 1 wenn kein Prozess gefunden
     }
+
+    // SingletonLock entfernen (bleibt nach unbeaufsichtigtem Chrome-Crash zurueck)
+    const lockFile = path.join(WWEBJS_AUTH_DIR, 'session', 'SingletonLock');
+    try {
+        if (fs.existsSync(lockFile)) {
+            fs.unlinkSync(lockFile);
+            console.log('[WhatsApp] SingletonLock entfernt');
+        }
+    } catch (e) {
+        console.warn('[WhatsApp] SingletonLock konnte nicht entfernt werden:', e.message);
+    }
 }
 
 /**

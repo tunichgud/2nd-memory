@@ -34,6 +34,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Elasticsearch-Transport-Logs auf ERROR beschraenken (verhindert Stacktrace-Spam
+# bei Connection-Fehlern, wenn ES nicht laeuft)
+logging.getLogger("elastic_transport").setLevel(logging.ERROR)
+logging.getLogger("elastic_transport.transport").setLevel(logging.ERROR)
+
 sys.path.insert(0, str(BASE_DIR))
 
 # ---------------------------------------------------------------------------
