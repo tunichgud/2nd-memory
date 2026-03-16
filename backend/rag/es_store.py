@@ -7,6 +7,7 @@ und Metadaten in Elasticsearch.
 
 import logging
 import sys
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from elasticsearch import Elasticsearch, helpers, BadRequestError
 import yaml
@@ -95,6 +96,13 @@ def _print_es_error(hosts: list):
 
 # Collections die ein geo_point-Feld "location" haben
 _GEO_COLLECTIONS = {"photos", "reviews", "saved_places"}
+
+
+def _iso_to_epoch_ms(date_str: str, end_of_day: bool = False) -> int:
+    """Konvertiert ISO-Datum (YYYY-MM-DD) in epoch_millis für ES range queries.
+    Funktioniert unabhängig davon ob timestamp als date- oder long-Feld gemappt ist."""
+    suffix = "T23:59:59" if end_of_day else ""
+    return int(datetime.fromisoformat(date_str + suffix).replace(tzinfo=timezone.utc).timestamp() * 1000)
 
 
 def get_index_name(collection_name: str) -> str:
@@ -303,9 +311,9 @@ def query_es(
             must_filters.append({"bool": {"should": geo_filters, "minimum_should_match": 1}})
 
     if date_from or date_to:
-        date_range = {}
-        if date_from: date_range["gte"] = date_from
-        if date_to: date_range["lte"] = date_to
+        date_range: Dict[str, Any] = {}
+        if date_from: date_range["gte"] = _iso_to_epoch_ms(date_from)
+        if date_to: date_range["lte"] = _iso_to_epoch_ms(date_to, end_of_day=True)
         must_filters.append({"range": {"timestamp": date_range}})
 
     # KNN Suche kombiniert mit Filter
@@ -416,9 +424,9 @@ def keyword_search_es(
     if date_from or date_to:
         date_range: Dict[str, Any] = {}
         if date_from:
-            date_range["gte"] = date_from
+            date_range["gte"] = _iso_to_epoch_ms(date_from)
         if date_to:
-            date_range["lte"] = date_to
+            date_range["lte"] = _iso_to_epoch_ms(date_to, end_of_day=True)
         must_filters.append({"range": {"timestamp": date_range}})
 
     search_query = {
