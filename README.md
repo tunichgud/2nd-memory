@@ -10,7 +10,7 @@
 
 memosaur ist eine lokal laufende KI-Anwendung, die deine persönlichen Daten aus verschiedenen Quellen zusammenführt und durch intelligente Abfragen zugänglich macht.
 
-**Das Besondere:** Alle Daten bleiben lokal. Personennamen und Orte werden durch intelligente Entity-Resolution erkannt und verknüpft, verlassen aber niemals deinen Browser im Klartext für externe Dienste. Die eigentliche Zuordnung liegt in deiner lokalen Browser-Datenbank (IndexedDB) und einer verschlüsselten Sync-Funktion.
+**Das Besondere:** Alle Daten bleiben lokal. Die gesamte Anwendung – Backend, Vektordatenbank und LLM – läuft auf deiner eigenen Hardware. Personennamen und Orte werden durch integrierte Entity-Resolution erkannt und verknüpft.
 
 **Typische Abfragen:**
 
@@ -36,8 +36,8 @@ memosaur ist eine lokal laufende KI-Anwendung, die deine persönlichen Daten aus
 ## Funktionen
 
 ### Privacy-First Entity-Flow
-- **Client-seitige Analyse**: Moderne KI-Modelle unterstützen die Erkennung von Personen und Orten direkt im Zusammenspiel mit deinen Daten.
-- **Lokale Zuordnung**: Das Mapping zwischen Gesichtern, Chat-Namen und Orten wird ausschließlich in der Browser-eigenen IndexedDB und einer lokalen SQLite-Datenbank gespeichert.
+- **Lokale Verarbeitung**: Alle Daten werden lokal auf deiner Hardware verarbeitet – kein Cloud-Server sieht deine Inhalte.
+- **Entity-Resolution**: Das Mapping zwischen Gesichtern, Chat-Namen und Orten wird in einer lokalen SQLite-Datenbank gespeichert.
 - **Transparenz**: Jede Information wird mit ihrer Originalquelle verknüpft, sodass du immer nachvollziehen kannst, woher ein Gedächtnis-Splitter stammt.
 
 ### Intelligente Suche
@@ -52,19 +52,13 @@ memosaur ist eine lokal laufende KI-Anwendung, die deine persönlichen Daten aus
   - **Nachrichten**: Chat-Blasen-Ansicht mit Zeitstempeln, scrollbar
   - **Gespeicherte Orte**: Adresse, Google Maps Link
 
-### Multi-Device Sync
-- Deine Daten können verschlüsselt auf dem Server gesichert werden.
-- Verschlüsselung: `PBKDF2 → AES-256-GCM` direkt im Browser (Web Crypto API).
-- Das Passwort verlässt niemals den Browser.
-- Auf einem zweiten Gerät: Blob herunterladen, entschlüsseln, alles ist sofort verfügbar.
-
 ### Kartenansicht
 - Alle indexierten GPS-Punkte auf einer interaktiven Karte (Leaflet.js / OpenStreetMap)
 - Farbkodiert nach Quellentyp: Fotos (blau), Bewertungen (grün), Gespeicherte Orte (amber)
 - Filter nach Quelle und Zeitraum
 
 ### Multi-User vorbereitet
-- SQLite-Datenbank mit User-Tabelle und Sync-Blob-Versionierung
+- SQLite-Datenbank mit User-Tabelle
 - Alle Dokumente sind mit `user_id` versehen
 - Aktuell: ein Default-User `ManfredMustermann`, weitere können per API angelegt werden
 
@@ -140,10 +134,8 @@ open http://localhost:8000
 | Vektordatenbank | ChromaDB / Elasticsearch (lokal, persistent) |
 | Embeddings | sentence-transformers (lokal, multilingual) |
 | LLM | Ollama (`qwen3:8b` Chat, `gemma3:12b` Vision) |
-| Relationale DB | SQLite via aiosqlite (User, Sync) |
+| Relationale DB | SQLite via aiosqlite (User) |
 | Karten | Leaflet.js / OpenStreetMap |
-| Entity-Speicher | IndexedDB (Browser-lokal) |
-| Verschlüsselung | Web Crypto API (AES-256-GCM, PBKDF2) |
 | Geodaten | Nominatim/OpenStreetMap (Reverse Geocoding) |
 | Frontend | HTML, Tailwind CSS CDN |
 

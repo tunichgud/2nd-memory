@@ -1,8 +1,8 @@
 """
 ingest.py – /api/v1/ingest/*
 
-Token-aware Ingestion. Texte (Nachrichten, Bildbeschreibungen) kommen
-bereits maskiert vom Browser. GPS und Datums-Metadaten bleiben unverändert.
+Ingestion-Endpunkte für Fotos, Nachrichten und Google-Daten.
+GPS und Datums-Metadaten bleiben unverändert.
 """
 from __future__ import annotations
 
@@ -47,24 +47,23 @@ class PhotoIngestRequest(BaseModel):
 
 class PhotoDescribeRequest(BaseModel):
     """
-    Backend beschreibt das Bild via Ollama, gibt den Klartext zurück.
-    Das Frontend maskiert ihn und schickt ihn via /photos/submit zurück.
+    Backend beschreibt das Bild via Ollama, gibt den Text zurück.
     """
     user_id: str
     filename: str
 
 
 class PhotoSubmitRequest(BaseModel):
-    """Foto-Datensatz mit bereits maskierter Beschreibung einreichen."""
+    """Foto-Datensatz einreichen."""
     user_id: str
     filename: str
-    masked_description: str     # "[PER_1] sitzt in einem Café in [LOC_2]..."
+    description: str = ""
     date_iso: str = ""
     date_ts: int = 0
     lat: float = 0.0
     lon: float = 0.0
-    place_name_token: str = ""  # "[LOC_3]" (vom Browser maskiert)
-    persons_tokens: str = ""    # "[PER_1],[PER_2]"
+    place_name: str = ""
+    persons: str = ""
     cluster: str = ""
     reset: bool = False
 
@@ -111,44 +110,28 @@ async def submit_photo_v1(
     db: aiosqlite.Connection = Depends(get_db),
 ):
     """
-    Schritt 2: Speichert das Foto mit bereits maskierter Beschreibung in ChromaDB.
+    Schritt 2: Speichert das Foto mit Beschreibung in ChromaDB.
     """
     from backend.rag.store_v2 import upsert_documents_v2
     from backend.rag.embedder import embed_single
 
-    # Dokument-Text aus maskierten Werten aufbauen
+    # Dokument-Text aufbauen
     parts = [f"Foto: {req.filename}"]
     if req.date_iso:
         parts.append(f"Datum: {req.date_iso}")
-    if req.place_name_token:
-        parts.append(f"Ort: {req.place_name_token}")
+    if req.place_name:
+        parts.append(f"Ort: {req.place_name}")
     if req.lat != 0.0:
         parts.append(f"Koordinaten: {req.lat:.5f}°N, {req.lon:.5f}°E")
-    if req.persons_tokens:
-        parts.append(f"Personen: {req.persons_tokens}")
-    if req.masked_description:
-        parts.append(f"Bildbeschreibung: {req.masked_description}")
+    if req.persons:
+        parts.append(f"Personen: {req.persons}")
+    if req.description:
+        parts.append(f"Bildbeschreibung: {req.description}")
     doc_text = "\n".join(parts)
 
     embedding = await asyncio.get_event_loop().run_in_executor(
         None, lambda: embed_single(doc_text)
     )
-
-    # Person-Flags aus tokens ableiten (z.B. has_per_1 = True)
-    person_flags = {}
-    for tok in req.persons_tokens.split(","):
-        tok = tok.strip()
-        if tok.startswith("[") and tok.endswith("]"):
-            field = "has_" + tok[1:-1].lower().replace("_", "_")
-            person_flags[field] = True
-
-    # Location-Flag aus place_name_token ableiten (z.B. has_loc_3 = True)
-    location_flags = {}
-    if req.place_name_token:
-        tok = req.place_name_token.strip()
-        if tok.startswith("[") and tok.endswith("]"):
-            field = "has_" + tok[1:-1].lower()
-            location_flags[field] = True
 
     meta = {
         "source": "google_photos",
@@ -158,11 +141,9 @@ async def submit_photo_v1(
         "date_iso": req.date_iso,
         "lat": req.lat,
         "lon": req.lon,
-        "place_name": req.place_name_token,
-        "persons": req.persons_tokens,
+        "place_name": req.place_name,
+        "persons": req.persons,
         "cluster": req.cluster,
-        **person_flags,
-        **location_flags,
     }
 
     upsert_documents_v2(
@@ -219,8 +200,7 @@ async def ingest_messages_v1(
     db: aiosqlite.Connection = Depends(get_db),
 ):
     """
-    Nimmt bereits maskierten Text entgegen.
-    Das Frontend hat NER ausgeführt und Klarnamen durch Tokens ersetzt.
+    Nimmt eine Nachrichtendatei entgegen und indexiert sie in ChromaDB.
     """
     content = await file.read()
     suffix = ".json" if source_type == "signal" else ".txt"

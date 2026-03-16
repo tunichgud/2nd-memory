@@ -21,25 +21,23 @@
 ┌──────────────────────────────────────────────────────────────────┐
 │                        Browser (Client)                           │
 │                                                                    │
-│  ┌─────────────────┐  ┌─────────────────────┐                    │
-│  │   IndexedDB     │  │  Web Crypto API     │                    │
-│  │  Entity-Mapping │  │  AES-GCM Encrypt    │                    │
-│  │  Wörterbuch     │  │  für Sync-Blob      │                    │
-│  └──────┬──────────┘  └──────────┬──────────┘                    │
-│         │                        │                               │
-└─────────┼────────────────────────┼───────────────────────────────┘
-          │ POST /api/v1/query     │ POST /sync
-          ▼                        ▼ 
+│  ┌─────────────────────────────────────────────────────────────┐  │
+│  │   IndexedDB – Entity-Mapping (Cluster → Personenname)       │  │
+│  └──────────────────────────┬──────────────────────────────────┘  │
+│                             │                                     │
+└─────────────────────────────┼─────────────────────────────────────┘
+                              │ POST /api/v1/query
+                              ▼
 ┌──────────────────────────────────────────────────────────────────┐
 │              FastAPI Backend – /api/v0/ + /api/v1/               │
 │                                                                    │
-│  /v1/query  /v1/ingest  /v1/sync  /v1/entities                 │
+│  /v1/query  /v1/ingest  /v1/entities                           │
 │                                                                    │
 │  ┌──────────────┐   ┌──────────────────┐   ┌──────────────────┐  │
 │  │   ChromaDB   │   │  SQLite          │   │  Ollama          │  │
 │  │   / ES       │   │  users           │   │  qwen3:8b Chat   │  │
 │  │              │   │                  │   │  gemma3:12b      │  │
-│  │  user-scoped │   │  sync_blobs      │   │  Vision          │  │
+│  │  user-scoped │   │                  │   │  Vision          │  │
 │  └──────────────┘   └──────────────────┘   └──────────────────┘  │
 └──────────────────────────────────────────────────────────────────┘
 ```
@@ -63,17 +61,16 @@ memosaur/
 │   │   ├── media.py                   # v0+v1 shared: Bild-Thumbnails
 │   │   └── v1/
 │   │       ├── users.py               # GET/POST /api/v1/users
-│   │       ├── consent.py             # GET/POST /api/v1/consent/{user_id}
-│   │       ├── sync.py                # GET/POST /api/v1/sync/{user_id}
-│   │       ├── ingest.py              # POST /api/v1/ingest/* (Consent-Gate)
+│   │       ├── ingest.py              # POST /api/v1/ingest/*
 │   │       ├── query.py               # POST /api/v1/query (user-scoped)
 │   │       ├── map.py                 # GET /api/v1/locations (user-scoped)
 │   │       └── media.py               # GET /api/v1/media/{user_id}/{file}
 │   ├── db/
 │   │   ├── database.py                # aiosqlite Verbindung, init_db(), Default-User
-│   │   ├── models.py                  # Pydantic-Modelle: User, Consent, SyncBlob
+│   │   ├── models.py                  # Pydantic-Modelle: User
 │   │   └── migrations/
-│   │       └── 001_initial.sql        # Schema: users, consents, sync_blobs
+│   │       ├── 001_initial.sql        # Schema: users
+│   │       └── 002_drop_sync_blobs.sql # sync_blobs entfernen
 │   ├── ingestion/
 │   │   ├── photos.py                  # Google Fotos: Sidecar-JSON, Vision, Geocoding
 │   │   ├── google_reviews.py          # Google Maps Bewertungen
@@ -92,10 +89,9 @@ memosaur/
 │       └── retriever_v2.py            # v1: Agentic RAG-Pipeline, user-scoped
 ├── frontend/
 │   ├── index.html                     # SPA: Chat, Karte, Import, Einstellungen
-│   ├── chat.js                        # Chat-UI, v2 Entity-Flow, v0 Fallback
+│   ├── chat.js                        # Chat-UI, Entity-Flow
 │   ├── map.js                         # Leaflet.js Kartenansicht
-│   ├── entities.js                    # Entity-Management & Personen-Onboarding
-│   └── sync.js                        # Web Crypto AES-GCM Verschlüsselung
+│   └── entities.js                    # Entity-Management & Personen-Onboarding
 ├── scripts/
 │   └── ...
 ├── sample/
@@ -139,11 +135,6 @@ Der Privacy-Aspekt wird dadurch gewahrt, dass die gesamte Anwendung (Backend + D
 ```sql
 -- Nutzer (Basis für Multi-User)
 users (id TEXT PK, display_name TEXT, created_at INT, is_active INT)
-
--- Verschlüsselte Sync-Blobs
-sync_blobs (id INT PK AUTOINCREMENT, user_id TEXT FK,
-            device_hint TEXT, blob BLOB, iv TEXT,
-            created_at INT, version INT)
 ```
 
 **Default-User** wird beim ersten Start automatisch angelegt:
@@ -156,7 +147,6 @@ Alle vier Collections (`photos`, `reviews`, `saved_places`, `messages`) enthalte
 
 - `user_id` – UUID des Nutzers (für Multi-User-Filterung)
 - Alle Texte und String-Metadaten werden lokal indexiert
-- Boolean-Flags `has_per_1`, `has_loc_2` etc. für strukturierte Filter
 
 #### `photos` – Metadatenfelder
 
@@ -352,14 +342,6 @@ POST /api/query
 | Methode | Pfad | Request | Response |
 |---|---|---|---|
 | `POST` | `/api/v1/query` | `{user_id, query, ...}` | `{answer, sources, filter_summary}` |
-
-#### Sync & Dictionary
-
-| Methode | Pfad | Beschreibung |
-|---|---|---|
-| `POST` | `/api/v1/sync/{user_id}` | Verschlüsselten Blob hochladen |
-| `GET` | `/api/v1/sync/{user_id}` | Neuesten Blob herunterladen |
-| `GET` | `/api/v1/sync/{user_id}/history` | Alle Versionen (für Rollback) |
 
 #### Karte & Medien
 

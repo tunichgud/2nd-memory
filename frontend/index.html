@@ -59,10 +59,6 @@
       word-break: break-word;
     }
 
-    #ner-overlay {
-      backdrop-filter: blur(4px);
-    }
-
     /* Indeterminate Progress Bar */
     .loading-bar {
       height: 2px;
@@ -273,7 +269,6 @@
       <button onclick="showTab('settings')" id="tab-settings" class="tab-btn px-3 py-1 rounded">Einstellungen</button>
     </nav>
     <div class="flex items-center gap-3">
-      <span id="sync-status-badge" class="text-xs text-gray-500">🔒 Kein Sync-PW</span>
       <div id="status-bar" class="text-xs text-gray-500"></div>
     </div>
   </header>
@@ -978,7 +973,6 @@
         window.Entities.loadLinkedEntities();
       }
       if (name === 'settings') {
-        window.Sync?.renderSyncUI('sync-container', window._userId);
         checkWhatsAppStatus();
       }
     }

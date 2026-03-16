@@ -227,10 +227,8 @@ async def replay_query(query_id: str, req: ReplayRequest):
         result = await loop.run_in_executor(
             None,
             lambda: answer_v2(
-                masked_query=raw_query,
+                query=raw_query,
                 user_id=DEFAULT_USER_ID,
-                person_tokens=[],
-                location_tokens=[],
             ),
         )
         new_answer = result.get("answer", "")

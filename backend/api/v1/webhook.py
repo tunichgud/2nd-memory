@@ -102,10 +102,8 @@ async def whatsapp_webhook(
             result = await loop.run_in_executor(
                 None,
                 lambda: answer_v2(
-                    masked_query=req.text,
+                    query=req.text,
                     user_id=DEFAULT_USER_ID,
-                    person_tokens=[],
-                    location_tokens=[],
                     collections=None
                 )
             )
