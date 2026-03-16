@@ -82,11 +82,11 @@ FEHLENDE FAKTEN:
 RECHERCHE-PARAMETER (nur wenn FEHLENDE FAKTEN vorhanden):
 date_from=YYYY-MM-DD, date_to=YYYY-MM-DD, keywords=["term1"]
 
-RELEVANZ-FILTER (kritisch!):
-Extrahiere NUR Fakten die DIREKT zur Nutzeranfrage beitragen.
-Wenn eine Quelle thematisch unpassend ist (z.B. Anfrage nach Jazz-Hund, Quelle über Menschenbeerdigung),
-dann IGNORIERE sie vollständig — extrahiere keinen einzigen Fakt daraus.
-Lieber zu wenig als irrelevante Fakten, die den Kontext verstopfen.
+RELEVANZ-FILTER:
+Extrahiere alle Fakten die zur Nutzeranfrage beitragen — direkt oder indirekt.
+Auch periphere Fakten können wertvoll sein (Zeitkontext, beteiligte Personen, Orte).
+Ignoriere nur klar thematisch unpassende Quellen vollständig
+(z.B. Anfrage nach Jazz-Hund, Quelle über eine völlig andere Person ohne Zusammenhang).
 
 DEDUPLICATION (kritisch!):
 Fakten die bereits in "BEREITS BEKANNTE FAKTEN" stehen → NICHT nochmals extrahieren.
