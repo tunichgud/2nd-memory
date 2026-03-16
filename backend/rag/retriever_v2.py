@@ -1,11 +1,10 @@
 """
-retriever_v2.py – Token-aware RAG-Retrieval für memosaur v2.
+retriever_v2.py – RAG-Retrieval für memosaur v2.
 
 Unterschiede zu retriever.py (v1):
-  - Kein LLM-basierter Query-Parser (NER findet im Browser statt)
-  - Strukturierte Filter kommen als Token-IDs vom Frontend
+  - Kein LLM-basierter Query-Parser
+  - Strukturierte Filter (Personen, Orte, Datum) kommen als Klarnamen vom Frontend
   - Alle ChromaDB-Queries sind user_id-gefiltert
-  - Ein- und Ausgabe enthalten nur Tokens, keine Klarnamen
 """
 from __future__ import annotations
 import logging
@@ -107,17 +106,12 @@ def retrieve_v2(
     min_score: float = _RELEVANT_MIN_SCORE,
     date_from: str | None = None,
     date_to: str | None = None,
-    **kwargs # Catch-all für veraltete Parameter wie masked_query/person_tokens
 ) -> list[dict]:
     """User-scoped semantisches Retrieval mit Python Post-Filtern für Personen und Orte."""
-    # Support für veraltete Parameter-Namen (Bugfix)
-    effective_query = kwargs.get("masked_query", query)
-    effective_persons = person_names or kwargs.get("person_tokens") or []
-    effective_locations = location_names or kwargs.get("location_tokens") or []
+    effective_persons = [n.strip() for n in (person_names or []) if n.strip()]
+    effective_locations = [n.strip() for n in (location_names or []) if n.strip()]
 
-    query_embedding = embed_single(effective_query)
-    effective_persons = [n.strip() for n in effective_persons if n.strip()]
-    effective_locations = [n.strip() for n in effective_locations if n.strip()]
+    query_embedding = embed_single(query)
 
     # Personen-Namen auflösen (z.B. "Ringo" -> ["Ringo", "cluster_5", "0123..."])
     resolved_person_identifiers = _resolve_person_names(effective_persons)
@@ -137,7 +131,7 @@ def retrieve_v2(
 
     logger.info(
         "v2 retrieve | query='%s' | persons=%s | locations=%s | relevant=%s",
-        effective_query[:60], effective_persons, effective_locations, sorted(relevant),
+        query[:60], effective_persons, effective_locations, sorted(relevant),
     )
 
     # --- NEU: Elasticsearch Integration ---
@@ -279,7 +273,7 @@ def retrieve_v2(
             all_results.extend([h for h in col_hits if h["score"] >= threshold])
 
     all_results.sort(key=lambda r: (r["is_relevant"], r["score"]), reverse=True)
-    logger.info("v2 retrieve GESAMT: %d Ergebnisse für '%s'", len(all_results), effective_query[:40])
+    logger.info("v2 retrieve GESAMT: %d Ergebnisse für '%s'", len(all_results), query[:40])
     return all_results
 
 
@@ -367,10 +361,8 @@ def _format_sources_for_llm(sources: list[dict], use_compression: bool = False) 
             meta_parts.append(meta["place_name"])
         if meta.get("lat") and meta.get("lat") != 0.0:
             meta_parts.append(f"GPS: {meta['lat']:.3f}°N {meta['lon']:.3f}°E")
-        # HINWEIS: 'persons'-Feld absichtlich weggelassen – unterschiedliche Token-Namespaces
-        # zwischen Foto-Import und Anfrage würden den Agenten verwirren (z.B. [PER_1] bedeutet
-        # im Foto-Import eine andere Person als [PER_1] in der Nutzeranfrage).
-        # Der Agent soll Personen aus dem Dokumenttext (Fotobeschreibung) ableiten.
+        # HINWEIS: 'persons'-Feld absichtlich weggelassen – der Agent soll Personen
+        # aus dem Dokumenttext (Fotobeschreibung) ableiten.
         if meta.get("name"):
             meta_parts.append(meta["name"])
         if meta.get("address"):
@@ -384,10 +376,9 @@ def _format_sources_for_llm(sources: list[dict], use_compression: bool = False) 
 
 
 def answer_v2(
-    masked_query: str,
+    query: str,
     user_id: str,
-    person_tokens: list[str] | None = None,
-    location_tokens: list[str] | None = None,
+    person_names: list[str] | None = None,
     location_names: list[str] | None = None,
     collections: list[str] | None = None,
     n_per_collection: int = 6,
@@ -395,28 +386,23 @@ def answer_v2(
     date_from: str | None = None,
     date_to: str | None = None,
 ) -> dict:
-    """Vollständige v2 RAG-Pipeline. Antwortet mit Tokens."""
+    """Vollständige v2 RAG-Pipeline."""
     from backend.llm.connector import chat, get_cfg
     from backend.rag.query_parser import parse_query
     from backend.rag.query_logger import start_trace
 
-    trace = start_trace(masked_query)
+    trace = start_trace(query)
 
-    # 1. Fallback: Parse query via LLM if frontend NER missed anything (e.g., short queries like "in München")
-    # This acts as a safety net. Anything already masked (like [LOC_1]) will be ignored or safely skipped.
-    parsed = parse_query(masked_query)
-    
+    # Fallback: Parse query via LLM to extract locations/persons the frontend may have missed
+    parsed = parse_query(query)
+
     if parsed.locations:
-        locs = [l for l in parsed.locations if not l.startswith("[LOC_")]
-        if locs:
-            logger.info("Fallback-Parser fand Klartext-Orte: %s", locs)
-            location_names = (location_names or []) + locs
+        logger.info("Fallback-Parser fand Klartext-Orte: %s", parsed.locations)
+        location_names = (location_names or []) + parsed.locations
 
     if parsed.persons:
-        pers = [p for p in parsed.persons if not p.startswith("[PER_")]
-        if pers:
-            logger.info("Fallback-Parser fand Klartext-Personen: %s", pers)
-            person_tokens = (person_tokens or []) + pers
+        logger.info("Fallback-Parser fand Klartext-Personen: %s", parsed.persons)
+        person_names = (person_names or []) + parsed.persons
 
     if parsed.date_from and not date_from:
         date_from = parsed.date_from
@@ -424,16 +410,16 @@ def answer_v2(
         date_to = parsed.date_to
 
     trace.log_parsed({
-        "persons": person_tokens or [],
+        "persons": person_names or [],
         "locations": location_names or [],
         "date_from": date_from,
         "date_to": date_to,
     })
 
     sources = retrieve_v2(
-        query=masked_query,
+        query=query,
         user_id=user_id,
-        person_names=person_tokens,
+        person_names=person_names,
         location_names=location_names,
         collections=collections,
         n_per_collection=n_per_collection,
@@ -457,24 +443,23 @@ def answer_v2(
         bis_datum: str | None = None,
     ) -> str:
         """Sucht gezielt in der Foto-Datenbank des Nutzers nach Aufnahmen, Orten und visuellen Momenten.
-        
+
         Args:
             suchtext: Wonach auf den Bildern gesucht werden soll (z.B. "Am Strand", "Urlaub").
-            personen: Liste von Personen-Tokens (z.B. ["[PER_1]"]).
-            orte: Liste von Orts-Tokens oder Klarnamen (z.B. ["[LOC_1]", "München"]).
+            personen: Liste von Klarnamen (z.B. ["Nora", "Sarah"]).
+            orte: Liste von Ortsnamen (z.B. ["München", "Hamburg"]).
             von_datum: Startdatum im Format YYYY-MM-DD (optional).
             bis_datum: Enddatum im Format YYYY-MM-DD (optional).
         """
         logger.info(f"==> Tool Call: search_photos(suchtext='{suchtext[:30]}...', personen={personen}, orte={orte}, von={von_datum}, bis={bis_datum})")
-        loc_toks = [l for l in (orte or []) if l.startswith("[LOC_")]
-        loc_names = [l for l in (orte or []) if not l.startswith("[LOC_")]
-        pers_toks = [p for p in (personen or []) if p.startswith("[PER_")]
+        loc_names = [l.strip() for l in (orte or []) if l.strip()]
+        pers_names = [p.strip() for p in (personen or []) if p.strip()]
 
         res = retrieve_v2(
             query=suchtext,
             user_id=user_id,
-            person_names=pers_toks,
-            location_names=loc_names, # Merged loc_toks into names if needed?
+            person_names=pers_names,
+            location_names=loc_names,
             collections=["photos"],
             n_per_collection=n_per_collection,
             min_score=min_score,
@@ -502,7 +487,7 @@ def answer_v2(
 
         Args:
             suchtext: Inhalt der gesuchten Nachrichten (z.B. "Wie geht es dir?", "Treffen").
-            personen: Liste von Personen-Tokens mit denen geschrieben wurde (z.B. ["[PER_1]"]).
+            personen: Liste von Klarnamen mit denen geschrieben wurde (z.B. ["Sarah", "Marius"]).
             von_datum: Startdatum im Format YYYY-MM-DD (optional).
             bis_datum: Enddatum im Format YYYY-MM-DD (optional).
             schluesselwoerter: Exakte Wörter/Namen die im Text vorkommen MÜSSEN (z.B. ["Jazz", "Schlaganfall"]).
@@ -510,13 +495,13 @@ def answer_v2(
                                die per Semantic Search nicht gefunden werden könnten.
         """
         logger.info(f"==> Tool Call: search_messages(suchtext='{suchtext[:30]}...', personen={personen}, von={von_datum}, bis={bis_datum}, keywords={schluesselwoerter})")
-        pers_toks = [p for p in (personen or []) if p.startswith("[PER_")]
+        pers_names = [p.strip() for p in (personen or []) if p.strip()]
 
         # Phase 1: Semantic Search (immer)
         res = retrieve_v2(
             query=suchtext,
             user_id=user_id,
-            person_names=pers_toks,
+            person_names=pers_names,
             collections=["messages"],
             n_per_collection=n_per_collection,
             min_score=min_score,
@@ -553,12 +538,10 @@ def answer_v2(
 
     # Zusammenfassung für User/Prompt
     filter_parts = []
-    if person_tokens:
-        filter_parts.append(f"Personen: {', '.join(person_tokens)}")
+    if person_names:
+        filter_parts.append(f"Personen: {', '.join(person_names)}")
     if location_names:
-        filter_parts.append(f"Orte (Klartext): {', '.join(location_names)}")
-    elif location_tokens:
-        filter_parts.append(f"Orte: {', '.join(location_tokens)}")
+        filter_parts.append(f"Orte: {', '.join(location_names)}")
     if date_from:
         filter_parts.append(f"Ab: {date_from}")
     if date_to:
@@ -568,7 +551,7 @@ def answer_v2(
     filter_note = f"\nErkannte Suchfilter: {filter_summary}" if filter_summary else ""
 
     user_prompt = (
-        f"NUTZERANFRAGE:\n{masked_query}\n\n"
+        f"NUTZERANFRAGE:\n{query}\n\n"
         f"FILTER-INFORMATIONEN (aus Frontend):{filter_note}\n\n"
         f"INITIALER KONTEXT AUS DER DATENBANK:\n{context}\n\n"
         f"ANWEISUNG:\n"
@@ -602,7 +585,7 @@ def answer_v2(
     trace.finish(llm_answer)
 
     return {
-        "masked_query": masked_query,
+        "query": query,
         "answer": llm_answer,
         "sources": sources,
         "filter_summary": filter_summary,
@@ -656,8 +639,8 @@ async def answer_v2_stream(
     except Exception as exc:
         logger.warning("Query-Analyzer fehlgeschlagen (nutze Fallback): %s", exc)
 
-    # Fallback: Parse die Anfrage via LLM, um Klarnamen-Orte zu extrahieren,
-    # die das Frontend-NER möglicherweise nicht erkannt hat (z.B. "München" statt "[LOC_1]").
+    # Fallback: Parse die Anfrage via LLM, um Orte/Personen zu extrahieren,
+    # die das Frontend nicht übergeben hat.
     # Initialisiere location_names und person_names falls nicht übergeben
     location_names = location_names or []
     person_names = person_names or []
@@ -666,15 +649,11 @@ async def answer_v2_stream(
         from backend.rag.query_parser import parse_query
         parsed = parse_query(query)
         if parsed.locations:
-            plain_locs = [l for l in parsed.locations if not l.startswith("[LOC_")]
-            if plain_locs:
-                logger.info("Stream-Fallback: LLM-Parser fand Klarnamen-Orte: %s", plain_locs)
-                location_names = list(location_names) + plain_locs
+            logger.info("Stream-Fallback: LLM-Parser fand Klartext-Orte: %s", parsed.locations)
+            location_names = list(location_names) + parsed.locations
         if parsed.persons:
-            plain_pers = [p for p in parsed.persons if not p.startswith("[PER_")]
-            if plain_pers:
-                logger.info("Stream-Fallback: LLM-Parser fand Klarnamen-Personen: %s", plain_pers)
-                person_names = list(person_names) + plain_pers
+            logger.info("Stream-Fallback: LLM-Parser fand Klartext-Personen: %s", parsed.persons)
+            person_names = list(person_names) + parsed.persons
         if parsed.date_from and not date_from:
             date_from = parsed.date_from
         if parsed.date_to and not date_to:

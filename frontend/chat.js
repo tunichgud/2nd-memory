@@ -1,4 +1,4 @@
-// chat.js – Chat-UI Logik für memosaur v2 (Token-Flow)
+// chat.js – Chat-UI Logik für memosaur v2
 
 const SOURCE_LABELS = {
   photos: { label: 'Foto', color: 'blue', icon: '📷' },
@@ -20,7 +20,7 @@ function _debugLog(topic, data) {
 }
 
 // -------------------------------------------------------------------------
-// Abfrage senden – mit optionalem Token-Flow (v2) oder direktem (v0)
+// Abfrage senden
 // -------------------------------------------------------------------------
 let currentAbortController = null;
 
@@ -182,28 +182,6 @@ async function _sendQueryStream(query, abortSignal) {
     }
   }
 }
-
-/** v0-Fallback: direkt ohne Maskierung */
-async function _sendQueryV0(query, typingId) {
-  const res = await fetch('/api/query', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query, n_results: 8, min_score: 0.25 }),
-  });
-
-  removeTyping(typingId);
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: res.statusText }));
-    appendErrorMessage(err.detail || 'Unbekannter Fehler (v0)');
-    return;
-  }
-
-  const data = await res.json();
-  appendAssistantMessage(data.answer, data.sources, data.parsed_query);
-}
-
-/** Unmaskiert String-Felder in einem Metadaten-Objekt. */
 
 function quickQuery(text) {
   document.getElementById('chat-input').value = text;
@@ -619,16 +597,8 @@ async function updateStreamingSources(ui, sources) {
   ui.srcWrapper.classList.remove('hidden');
   ui.srcWrapper.innerHTML = ''; // überschreiben
 
-  const unmaskedSources = await Promise.all(
-    sources.map(async (src) => ({
-      ...src,
-      document: src.document,
-      metadata: src.metadata,
-    }))
-  );
-
   const byCollection = {};
-  unmaskedSources.forEach(src => {
+  sources.forEach(src => {
     if (!byCollection[src.collection]) byCollection[src.collection] = [];
     byCollection[src.collection].push(src);
   });

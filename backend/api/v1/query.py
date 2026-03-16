@@ -1,15 +1,14 @@
 """
-query.py – /api/v1/query
+query.py – /api/v1/query_stream
 
-Token-aware RAG-Abfrage. Das Frontend schickt bereits maskierten Text
-(Tokens statt Klarnamen). Die Antwort enthält ebenfalls nur Tokens –
-das Re-Mapping findet im Browser via IndexedDB statt.
+RAG-Abfrage mit Streaming-Support (SSE).
 """
 from __future__ import annotations
 
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 import aiosqlite
 
@@ -38,86 +37,6 @@ class V1QueryRequest(BaseModel):
     use_thinking_mode: bool = Field(default=True, description="Aktiviert Researcher → Challenger → Decider Pipeline")
     thinking_max_iterations: int = Field(default=10, ge=1, le=10, description="Max. Iterationen im Thinking Mode")
 
-
-class V1SourceItem(BaseModel):
-    id: str
-    collection: str
-    score: float
-    document: str           # Enthält nur Tokens
-    metadata: dict
-
-
-class V1QueryResponse(BaseModel):
-    query: str
-    answer: str
-    sources: list[V1SourceItem]
-    source_count: int
-    filter_summary: str = ""
-
-
-@router.post("/query", response_model=V1QueryResponse)
-async def query_v1(
-    req: V1QueryRequest,
-    db: aiosqlite.Connection = Depends(get_db),
-):
-    """Token-aware RAG-Abfrage. Ein- und Ausgabe enthalten nur Tokens."""
-    import asyncio
-
-    logger.info("=== DEBUG API /v1/query ===")
-    logger.info("  masked_query:    %s", req.masked_query)
-    logger.info("  location_tokens: %s", req.location_tokens)
-    logger.info("  location_names:  %s", req.location_names)
-    logger.info("===========================")
-
-    # User prüfen
-    cursor = await db.execute("SELECT id FROM users WHERE id = ? AND is_active = 1", (req.user_id,))
-    if not await cursor.fetchone():
-        raise HTTPException(status_code=404, detail="User nicht gefunden oder inaktiv")
-
-    try:
-        from backend.rag.retriever_v2 import answer_v2
-
-        result = await asyncio.get_event_loop().run_in_executor(
-            None,
-            lambda: answer_v2(
-                masked_query=req.masked_query,
-                user_id=req.user_id,
-                person_tokens=req.person_tokens,
-                location_tokens=req.location_tokens,
-                location_names=req.location_names,
-                collections=req.collections,
-                n_per_collection=req.n_results,
-                min_score=req.min_score,
-                date_from=req.date_from,
-                date_to=req.date_to,
-            ),
-        )
-
-        sources = [
-            V1SourceItem(
-                id=s["id"],
-                collection=s["collection"],
-                score=s["score"],
-                document=s["document"],
-                metadata=s["metadata"],
-            )
-            for s in result["sources"]
-        ]
-
-        return V1QueryResponse(
-            masked_query=req.masked_query,
-            masked_answer=result["answer"],
-            sources=sources,
-            source_count=len(sources),
-            filter_summary=result.get("filter_summary", ""),
-        )
-
-    except Exception as exc:
-        logger.exception("Fehler bei v1 RAG-Abfrage")
-        raise HTTPException(status_code=500, detail=str(exc))
-
-
-from fastapi.responses import StreamingResponse
 
 @router.post("/query_stream")
 async def query_stream_v1(
