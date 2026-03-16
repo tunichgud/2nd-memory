@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 _client: Optional[Elasticsearch] = None
 _config: Optional[Dict[str, Any]] = None
 _es_available: Optional[bool] = None  # None = noch nicht geprueft; True/False nach erstem Check
+_knn_unavailable: set = set()  # Collections ohne embedding-Feld (kein KNN möglich)
 
 def _get_config() -> Dict[str, Any]:
     global _config
@@ -316,37 +317,37 @@ def query_es(
         if date_to: date_range["lte"] = _iso_to_epoch_ms(date_to, end_of_day=True)
         must_filters.append({"range": {"timestamp": date_range}})
 
-    # KNN Suche kombiniert mit Filter
-    search_query = {
-        "knn": {
-            "field": "embedding",
-            "query_vector": query_vector,
-            "k": n_results,
-            "num_candidates": 100,
-            "filter": must_filters
-        }
-    }
-
     import json
+
+    use_bm25_only = collection_name in _knn_unavailable
+
+    if use_bm25_only:
+        search_query = {"query": {"bool": {"filter": must_filters}}}
+    else:
+        # KNN Suche kombiniert mit Filter
+        search_query = {
+            "knn": {
+                "field": "embedding",
+                "query_vector": query_vector,
+                "k": n_results,
+                "num_candidates": 100,
+                "filter": must_filters
+            }
+        }
+
     logger.debug("ES Search Query [%s]: %s", collection_name, json.dumps(search_query, indent=2, ensure_ascii=False))
 
     try:
         res = client.search(index=index_name, body=search_query, size=n_results)
     except BadRequestError as exc:
-        # Fallback: Wenn das embedding-Feld nicht im Mapping existiert
-        # (z.B. Photos ohne Embeddings exportiert), nutze BM25 text-only Suche.
-        logger.warning(
-            "[%s] KNN-Suche fehlgeschlagen (embedding-Feld fehlt?), Fallback auf BM25: %s",
-            collection_name, exc,
-        )
-        fallback_query = {
-            "query": {
-                "bool": {
-                    "filter": must_filters,
-                }
-            }
-        }
-        res = client.search(index=index_name, body=fallback_query, size=n_results)
+        if not use_bm25_only:
+            # Embedding-Feld fehlt — einmalig loggen, danach dauerhaft BM25 für diese Collection
+            _knn_unavailable.add(collection_name)
+            logger.info("[%s] Kein embedding-Feld im Index — nutze dauerhaft BM25 (kein KNN)", collection_name)
+            fallback_query = {"query": {"bool": {"filter": must_filters}}}
+            res = client.search(index=index_name, body=fallback_query, size=n_results)
+        else:
+            raise
 
     hits = []
     for hit in res["hits"]["hits"]:
