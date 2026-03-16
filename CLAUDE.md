@@ -8,8 +8,8 @@ Memosaur ist ein persönliches Gedächtnis-System: es importiert WhatsApp-Chats,
 - **Backend:** Python (FastAPI) unter `backend/`
 - **WhatsApp Bridge:** Node.js (Express + whatsapp-web.js) — `index.js`
 - **Frontend:** HTML/JS unter `frontend/`
-- **Vektordatenbank:** ChromaDB
-- **KI:** Claude Sonnet (Anthropic API)
+- **Vektordatenbank:** Elasticsearch (BM25 + KNN-Vektor-Suche)
+- **KI:** Gemini / Ollama / Anthropic (über `backend/llm/`)
 
 ---
 
@@ -25,12 +25,12 @@ A: `config.yaml` für alle LLM-, RAG- und Pfad-Einstellungen. Secrets (API-Keys)
 A:
 - `backend/main.py` — FastAPI App, Routers, CORS
 - `backend/api/v1/` — REST Endpoints (webhook, entities, media, validation)
-- `backend/rag/` — RAG Pipeline (retriever_v2.py, store.py)
+- `backend/rag/` — RAG Pipeline (retriever_v3.py, es_store.py)
 - `backend/ingestion/` — Import-Logik (photos.py, google_maps.py)
 - `backend/llm/` — LLM Provider-Abstraktion
 
-**Q: Welche ChromaDB-Collections gibt es?**
-A: `messages`, `photos`, `reviews`, `saved_places` — immer lowercase, plural.
+**Q: Welche Elasticsearch-Indices gibt es?**
+A: `messages`, `photos`, `reviews`, `saved_places` — immer lowercase, plural. (Die `faces`-Collection nutzt noch ChromaDB — Migration via `@face-recognition-dev` ausstehend.)
 
 **Q: Welche API-Conventions gelten?**
 A: Alle Endpoints unter `/api/v1/`. CORS erlaubt localhost:8001 (Frontend) und localhost:3001 (WhatsApp Bridge). Health-Check: `GET /health`.
@@ -141,7 +141,7 @@ A: Python: `pytest tests/` — Node.js: `npm test` (falls konfiguriert).
 A: Ja — `docker-compose.yaml` + `Dockerfile` (Backend) + `Dockerfile.whatsapp` (WhatsApp Bridge). Dokumentation in `DOCKER_README.md`.
 
 **Q: Wo werden Daten gespeichert?**
-A: `data/photos/` (Originale), `data/thumbnails/` (300px), ChromaDB unter `chroma_db/` bzw. `chromadb_data/`.
+A: `data/photos/` (Originale), `data/thumbnails/` (300px), Elasticsearch unter `data/elasticsearch/`, Snapshots unter `data/es_snapshots/`.
 
 ---
 
@@ -154,5 +154,6 @@ A: `data/photos/` (Originale), `data/thumbnails/` (300px), ChromaDB unter `chrom
 | `DOCKER_README.md` | Docker-Setup |
 | `docs/ARCHITECTURE_DECISIONS.md` | Architekturentscheidungen |
 | `docs/STREAMING_ARCHITECTURE.md` | Streaming-Implementierung |
+| `docs/MIGRATION_NOTES.md` | ChromaDB→ES Migration — offene Reste |
 | `.antigravity/README.md` | Multi-Agent Setup Übersicht |
 | `.antigravity/rules.md` | Globale Agent-Regeln |

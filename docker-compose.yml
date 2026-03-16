@@ -12,7 +12,7 @@
 # Services:
 #   - backend: FastAPI Backend (Port 8000)
 #   - whatsapp: WhatsApp Web.js Bridge (Port 3001)
-#   - chromadb: Vector Database (Port 8001)
+#   - elasticsearch: Vector + Fulltext Database (Port 9200)
 #
 # ==============================================================================
 
@@ -40,8 +40,7 @@ services:
       # Environment aus .env Datei (siehe .env.example)
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000}
       - DATABASE_PATH=${DATABASE_PATH:-data/memosaur.db}
-      - CHROMA_HOST=${CHROMA_HOST:-chromadb}
-      - CHROMA_PORT=${CHROMA_PORT:-8000}
+      - ELASTICSEARCH_URL=${ELASTICSEARCH_URL:-http://elasticsearch:9200}
       - WHATSAPP_BRIDGE_HOST=${WHATSAPP_BRIDGE_HOST:-whatsapp}
       - WHATSAPP_BRIDGE_PORT=${WHATSAPP_BRIDGE_PORT:-3001}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
@@ -62,7 +61,7 @@ services:
       - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-15}
       - REFRESH_TOKEN_EXPIRE_DAYS=${REFRESH_TOKEN_EXPIRE_DAYS:-7}
     depends_on:
-      - chromadb
+      - elasticsearch
     restart: unless-stopped
     networks:
       - memosaur
@@ -103,55 +102,30 @@ services:
       start_period: 60s
 
   # ----------------------------------------------------------------------------
-  # ChromaDB (Vector Database)
+  # Elasticsearch (Vektor- + Volltextdatenbank)
   # ----------------------------------------------------------------------------
-  chromadb:
-    image: chromadb/chroma:latest
-    container_name: memosaur-chromadb
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: memosaur-elasticsearch
     ports:
-      - "8001:8000"
+      - "9200:9200"
     volumes:
-      - ./data/chroma:/chroma/chroma
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
+      - ./data/es_snapshots:/usr/share/elasticsearch/snapshots
     environment:
-      - IS_PERSISTENT=TRUE
-      - ANONYMIZED_TELEMETRY=${CHROMA_ANONYMIZED_TELEMETRY:-FALSE}
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - path.repo=/usr/share/elasticsearch/snapshots
     restart: unless-stopped
     networks:
       - memosaur
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 30s
-
-  # ----------------------------------------------------------------------------
-  # Elasticsearch (optional - für advanced RAG)
-  # ----------------------------------------------------------------------------
-  # Uncomment wenn du Elasticsearch nutzen willst (benötigt ~2GB RAM)
-  #
-  elasticsearch:
-     image: elasticsearch:8.12.0
-     container_name: memosaur-elasticsearch
-     ports:
-       - "9200:9200"
-     volumes:
-       - ./data/elasticsearch:/usr/share/elasticsearch/data
-       - ./data/es_snapshots:/usr/share/elasticsearch/snapshots
-     environment:
-       - discovery.type=single-node
-       - xpack.security.enabled=false
-       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-       - path.repo=/usr/share/elasticsearch/snapshots
-     restart: unless-stopped
-     networks:
-       - memosaur
-     healthcheck:
-       test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
-       interval: 30s
-       timeout: 10s
-       retries: 3
-       start_period: 60s
+      start_period: 60s
 
 # ------------------------------------------------------------------------------
 # Networks

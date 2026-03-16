@@ -5,9 +5,13 @@
 # Google Takeout Export (Fotos, Nachrichten, Bewertungen)
 takeout/
 
-# Lokale Datenbank (ChromaDB + SQLite)
+# Lokale Datenbank (SQLite, Elasticsearch-Daten, Foto-Originals)
 data/
 !data/.gitkeep
+
+# ChromaDB-Altdaten (deprecated — nur noch faces-Domain, Phase 2)
+chroma_db/
+chromadb_data/
 
 # Sample-Liste (enthält keine Rohdaten, aber Dateinamen)
 # sample/photo_sample.json darf eingecheckt werden – nur Metadaten

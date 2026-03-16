@@ -12,12 +12,12 @@ Stand: 16.03.2026 | Branch: `main`
 - Endpoint: `POST /api/v1/ingest/messages` mit `source_type=whatsapp`
 
 ### 1.2 WhatsApp Live-Ingestion (Bridge)
-- Echtzeit-Erfassung: Jede ein- und ausgehende WhatsApp-Nachricht wird live in ChromaDB indiziert
+- Echtzeit-Erfassung: Jede ein- und ausgehende WhatsApp-Nachricht wird live in Elasticsearch indiziert
 - Deduplizierter Bulk-Import: `POST /api/whatsapp/import-all-chats` mit Smart Deduplication
 - Selektiver Import: `POST /api/whatsapp/import-selected-chats`
 - Rate Limiting: 3s Pause zwischen Chats, 60s Batch-Pause nach je 10 Chats
 - Exponential Backoff: Automatische Wiederholung bei WhatsApp-Rate-Limits
-- Import-Tracking: Pro-Chat Timestamp-Tracking in ChromaDB
+- Import-Tracking: Pro-Chat Timestamp-Tracking in Elasticsearch
 
 ### 1.3 Signal Messenger Import
 - JSON-Export-Parser: Signal Desktop Backup (messages.json) importieren
@@ -63,13 +63,13 @@ Stand: 16.03.2026 | Branch: `main`
 ### 2.3 Query-Parsing (LLM-basiert)
 - Strukturierte Filter-Extraktion: Personen, Datum/Zeitraum, Orte aus natürlicher Sprache
 - Temporale Auflösung: "letztes Wochenende", "im August" etc.
-- ChromaDB where-Filter: Automatische Generierung von Metadaten-Filtern
+- Elasticsearch-Filter: Automatische Generierung von ES-Query-Filtern (date_range, term)
 
 ### 2.4 Hybrid-Retrieval
-- Semantische Suche: Embedding-basiert (paraphrase-multilingual-MiniLM-L12-v2)
-- Keyword-Suche: Ergänzende exakte Textsuche
-- Multi-Collection: Parallele Suche über `messages`, `photos`, `reviews`, `saved_places`
-- Deduplizierung: Semantische + Keyword-Ergebnisse automatisch dedupliziert
+- Semantische Suche: KNN-Vektor-Suche in Elasticsearch (paraphrase-multilingual-MiniLM-L12-v2)
+- BM25-Volltext-Suche: Elasticsearch-native Keyword-Suche mit Relevanz-Scoring
+- Multi-Index: Parallele Suche über `messages`, `photos`, `reviews`, `saved_places`
+- Deduplizierung: Semantische + BM25-Ergebnisse automatisch dedupliziert
 
 ### 2.5 Cross-Encoder Re-Ranking
 - Modell: `cross-encoder/mmarco-mMiniLMv2-L12-H384-v1` (multilingual, lokal)
@@ -129,7 +129,7 @@ Stand: 16.03.2026 | Branch: `main`
 ### 4.2 Sprachnachrichten-Pipeline
 - Automatische Erkennung aller WhatsApp-Sprachnachrichten
 - LLM-Zusammenfassung: Transkript -> 1-3 Sätze (3. Person)
-- ChromaDB-Indexierung als Nachricht
+- Elasticsearch-Indexierung als Nachricht
 
 ---
 
@@ -176,8 +176,9 @@ Stand: 16.03.2026 | Branch: `main`
 
 ## 9. Infrastruktur
 - **config.yaml**: Zentrale Konfiguration für LLM, Pfade, RAG, ES, STT, FaceRec
-- **Docker**: docker-compose.yaml, Dockerfile (Backend + WhatsApp Bridge)
+- **Docker**: docker-compose.yaml, Dockerfile (Backend + WhatsApp Bridge + Elasticsearch)
 - **start.sh**: Startet Backend (Port 8000) + WhatsApp Bridge (Port 3001)
+- **Elasticsearch**: Vektordatenbank + BM25-Volltext (Port 9200), Daten unter `data/elasticsearch/`
 - **Media-Serving**: Thumbnails (300px), Full-Size (1200px), Bounding-Box-Crop, LRU-Cache
 - **Frontend-Serving**: FastAPI serviert `/static/`, SPA Root
 
@@ -191,6 +192,6 @@ Stand: 16.03.2026 | Branch: `main`
 | RAG-Subsysteme | 8 (Streaming, Thinking Mode, Query-Parsing, Hybrid-Retrieval, Re-Ranking, Context, Temporal, Bot) |
 | Gesichtserkennung | 5 Bereiche (Detection, Clustering, Linking, Entity-Mgmt, Validation) |
 | LLM Provider | 4 (Ollama, Gemini, OpenAI, Anthropic) |
-| ChromaDB Collections | 5 (`messages`, `photos`, `reviews`, `saved_places`, `faces`) |
+| Elasticsearch-Indices | 4 (`messages`, `photos`, `reviews`, `saved_places`) + `faces` noch ChromaDB (Phase 2) |
 | REST API Endpoints | ~50+ |
 | Frontend Tabs | 4 (Chat, Personen, Validierung, Karte) |
