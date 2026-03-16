@@ -133,7 +133,6 @@ Add to `.github/workflows/test.yml` (or equivalent):
 Issues or questions? Check:
 1. `TEST_REPORT.md` for findings
 2. Test docstrings for test rationale
-3. `.antigravity/tester.md` for agent role definition
 
 ---
 

@@ -53,57 +53,6 @@ A: Conventional Commits — `feat:`, `fix:`, `docs:`, `refactor:`, `test:`.
 
 ---
 
-## Q&A: Multi-Agent Setup (.antigravity)
-
-**Q: Was ist `.antigravity/`?**
-A: Konfigurationsordner für das **Antigravity Manager View** Multi-Agent-System. Jede `.md`-Datei definiert einen spezialisierten Agenten mit Rolle, Kontext, Domain und Verhalten.
-
-**Q: Welche Agenten gibt es?**
-
-| Agent | Datei | Trigger | Modell |
-|-------|-------|---------|--------|
-| BD (Product Manager) | `bd.md` | Neue Business-Anforderungen, PRD | Sonnet Thinking |
-| UX Manager | `ux.md` | UI/UX-Änderungen, Wireframes | Sonnet Standard |
-| Architect | `architect.md` | Technisches Planen, System Design | Sonnet Thinking |
-| WhatsApp-Dev | `whatsapp-dev.md` | WhatsApp Import, Bot, Bridge | Sonnet Standard |
-| Face-Recognition-Dev | `face-recognition-dev.md` | Fotos, Gesichter, Clustering | Sonnet Standard |
-| Chat-RAG-Dev | `chat-rag-dev.md` | Chat UI, RAG Pipeline, LLM | Sonnet Standard |
-| Developer | `developer.md` | Infrastruktur, Config, allgemein | Sonnet Standard |
-| Tester | `tester.md` | Tests schreiben und ausführen | Sonnet Standard |
-| QS | `qs.md` | Bug-Koordination, Log-Analyse | Sonnet Thinking |
-| Scribe | `scribe.md` | Dokumentation nach Feature-Abschluss | Sonnet Standard |
-| Prompt-Engineer | `prompt-engineer.md` | Prompt-Optimierung | Sonnet Standard |
-
-**Q: Welchen Developer-Agenten soll ich wählen?**
-A: Faustregel:
-- WhatsApp / Import / Bot → `@whatsapp-dev`
-- Gesichter / Fotos / Personen → `@face-recognition-dev`
-- Chat / Suche / LLM / RAG → `@chat-rag-dev`
-- Alles andere (Config, Media, Infra) → `@developer`
-
-**Q: Was sind globale Agent-Regeln?**
-A: Siehe `.antigravity/rules.md`. Kernpunkte: Immer existierenden Code lesen bevor schreiben, niemals ohne Bestätigung löschen/überschreiben, kleine fokussierte Änderungen bevorzugen, bei Unklarheit fragen.
-
-**Q: In welcher Reihenfolge sollen Agenten aufgerufen werden?**
-A:
-1. (Optional) `@bd` → PRD, User Stories
-2. (Optional) `@ux` → User Flows, Wireframes
-3. `@architect` → Technischer Plan (Pflicht vor Implementierung)
-4. Passender `@*-dev` → Implementierung nach Freigabe
-5. `@tester` → Tests schreiben und ausführen
-6. `@qs` → Qualitätsprüfung (bei Bugs immer zuerst!)
-7. `@scribe` → Dokumentation
-
-**Q: Bug gefunden — was tun?**
-A: Immer `@qs [Bug-Beschreibung]` — QS koordiniert Analyse, Fix und Verifikation.
-
-**Q: Welche Agenten kann ich parallel laufen lassen?**
-A: Sinnvolle Kombinationen: `BD + UX`, `Tester + Scribe`, `WhatsApp-Dev + Face-Recognition-Dev`, `Chat-RAG-Dev + Developer`.
-
-**Nicht parallel:** Architect + Developer am gleichen Feature, zwei Devs auf derselben Datei, `WhatsApp-Dev + Developer` auf `backend/main.py`.
-
----
-
 ## Q&A: Wichtige File-Ownership
 
 **Q: Wer darf welche Dateien anfassen?**
@@ -154,5 +103,3 @@ A: `data/photos/` (Originale), `data/thumbnails/` (300px), ChromaDB unter `chrom
 | `DOCKER_README.md` | Docker-Setup |
 | `docs/ARCHITECTURE_DECISIONS.md` | Architekturentscheidungen |
 | `docs/STREAMING_ARCHITECTURE.md` | Streaming-Implementierung |
-| `.antigravity/README.md` | Multi-Agent Setup Übersicht |
-| `.antigravity/rules.md` | Globale Agent-Regeln |

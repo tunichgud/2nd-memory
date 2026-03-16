@@ -290,7 +290,6 @@ tail -f logs/whatsapp.log
 
 - **Hauptdokumentation**: [README.md](README.md)
 - **Architektur-Details**: [PRODUCT_ANALYSIS.md](PRODUCT_ANALYSIS.md)
-- **Antigravity Multi-Agent Setup**: [.antigravity/README.md](.antigravity/README.md)
 
 ---
 
