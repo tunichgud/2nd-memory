@@ -78,6 +78,7 @@ docs/
 tests/
 *.md
 !README.md
+.antigravity/
 
 # -------------------------------------------------------
 # Backups
