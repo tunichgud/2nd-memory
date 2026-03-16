@@ -8,16 +8,14 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - path.repo=/usr/share/elasticsearch/snapshots
     ports:
       - "9200:9200"
     volumes:
-      - es_data:/usr/share/elasticsearch/data
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
+      - ./data/es_snapshots:/usr/share/elasticsearch/snapshots
     networks:
       - memosaur-network
-
-volumes:
-  es_data:
-    driver: local
 
 networks:
   memosaur-network:

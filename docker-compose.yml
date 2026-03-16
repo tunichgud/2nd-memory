@@ -130,26 +130,28 @@ services:
   # ----------------------------------------------------------------------------
   # Uncomment wenn du Elasticsearch nutzen willst (benötigt ~2GB RAM)
   #
-  # elasticsearch:
-  #   image: elasticsearch:8.12.0
-  #   container_name: memosaur-elasticsearch
-  #   ports:
-  #     - "9200:9200"
-  #   volumes:
-  #     - ./data/elasticsearch:/usr/share/elasticsearch/data
-  #   environment:
-  #     - discovery.type=single-node
-  #     - xpack.security.enabled=false
-  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-  #   restart: unless-stopped
-  #   networks:
-  #     - memosaur
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 60s
+  elasticsearch:
+     image: elasticsearch:8.12.0
+     container_name: memosaur-elasticsearch
+     ports:
+       - "9200:9200"
+     volumes:
+       - ./data/elasticsearch:/usr/share/elasticsearch/data
+       - ./data/es_snapshots:/usr/share/elasticsearch/snapshots
+     environment:
+       - discovery.type=single-node
+       - xpack.security.enabled=false
+       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+       - path.repo=/usr/share/elasticsearch/snapshots
+     restart: unless-stopped
+     networks:
+       - memosaur
+     healthcheck:
+       test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+       interval: 30s
+       timeout: 10s
+       retries: 3
+       start_period: 60s
 
 # ------------------------------------------------------------------------------
 # Networks
@@ -165,3 +167,4 @@ networks:
 #   memosaur-data:
 #   memosaur-chroma:
 #   memosaur-whatsapp:
+
