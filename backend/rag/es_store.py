@@ -597,3 +597,115 @@ def reset_es_index(collection_name: str):
     if client.indices.exists(index=index_name):
         client.indices.delete(index=index_name)
         logger.info("ES Index gelöscht: %s", index_name)
+
+
+def fetch_neighbors_es(
+    collection_name: str,
+    chat_name: str,
+    timestamp_ms: int,
+    user_id: str,
+    n_before: int = 1,
+    n_after: int = 1,
+    exclude_ids: set | None = None,
+) -> list[dict]:
+    """Laedt die N zeitlich naechsten Chunks vor und nach einem Treffer im selben Chat.
+
+    Wird fuer Neighbor-Expansion in retrieve_v2 genutzt:
+    WhatsApp-Nachrichten sind fragmentiert — wichtige Information steckt oft
+    im Folge-Chunk eines Matches.
+
+    Args:
+        collection_name: Name der Collection (sinnvoll nur fuer "messages").
+        chat_name: Name des Chats, auf den der Filter beschraenkt wird.
+        timestamp_ms: Unix-Timestamp des Treffer-Chunks in Millisekunden.
+        user_id: Pflicht-Filter fuer User-Scoping.
+        n_before: Anzahl der Chunks vor dem Treffer (Standard 1).
+        n_after: Anzahl der Chunks nach dem Treffer (Standard 1).
+        exclude_ids: Dokument-IDs, die uebersprungen werden sollen (bereits gefundene).
+
+    Returns:
+        Liste von Dicts (gleiche Struktur wie query_es-Ergebnisse), leer wenn
+        ES nicht verfuegbar oder Collection kein chat_name-Feld hat.
+    """
+    if _es_available is False:
+        return []
+    if collection_name != "messages":
+        return []
+
+    client = get_es_client()
+    index_name = get_index_name(collection_name)
+
+    if not client.indices.exists(index=index_name):
+        return []
+
+    exclude_ids = exclude_ids or set()
+    results: List[Dict[str, Any]] = []
+
+    base_filters = [
+        {"term": {"user_id": user_id}},
+        {"term": {"chat_name": chat_name}},
+    ]
+
+    try:
+        # Chunks VOR dem Treffer: timestamp < timestamp_ms, absteigend sortiert
+        if n_before > 0:
+            query_before = {
+                "query": {
+                    "bool": {
+                        "filter": base_filters + [
+                            {"range": {"timestamp": {"lt": timestamp_ms}}}
+                        ]
+                    }
+                },
+                "sort": [{"timestamp": {"order": "desc"}}],
+            }
+            res_before = client.search(
+                index=index_name, body=query_before, size=n_before
+            )
+            for hit in reversed(res_before["hits"]["hits"]):
+                if hit["_id"] in exclude_ids:
+                    continue
+                source = hit["_source"]
+                results.append({
+                    "id": hit["_id"],
+                    "document": source.get("content", ""),
+                    "metadata": source.get("metadata", {}),
+                    "score": 0.0,
+                    "collection": collection_name,
+                })
+
+        # Chunks NACH dem Treffer: timestamp > timestamp_ms, aufsteigend sortiert
+        if n_after > 0:
+            query_after = {
+                "query": {
+                    "bool": {
+                        "filter": base_filters + [
+                            {"range": {"timestamp": {"gt": timestamp_ms}}}
+                        ]
+                    }
+                },
+                "sort": [{"timestamp": {"order": "asc"}}],
+            }
+            res_after = client.search(
+                index=index_name, body=query_after, size=n_after
+            )
+            for hit in res_after["hits"]["hits"]:
+                if hit["_id"] in exclude_ids:
+                    continue
+                source = hit["_source"]
+                results.append({
+                    "id": hit["_id"],
+                    "document": source.get("content", ""),
+                    "metadata": source.get("metadata", {}),
+                    "score": 0.0,
+                    "collection": collection_name,
+                })
+
+    except Exception as exc:
+        logger.warning(
+            "fetch_neighbors_es '%s' chat='%s' ts=%d fehlgeschlagen: %s",
+            collection_name, chat_name, timestamp_ms, exc,
+        )
+        return []
+
+    return results

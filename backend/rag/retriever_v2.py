@@ -159,6 +159,41 @@ def retrieve_v2(
 
     all_results.sort(key=lambda r: (r.get("is_relevant", False), r.get("score", 0)), reverse=True)
     logger.info("v2 ES retrieve GESAMT: %d Ergebnisse für '%s'", len(all_results), query[:40])
+
+    # Neighbor-Expansion fuer messages: laedt je 1 Chunk vor/nach jedem Treffer
+    from backend.rag.es_store import fetch_neighbors_es
+    existing_ids: set[str] = {r["id"] for r in all_results}
+    neighbors: list[dict] = []
+    for hit in all_results:
+        if hit.get("collection") != "messages":
+            continue
+        ts_sec = hit.get("metadata", {}).get("date_ts")
+        if not ts_sec:
+            continue
+        chat_name = hit.get("metadata", {}).get("chat_name")
+        if not chat_name:
+            continue
+        new_neighbors = fetch_neighbors_es(
+            collection_name="messages",
+            chat_name=chat_name,
+            timestamp_ms=int(ts_sec) * 1000,
+            user_id=user_id,
+            n_before=1,
+            n_after=1,
+            exclude_ids=existing_ids,
+        )
+        for nb in new_neighbors:
+            if nb["id"] not in existing_ids:
+                existing_ids.add(nb["id"])
+                neighbors.append(nb)
+
+    if neighbors:
+        logger.info(
+            "v2 Neighbor-Expansion: %d zusaetzliche Chunks fuer '%s'",
+            len(neighbors), query[:40],
+        )
+        all_results.extend(neighbors)
+
     return all_results
 
 
