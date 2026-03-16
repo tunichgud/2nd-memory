@@ -8,7 +8,7 @@ und Metadaten in Elasticsearch.
 import logging
 import sys
 from typing import Any, Dict, List, Optional
-from elasticsearch import Elasticsearch, helpers
+from elasticsearch import Elasticsearch, helpers, BadRequestError
 import yaml
 from pathlib import Path
 
@@ -322,15 +322,31 @@ def query_es(
     import json
     logger.debug("ES Search Query [%s]: %s", collection_name, json.dumps(search_query, indent=2, ensure_ascii=False))
 
-    res = client.search(index=index_name, body=search_query, size=n_results)
-    
+    try:
+        res = client.search(index=index_name, body=search_query, size=n_results)
+    except BadRequestError as exc:
+        # Fallback: Wenn das embedding-Feld nicht im Mapping existiert
+        # (z.B. Photos ohne Embeddings exportiert), nutze BM25 text-only Suche.
+        logger.warning(
+            "[%s] KNN-Suche fehlgeschlagen (embedding-Feld fehlt?), Fallback auf BM25: %s",
+            collection_name, exc,
+        )
+        fallback_query = {
+            "query": {
+                "bool": {
+                    "filter": must_filters,
+                }
+            }
+        }
+        res = client.search(index=index_name, body=fallback_query, size=n_results)
+
     hits = []
     for hit in res["hits"]["hits"]:
         source = hit["_source"]
         hits.append({
             "id": hit["_id"],
             "document": source["content"],
-            "metadata": source["metadata"],
+            "metadata": source.get("metadata", {}),
             "score": hit["_score"],
             "collection": collection_name
         })

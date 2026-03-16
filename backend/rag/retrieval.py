@@ -201,7 +201,6 @@ def build_retrieval_fn(
             budget=ContextBudget(max_tokens=DEFAULT_TOKEN_BUDGET),
             top_n_full=TOP_N_FULL,
             keyword_sources=new_kw or None,
-            sort_order=sort_order,
         )
 
     return retrieval_fn, thinking_sources
