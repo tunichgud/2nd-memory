@@ -3,6 +3,8 @@ const qrcode = require('qrcode-terminal');
 const axios = require('axios');
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 
 // Backend URL (Docker-aware: nutzt backend:8000 im Container, localhost:8000 lokal)
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
@@ -279,7 +281,87 @@ client.on('message_create', async msg => {
     }
 });
 
-client.initialize();
+// ==============================================================================
+// Robuste client.initialize() mit Retry + Exponential Backoff
+// ==============================================================================
+
+const WWEBJS_CACHE_DIR = path.join(__dirname, '.wwebjs_cache');
+const WWEBJS_AUTH_DIR  = path.join(__dirname, '.wwebjs_auth');
+
+/**
+ * Löscht den .wwebjs_cache-Ordner rekursiv (veralterter Cache → "Execution context destroyed").
+ */
+function clearWwebjsCache() {
+    if (fs.existsSync(WWEBJS_CACHE_DIR)) {
+        fs.rmSync(WWEBJS_CACHE_DIR, { recursive: true, force: true });
+        console.log('[WhatsApp] .wwebjs_cache geleert.');
+    }
+}
+
+/**
+ * Löscht Session-Daten in .wwebjs_auth (erzwingt erneuten QR-Scan).
+ */
+function clearWwebjsAuth() {
+    if (fs.existsSync(WWEBJS_AUTH_DIR)) {
+        fs.rmSync(WWEBJS_AUTH_DIR, { recursive: true, force: true });
+        console.log('[WhatsApp] .wwebjs_auth geleert — QR-Scan beim naechsten Start erforderlich.');
+    }
+}
+
+/**
+ * Startet client.initialize() mit bis zu maxAttempts Versuchen.
+ * Vor jedem Retry (nicht vor dem ersten) wird der Cache geleert.
+ * @param {number} maxAttempts - Maximale Anzahl Versuche (Standard: 3)
+ */
+async function initializeWithRetry(maxAttempts = 3) {
+    const delays = [5000, 10000, 20000];
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+            console.log(`[WhatsApp] client.initialize() — Versuch ${attempt}/${maxAttempts}`);
+            await client.initialize();
+            console.log('[WhatsApp] client.initialize() erfolgreich.');
+            return;
+        } catch (err) {
+            console.error(`[WhatsApp] client.initialize() Fehler (Versuch ${attempt}): ${err.message}`);
+            if (attempt < maxAttempts) {
+                const waitMs = delays[attempt - 1] || 20000;
+                console.log(`[WhatsApp] Leere .wwebjs_cache und warte ${waitMs / 1000}s vor Retry...`);
+                clearWwebjsCache();
+                await new Promise(resolve => setTimeout(resolve, waitMs));
+            } else {
+                console.error('[WhatsApp] Alle Versuche fehlgeschlagen. Prozess wird beendet.');
+                process.exit(1);
+            }
+        }
+    }
+}
+
+// Auth-Fehler: Session ungültig → Cache + Auth leeren, Prozess beenden (QR-Scan erforderlich)
+client.on('auth_failure', (msg) => {
+    console.error(`[WhatsApp] Authentifizierungsfehler: ${msg}`);
+    console.error('[WhatsApp] Session ungültig — leere Cache und Auth-Daten.');
+    clearWwebjsCache();
+    clearWwebjsAuth();
+    console.error('[WhatsApp] Bitte neu starten und QR-Code scannen.');
+    process.exit(1);
+});
+
+// Verbindung verloren → nach 30s automatisch neu verbinden
+client.on('disconnected', async (reason) => {
+    console.warn(`[WhatsApp] Verbindung getrennt: ${reason}`);
+    console.log('[WhatsApp] Reconnect in 30s...');
+    await new Promise(resolve => setTimeout(resolve, 30000));
+    console.log('[WhatsApp] Starte Reconnect...');
+    await initializeWithRetry();
+});
+
+// Globaler Handler für unerwartete Promise-Rejections — warnt, beendet Prozess NICHT
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('[WhatsApp] Unbehandelte Promise-Rejection:', reason);
+    console.error('[WhatsApp] Promise:', promise);
+});
+
+initializeWithRetry();
 
 // ==============================================================================
 // REST API für Frontend
