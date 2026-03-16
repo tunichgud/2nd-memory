@@ -65,6 +65,24 @@ def _ensure_schema() -> None:
                 hallucination_risk TEXT DEFAULT 'unknown'
             );
 
+            CREATE TABLE IF NOT EXISTS thinking_traces (
+                id                    INTEGER PRIMARY KEY AUTOINCREMENT,
+                query_id              TEXT NOT NULL,
+                iteration             INTEGER NOT NULL,
+                researcher_output     TEXT,
+                challenger_output     TEXT,
+                decider_decision      TEXT,
+                decider_reasoning     TEXT,
+                retrieval_keywords    TEXT,
+                retrieval_date_from   TEXT,
+                retrieval_date_to     TEXT,
+                retrieval_found_count INTEGER,
+                context_size_before   INTEGER,
+                context_size_after    INTEGER,
+                accumulated_facts_size INTEGER,
+                created_at            TEXT DEFAULT (datetime('now'))
+            );
+
             CREATE TABLE IF NOT EXISTS rag_eval (
                 eval_id              TEXT PRIMARY KEY,
                 query_id             TEXT NOT NULL REFERENCES rag_queries(query_id),
@@ -253,6 +271,44 @@ def list_queries(limit: int = 50, offset: int = 0) -> list[dict]:
             LIMIT ? OFFSET ?
         """, (limit, offset)).fetchall()
     return [dict(r) for r in rows]
+
+
+def log_thinking_iteration(
+    query_id: str,
+    iteration: int,
+    researcher_output: str = "",
+    challenger_output: str = "",
+    decider_decision: str = "",
+    decider_reasoning: str = "",
+    retrieval_keywords: list | None = None,
+    retrieval_date_from: str | None = None,
+    retrieval_date_to: str | None = None,
+    retrieval_found_count: int = -1,
+    context_size_before: int = 0,
+    context_size_after: int = 0,
+    accumulated_facts_size: int = 0,
+    **_kwargs: Any,
+) -> None:
+    """Speichert eine Thinking-Mode-Iteration in der DB."""
+    _init_once()
+    try:
+        with _get_conn() as conn:
+            conn.execute("""
+                INSERT INTO thinking_traces
+                    (query_id, iteration, researcher_output, challenger_output,
+                     decider_decision, decider_reasoning, retrieval_keywords,
+                     retrieval_date_from, retrieval_date_to, retrieval_found_count,
+                     context_size_before, context_size_after, accumulated_facts_size)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+            """, (
+                query_id, iteration, researcher_output, challenger_output,
+                decider_decision, decider_reasoning,
+                json.dumps(retrieval_keywords) if retrieval_keywords else None,
+                retrieval_date_from, retrieval_date_to, retrieval_found_count,
+                context_size_before, context_size_after, accumulated_facts_size,
+            ))
+    except Exception as exc:
+        logger.warning("log_thinking_iteration fehlgeschlagen: %s", exc)
 
 
 def get_latest_eval(query_id: str) -> dict | None:
