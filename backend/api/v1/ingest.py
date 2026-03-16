@@ -29,7 +29,7 @@ router = APIRouter(prefix="/api/v1/ingest", tags=["v1/ingest"])
 @router.get("/status")
 async def get_status_v1(user_id: str, db: aiosqlite.Connection = Depends(get_db)):
     """Anzahl indexierter Dokumente pro Collection für einen User."""
-    from backend.rag.store_v2 import count_documents_for_user
+    from backend.rag.store_es import count_documents_for_user
     return {
         col: count_documents_for_user(col, user_id)
         for col in ["photos", "reviews", "saved_places", "messages"]
@@ -112,7 +112,7 @@ async def submit_photo_v1(
     """
     Schritt 2: Speichert das Foto mit Beschreibung in ChromaDB.
     """
-    from backend.rag.store_v2 import upsert_documents_v2
+    from backend.rag.store_es import upsert_documents_v2
     from backend.rag.embedder import embed_single
 
     # Dokument-Text aufbauen

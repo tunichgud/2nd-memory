@@ -35,7 +35,8 @@ async def get_locations_v1(
     if not await cursor.fetchone():
         raise HTTPException(status_code=404, detail="User nicht gefunden")
 
-    from backend.rag.store_v2 import get_all_documents_for_user, COLLECTIONS
+    from backend.rag.store_es import get_all_documents_for_user
+    from backend.rag.constants import COLLECTIONS
     from datetime import datetime
 
     points = []

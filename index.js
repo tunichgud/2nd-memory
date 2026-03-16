@@ -298,7 +298,7 @@ function killZombieChrome() {
         const { execSync } = require('child_process');
         // Alle Chrome/Chromium-Prozesse killen, die den session-Pfad halten
         execSync(`pkill -f "${WWEBJS_AUTH_DIR}" 2>/dev/null || true`, { stdio: 'ignore' });
-        console.log('[WhatsApp] Zombie-Chrome-Prozesse beendet (falls vorhanden)');
+        console.error('[WhatsApp] Zombie-Chrome-Prozesse beendet (falls vorhanden)');
     } catch (e) {
         // ignore — pkill gibt exit code 1 wenn kein Prozess gefunden
     }
@@ -308,7 +308,7 @@ function killZombieChrome() {
     try {
         if (fs.existsSync(lockFile)) {
             fs.unlinkSync(lockFile);
-            console.log('[WhatsApp] SingletonLock entfernt');
+            console.error('[WhatsApp] SingletonLock entfernt');
         }
     } catch (e) {
         console.warn('[WhatsApp] SingletonLock konnte nicht entfernt werden:', e.message);
@@ -348,15 +348,15 @@ async function initializeWithRetry(maxAttempts = 3) {
             // Zombie-Chrome vor JEDEM Versuch killen (auch vor dem ersten),
             // damit "browser is already running" nicht auftreten kann
             killZombieChrome();
-            console.log(`[WhatsApp] client.initialize() — Versuch ${attempt}/${maxAttempts}`);
+            console.error(`[WhatsApp] client.initialize() — Versuch ${attempt}/${maxAttempts}`);
             await client.initialize();
-            console.log('[WhatsApp] client.initialize() erfolgreich.');
+            console.error('[WhatsApp] client.initialize() erfolgreich.');
             return;
         } catch (err) {
             console.error(`[WhatsApp] client.initialize() Fehler (Versuch ${attempt}): ${err.message}`);
             if (attempt < maxAttempts) {
                 const waitMs = delays[attempt - 1] || 20000;
-                console.log(`[WhatsApp] Leere .wwebjs_cache und warte ${waitMs / 1000}s vor Retry...`);
+                console.error(`[WhatsApp] Leere .wwebjs_cache und warte ${waitMs / 1000}s vor Retry...`);
                 clearWwebjsCache();
                 await new Promise(resolve => setTimeout(resolve, waitMs));
             } else {
